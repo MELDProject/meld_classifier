@@ -1,6 +1,8 @@
 # MELD classifier
 Neural network lesion classifier for the MELD project.
 
+The preprint describing the classifier can be found here:
+https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1
 *Authors (alphabetical): Sophie Adler, Mathilde Ripart, Hannah Spitzer, Konrad Wagstyl*
 
 ![overview](overview.png)
