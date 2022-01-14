@@ -228,7 +228,7 @@ class Preprocess:
             )
             # save combat parameters
             if combat_params_file is not None:
-                self.save_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
+                self.save_norm_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
 
             post_combat_feature_name = self.feat.combat_feat(feature_name)
 
