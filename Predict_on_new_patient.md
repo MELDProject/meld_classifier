@@ -6,14 +6,21 @@ Note: No demographic information are required for this process.
 If you would like to predict lesions on patients from new epilepsy centres or new MRI scanners or updated T1 / FLAIR sequences that were not used to train the classifier, you will need to used the Predict_on_patients_from_new_sites pipeline which is under development.
 Note: Demographic information (e.g age and sex) will be required for this process.
 
-## Installation
-- Before being able to use the classifier on your data, some paths need to be set up and the pretrained model needs to be downloaded. 
-- To set up the paths open the meld_config.ini.example and add the path to your meld data e.g. 
-
 ## Information about the pipeline
-- The pipeline is split into 3 main scripts (detailed below). 
+Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation).
+The pipeline is split into 3 main scripts (detailed below) 
 
-### First step 
+### First step - Organising your data!
+You need to organise the MRI data for the patients you want to run the classifier on.
+In the 'input' folder where your meld data has / is going to be stored, create a folder for each patient. 
+The IDs should follow the same naming structure as before. i.e. MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X
+e.g.MELD\_H1\_3T\_FCD\_0001 
+In each patient folder, create a T1 and FLAIR folder.
+Place the T1.nii into the T1 folder 
+Place the FLAIR.nii into the FLAIR folder
+
+
+### Second step
 Go into the meld_classifier folder 
 ```bash
   cd <path_to_meld_classifier_folder>
