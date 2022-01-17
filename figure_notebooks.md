@@ -1,5 +1,13 @@
 # Notebooks to recreate figures
 
+
+## Prerequisite
+To run the notebooks make sure you are using the meld_environment and you have also installed these additionals packages :
+  - umap-learn
+```bash
+pip install umap-learn
+```
+
 ## Figure 1
 Overview figure, composite of:
 - Native subject meshes plot_one_subject_native.ipynb
