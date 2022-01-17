@@ -45,7 +45,7 @@ python scripts/prepare_classifier.py --skip-download-data
 ```
 
 ### FAQs
-Please see our [FAQ](USAGE.md#FAQs.md) for common installation problems.
+Please see our [FAQ](FAQs.md#) for common installation problems.
 
 ### Verify installation
 We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient.
