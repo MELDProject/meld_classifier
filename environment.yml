@@ -17,7 +17,7 @@ dependencies:
   - pip:
     - matplotlib_surface_plotting
     - potpourri3d
-    - umap-learn
+#    - umap-learn
     - nilearn
     - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
     - alibi
