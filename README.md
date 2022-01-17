@@ -39,7 +39,8 @@ Before being able to use the classifier on your data, some paths need to be set 
 python scripts/prepare_classifier.py
 ```
 
-This script will ask you for the location of your **MELD data folder** and download the pretrained model and test data to a folder inside your MELD data folder. You can also skip the downloading of the test data. For this, append the option `--skip-download-data` to the python call:
+This script will ask you for the location of your **MELD data folder** and download the pretrained model and test data to a folder inside your MELD data folder. Please provide the path to where your MELD data is stored on your computer.
+You can also skip the downloading of the test data. For this, append the option `--skip-download-data` to the python call:
 ```bash
 python scripts/prepare_classifier.py --skip-download-data
 ```
