@@ -17,7 +17,7 @@ This package comes with a pretrained model that can be used to predict new subje
 For preprocessing, MELD classifier requires [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall). It is trained on data from versions 6 & v5.3. Please follow instructions on [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall) to install FreeSurfer.
 
 ### Conda installation
-We use [anaconda](https://www.anaconda.com/products/individual) to manage the environment and dependencies. Please follow instructions on [anaconda](https://www.anaconda.com/products/individual) to install Anaconda.
+We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage the environment and dependencies. Please follow instructions on [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to install Anaconda.
 
 Install MELD classifier and python dependencies:
 ```bash
