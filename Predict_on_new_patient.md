@@ -12,12 +12,20 @@ The pipeline is split into 3 main scripts (detailed below)
 
 ### First step - Organising your data!
 You need to organise the MRI data for the patients you want to run the classifier on.
+
 In the 'input' folder where your meld data has / is going to be stored, create a folder for each patient. 
+
 The IDs should follow the same naming structure as before. i.e. MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X
+
 e.g.MELD\_H1\_3T\_FCD\_0001 
+
 In each patient folder, create a T1 and FLAIR folder.
+
 Place the T1.nii into the T1 folder 
+
 Place the FLAIR.nii into the FLAIR folder
+
+![example](example_folder_structure.png)
 
 
 ### Second step
