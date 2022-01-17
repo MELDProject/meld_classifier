@@ -45,7 +45,7 @@ python scripts/prepare_classifier.py --skip-download-data
 ```
 
 ### FAQs
-Please see our [FAQ](FAQs.md#) for common installation problems.
+Please see our [FAQ](FAQs.md) for common installation problems.
 
 ### Verify installation
 We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient.
@@ -55,9 +55,9 @@ TODO add script all
 ## Usage
 With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.
 For more details, check out the guides linked below:
-- [Predict new subjects (existing site)](USAGE.md#predict-lesion-on-a-new-patient)
-- [Predict new subjects (new site)](USAGE.md#predict-lesion-on-a-patient-from-a-new-site) (COMING SOON)
-- [Train and evaluate models](USAGE.md#training-and-evaluating-models)
+- [Predict new subjects (existing site)](predic_on_new_patient)
+- Predict new subjects (new site) : COMING SOON
+- [Train and evaluate models](Training_and_evaluating_models)
 
 ## Contribute
 If you'd like to contribute to this code base, have a look at our [contribution guide](DEVELOP.md)
