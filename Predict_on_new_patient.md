@@ -21,14 +21,18 @@ Go into the meld_classifier folder
 Each of the 3 following scripts needs to be run from the 'meld_classifier' folder
 
 ### Script 1 - FreeSurfer reconstruction
-`python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>`
+```bash
+python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>
+```
 - This script runs a FreeSurfer reconstruction on a participant
 - REMINDER: you need to have set up your paths & organised your data before running Script 1 (see Installation)
 - Within your  MELD folder should be an input folder that contains folders for each participant. 
 - Within each participant folder should be a T1 folder that contains the T1 in nifti format ".nii" and where available a FLAIR folder that contains the FLAIR in nifti format ".nii"
 
 ### Script 2 - Feature Preprocessing
-`python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_with_subjects_ids> - site <site_code>`
+```bash
+python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_with_subjects_ids> - site <site_code>
+```
 - The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
 - This script:
 1. Extracts surface-based features needed for the classifier :
@@ -43,7 +47,9 @@ Each of the 3 following scripts needs to be run from the 'meld_classifier' folde
 * Normalise the raw combat features (intra-subject, asymmetry and then inter-subject (by controls)) and write in hdf5
 
 ### Script 3 - Lesions prediction & MELD reports
-`python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_with_subjects_ids> - site <site_code>`
+```bash
+python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_with_subjects_ids> - site <site_code>
+```
 - The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
 - Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
 - This script : 
