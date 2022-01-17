@@ -8,7 +8,6 @@ Note: Demographic information (e.g age and sex) will be required for this proces
 
 ## Information about the pipeline
 Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation).
-The pipeline is split into 3 main scripts (detailed below) 
 
 ### First step - Organising your data!
 You need to organise the MRI data for the patients you want to run the classifier on.
@@ -27,13 +26,17 @@ Place the FLAIR.nii into the FLAIR folder
 
 ![example](example_folder_structure.png)
 
-
 ### Second step
 Go into the meld_classifier folder 
 ```bash
   cd <path_to_meld_classifier_folder>
 ```
 Each of the 3 following scripts needs to be run from the 'meld_classifier' folder
+
+### Overview new patient pipeline
+The pipeline is split into 3 main scripts as illustrated below and detailed after.
+![pipeline_fig](tutorial_pipeline_fig.png)
+
 
 ### Script 1 - FreeSurfer reconstruction
 ```bash
