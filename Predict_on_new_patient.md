@@ -13,6 +13,13 @@ Note: Demographic information (e.g age and sex) will be required for this proces
 ## Information about the pipeline
 - The pipeline is split into 3 main scripts (detailed below). 
 
+### First step 
+Go into the meld_classifier folder 
+```bash
+  cd <path_to_meld_classifier_folder>
+```
+Each of the 3 following scripts needs to be run from the 'meld_classifier' folder
+
 ### Script 1 - FreeSurfer reconstruction
 `python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>`
 - This script runs a FreeSurfer reconstruction on a participant
