@@ -55,7 +55,7 @@ TODO add script all
 ## Usage
 With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.
 For more details, check out the guides linked below:
-- [Predict new subjects (existing site)](predict_on_new_patient.md)
+- [Predict new subjects (existing site)](Predict_on_new_patient.md)
 - Predict new subjects (new site) : COMING SOON
 - [Train and evaluate models](Training_and_evaluating_models.md)
 
