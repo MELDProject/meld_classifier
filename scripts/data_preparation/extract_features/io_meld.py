@@ -68,7 +68,7 @@ def load_subject_features(fs_id,features,subject_number,medial_wall,subjects_dir
                 #set medial wall values to zero
                 feature[medial_wall]=0
                 hemisphere_feature_matrix[:,f_num] = feature
-            except nb.py3k.FileNotFoundError:
+            except:
                 hemisphere_feature_matrix[:,f_num] = np.ones(n_vert)*666
                 if "FLAIR" not in f:
                     print('Feature '+f+' not found!')
