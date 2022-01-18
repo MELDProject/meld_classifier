@@ -19,7 +19,7 @@ def download_test_data():
     """
     Download test data from figshare
     """
-    url = "https://figshare.com/ndownloader/files/31619066?private_link=61d8e7b5bd1cda77f3b6"
+    url = "https://figshare.com/ndownloader/files/33164459?private_link=0f64f446f0fc0f3e917bd715f8b95a21"
     test_data_dir = MELD_DATA_PATH
     os.makedirs(test_data_dir, exist_ok=True)
     print('downloading test data to '+ test_data_dir)
