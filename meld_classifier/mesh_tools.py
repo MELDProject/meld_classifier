@@ -71,22 +71,26 @@ def smooth_array(input_array, neighbours, n_iter=70, cortex_mask=None):
     n_iter - number of iterations 5mm fwhm = 18 iterations
                                   10mm fwhm = 70 iterations
     cortex_mask: binary mask of cortex eg cohort.cortex_mask"""
-    old_array = input_array
+    old_array = input_array.T
     if cortex_mask is not None:
         for v, n in enumerate(neighbours):
             n = np.array(n)
             neighbours[v] = n[cortex_mask[n]]
     else:
         cortex_mask = np.ones(len(neighbours), dtype=bool)
+    #neighbours mask & array
+    neighbours_array = np.zeros((len(neighbours),6),dtype=int)
+    neighbours_mask=np.ones((len(neighbours),6),dtype=bool)
+
+    for ni,n in enumerate(neighbours):
+        neighbours_array[ni,:len(neighbours[ni])]=neighbours[ni]
+        neighbours_mask[ni,:len(neighbours[ni])]=False
+
     for iteration in np.arange(n_iter):
-        new_array = np.zeros_like(old_array)
-        # this bit is quite loopy and could potentially be sped up
-        vertices = np.arange(len(neighbours))[cortex_mask]
-        for v in vertices:
-            n = neighbours[v]
-            new_array[v] = np.mean(old_array[np.hstack([n, v])], axis=0)
+        arr=np.ma.masked_array(old_array[:,neighbours_array],np.tile(neighbours_mask,(4,1,1)))
+        new_array = arr.mean(axis=2)
         old_array = new_array
-    return new_array
+    return new_array.T
 
 
 def save_mgh(filename, array, demo):
