@@ -20,9 +20,9 @@ e.g.MELD\_H1\_3T\_FCD\_0001
 
 In each patient folder, create a T1 and FLAIR folder.
 
-Place the T1.nii into the T1 folder 
+Place the T1 nifti file into the T1 folder. Please ensure 'T1' is in the file name.
 
-Place the FLAIR.nii into the FLAIR folder
+Place the FLAIR nifti file into the FLAIR folder. Please ensure 'FLAIR' is in the file name.
 
 ![example](example_folder_structure.png)
 
