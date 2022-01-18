@@ -21,7 +21,11 @@ conda env create -f environment.yml
   nano ~/.bash_profile
   nano ~/.bashrc
   ```
-  Then close the terminal and open a new one. 
+  And add the following line just after:
+  ```
+  source <path_to_anaconda3>/etc/profile.d/conda.sh
+  ```
+  Save and close the terminal and open a new one. 
    
 * if the error is : *Your shell has not been properly configured to use ‘conda activate’*
   
