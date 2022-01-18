@@ -14,7 +14,6 @@ def find_nearest_multi(array, value):
     idx = [i for i, val in enumerate(new_array) if val == min_array]
     return idx
 
-
 def calibrate_smoothing(coords, faces, start_v=125000, n_iter=70, cortex_mask=None):
     """find the calibratin curve for smoothing of a surface mesh"""
     print("Need to calibrate the smoothing curve for this surface mesh")
@@ -37,12 +36,10 @@ def calibrate_smoothing(coords, faces, start_v=125000, n_iter=70, cortex_mask=No
     # smooth the array at each iteration and find the full-width-at-half-maximum of non-null area
     fwhm_values = []
     for iteration in np.arange(n_iter):
-        new_array = np.zeros_like(old_array)
+        
+        new_array = smooth_array(old_array,neighbours,n_iter=1,cortex_mask=cortex_mask)
         # This is the smoothing function
-        vertices = np.arange(len(neighbours))[cortex_mask]
-        for v in vertices:
-            n = neighbours[v]
-            new_array[v] = np.mean(old_array[np.hstack([n, v])], axis=0)
+        
         old_array = new_array.copy()
         # threshold at half maximum value
         max_pic = old_array.max()
@@ -71,6 +68,9 @@ def smooth_array(input_array, neighbours, n_iter=70, cortex_mask=None):
     n_iter - number of iterations 5mm fwhm = 18 iterations
                                   10mm fwhm = 70 iterations
     cortex_mask: binary mask of cortex eg cohort.cortex_mask"""
+    dim = len(input_array.shape)
+    if dim==1:
+        input_array=input_array.reshape(-1,1)
     old_array = input_array.T
     if cortex_mask is not None:
         for v, n in enumerate(neighbours):
@@ -85,13 +85,14 @@ def smooth_array(input_array, neighbours, n_iter=70, cortex_mask=None):
     for ni,n in enumerate(neighbours):
         neighbours_array[ni,:len(neighbours[ni])]=neighbours[ni]
         neighbours_mask[ni,:len(neighbours[ni])]=False
-
+    size=input_array.shape[1]
     for iteration in np.arange(n_iter):
-        arr=np.ma.masked_array(old_array[:,neighbours_array],np.tile(neighbours_mask,(4,1,1)))
+        arr=np.ma.masked_array(old_array[:,neighbours_array],np.tile(neighbours_mask,(size,1,1)))
         new_array = arr.mean(axis=2)
         old_array = new_array
-    return new_array.T
-
+    if dim==1:
+        return np.squeeze(new_array.data)
+    return new_array.data.T
 
 def save_mgh(filename, array, demo):
     """save mgh file using nibabel and imported demo mgh file"""
