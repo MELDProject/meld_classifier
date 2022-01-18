@@ -201,40 +201,43 @@ class Preprocess:
             else:
                 print("exclude")
                 combat_subject_include[k] = False
-
-        precombat_features = np.array(precombat_features)
-        # load in covariates - age, sex, group, site and scanner unless provided
-        covars = self.covars[combat_subject_include].copy()
-        # check for nan
-        index_nan = pd.isnull(covars).any(1).to_numpy().nonzero()[0]
-        if len(index_nan) != 0:
-            print(
-                "There is missing information in the covariates for subjects {}. \
-            Combat aborted".format(
-                    np.array(covars["ID"])[index_nan]
+        if precombat_features:
+            precombat_features = np.array(precombat_features)
+            # load in covariates - age, sex, group, site and scanner unless provided
+            covars = self.covars[combat_subject_include].copy()
+            # check for nan
+            index_nan = pd.isnull(covars).any(1).to_numpy().nonzero()[0]
+            if len(index_nan) != 0:
+                print(
+                    "There is missing information in the covariates for subjects {}. \
+                Combat aborted".format(
+                        np.array(covars["ID"])[index_nan]
+                    )
                 )
-            )
+            else:
+                # function to check for single subjects
+                covars, precombat_features = self.remove_isolated_subs(covars, precombat_features)
+                covars = covars.reset_index(drop=True)
+
+                dict_combat = neuroCombat(
+                    precombat_features.T,
+                    covars,
+                    batch_col="site_scanner",
+                    categorical_cols=["sex", "group"],
+                    continuous_cols="ages",
+                )
+                # save combat parameters
+                if combat_params_file is not None:
+                    self.save_norm_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
+
+                post_combat_feature_name = self.feat.combat_feat(feature_name)
+
+                print("Combat finished \n Saving data")
+                self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(covars["ID"]))
         else:
-            # function to check for single subjects
-            covars, precombat_features = self.remove_isolated_subs(covars, precombat_features)
-            covars = covars.reset_index(drop=True)
-
-            dict_combat = neuroCombat(
-                precombat_features.T,
-                covars,
-                batch_col="site_scanner",
-                categorical_cols=["sex", "group"],
-                continuous_cols="ages",
-            )
-            # save combat parameters
-            if combat_params_file is not None:
-                self.save_norm_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
-
-            post_combat_feature_name = self.feat.combat_feat(feature_name)
-
-            print("Combat finished \n Saving data")
-            self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(covars["ID"]))
-
+            print('no data to combat harmonised')
+            pass
+        
     def combat_new_site(
         self,
         feature_name,
@@ -283,32 +286,35 @@ class Preprocess:
                 combat_subject_include[k] = True
             else:
                 combat_subject_include[k] = False
+        if precombat_features:
+            precombat_features = np.array(precombat_features)
+            # load in covariates - age, sex, group, site and scanner,
+            # set site_scanner to 0 for existing cohort
+            covars = pd.concat([self.load_covars(ref_subject_ids), self.covars])
+            covars["site_scanner"][: len(ref_subject_ids)] = "H0"
+            covars = covars[combat_subject_include].copy()
 
-        precombat_features = np.array(precombat_features)
-        # load in covariates - age, sex, group, site and scanner,
-        # set site_scanner to 0 for existing cohort
-        covars = pd.concat([self.load_covars(ref_subject_ids), self.covars])
-        covars["site_scanner"][: len(ref_subject_ids)] = "H0"
-        covars = covars[combat_subject_include].copy()
+            # function to check for single subjects
+            covars, precombat_features = self.remove_isolated_subs(covars, precombat_features)
 
-        # function to check for single subjects
-        covars, precombat_features = self.remove_isolated_subs(covars, precombat_features)
+            dict_combat = neuroCombat(
+                precombat_features.T,
+                covars,
+                batch_col="site_scanner",
+                categorical_cols=["sex", "group"],
+                continuous_cols=["ages"],
+                ref_batch="H0",
+            )
 
-        dict_combat = neuroCombat(
-            precombat_features.T,
-            covars,
-            batch_col="site_scanner",
-            categorical_cols=["sex", "group"],
-            continuous_cols=["ages"],
-            ref_batch="H0",
-        )
-
-        print("Combat finished \n Saving data")
-        # only save out new subjects
-        ids_to_save = np.array(covars[covars["site_scanner"] != "H0"]["ID"])
-        self.save_cohort_features(
-            post_combat_feature_name, dict_combat["data"].T[covars["site_scanner"] != "H0"], ids_to_save
-        )
+            print("Combat finished \n Saving data")
+            # only save out new subjects
+            ids_to_save = np.array(covars[covars["site_scanner"] != "H0"]["ID"])
+            self.save_cohort_features(
+                post_combat_feature_name, dict_combat["data"].T[covars["site_scanner"] != "H0"], ids_to_save
+            )
+        else:
+            print('No data to combat harmonised')
+            pass
 
     def combat_new_subject(self, feature_name, combat_params_file):
         """Harmonise new subject data with Combat parameters from whole cohort
@@ -330,15 +336,19 @@ class Preprocess:
                 combined_hemis = np.hstack([lh, rh])
                 precombat_features.append(combined_hemis)
                 site_scanner.append(subj.site_code + "_" + subj.scanner)
+        #if matrix empty, pass
+        if precombat_features:
+            precombat_features = np.array(precombat_features)
+            site_scanner = np.array(site_scanner)
+            dict_combat = neuroCombatFromTraining(dat=precombat_features.T, batch=site_scanner, estimates=combat_estimates)
 
-        precombat_features = np.array(precombat_features)
-        site_scanner = np.array(site_scanner)
-        dict_combat = neuroCombatFromTraining(dat=precombat_features.T, batch=site_scanner, estimates=combat_estimates)
-
-        post_combat_feature_name = self.feat.combat_feat(feature_name)
-        print("Combat finished \n Saving data")
-        self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(self.subject_ids))
-
+            post_combat_feature_name = self.feat.combat_feat(feature_name)
+            print("Combat finished \n Saving data")
+            self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(self.subject_ids))
+        else:
+            print('No data to combat harmonised')
+            pass
+        
     def save_cohort_features(self, feature_name, features, subject_ids, hemis=["lh", "rh"]):
         assert len(features) == len(subject_ids)
         for s, subject in enumerate(subject_ids):
@@ -402,33 +412,37 @@ class Preprocess:
                 subject_include.append(id_sub)
             else:
                 print("feature {} does not exist for subject {}".format(feature, id_sub))
-        # smoothed data if fwhm
-        vals_matrix_lh = np.array(vals_matrix_lh)
-        vals_matrix_rh = np.array(vals_matrix_rh)
-        if fwhm:
-            # find number iteration from calibration smoothing
-            x, y = self.calibration_smoothing
-            idx = (np.abs(y - fwhm)).argmin()
-            n_iter = int(np.round(x[idx]))
-            print(f"smoothing with {n_iter} iterations ...")
-            vals_matrix_lh = mt.smooth_array(
-                vals_matrix_lh.T, neighbours, n_iter=n_iter, cortex_mask=self.cohort.cortex_mask
-            )
-            vals_matrix_rh = mt.smooth_array(
-                vals_matrix_rh.T, neighbours, n_iter=n_iter, cortex_mask=self.cohort.cortex_mask
-            )
+        #if matrix is empty, do nothing
+        if not vals_matrix_lh:
+            pass
         else:
-            print("no smoothing")
-            vals_matrix_lh = vals_matrix_lh.T
-            vals_matrix_rh = vals_matrix_rh.T
+            # smoothed data if fwhm
+            vals_matrix_lh = np.array(vals_matrix_lh)
+            vals_matrix_rh = np.array(vals_matrix_rh)
+            if fwhm:
+                # find number iteration from calibration smoothing
+                x, y = self.calibration_smoothing
+                idx = (np.abs(y - fwhm)).argmin()
+                n_iter = int(np.round(x[idx]))
+                print(f"smoothing with {n_iter} iterations ...")
+                vals_matrix_lh = mt.smooth_array(
+                    vals_matrix_lh.T, neighbours, n_iter=n_iter, cortex_mask=self.cohort.cortex_mask
+                )
+                vals_matrix_rh = mt.smooth_array(
+                    vals_matrix_rh.T, neighbours, n_iter=n_iter, cortex_mask=self.cohort.cortex_mask
+                )
+            else:
+                print("no smoothing")
+                vals_matrix_lh = vals_matrix_lh.T
+                vals_matrix_rh = vals_matrix_rh.T
 
-        smooth_vals_hemis = np.array(
-            np.hstack([vals_matrix_lh[self.cohort.cortex_mask].T, vals_matrix_rh[self.cohort.cortex_mask].T])
-        )
-        # write features in hdf5
-        print("Smoothing finished \n Saving data")
-        self.save_cohort_features(feature_smooth, smooth_vals_hemis, np.array(subject_include))
-        return smooth_vals_hemis
+            smooth_vals_hemis = np.array(
+                np.hstack([vals_matrix_lh[self.cohort.cortex_mask].T, vals_matrix_rh[self.cohort.cortex_mask].T])
+            )
+            # write features in hdf5
+            print("Smoothing finished \n Saving data")
+            self.save_cohort_features(feature_smooth, smooth_vals_hemis, np.array(subject_include))
+            return smooth_vals_hemis
 
     def define_atlas(self):
         atlas = nb.freesurfer.io.read_annot(os.path.join(BASE_PATH, DK_ATLAS_FILE))
@@ -640,34 +654,37 @@ class Preprocess:
                 print("exlude subject {}".format(id_sub))
                 included_subjects[k] = False
                 controls_subjects[k] = False
-
-        vals_array = np.array(vals_array)
-        # remove exclude subjects
-        controls_subjects = np.array(controls_subjects)[included_subjects]
-        included_subjects = np.array(self.subject_ids)[included_subjects]
-        # normalise by controls
-        if cohort_for_norm is not None:
-            print("Use other cohort for normalisation")
-            mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, 
-                                                           params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
-        else:
-            if params_norm is not None:
-                params = self.read_norm_combat_parameters(feature, params_norm)
-                mean_c = params['mean']
-                std_c = params['std']
-            else : 
-                print(
-                    "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
-                        len(controls_subjects)
+        if vals_array:
+            vals_array = np.array(vals_array)
+            # remove exclude subjects
+            controls_subjects = np.array(controls_subjects)[included_subjects]
+            included_subjects = np.array(self.subject_ids)[included_subjects]
+            # normalise by controls
+            if cohort_for_norm is not None:
+                print("Use other cohort for normalisation")
+                mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, 
+                                                               params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
+            else:
+                if params_norm is not None:
+                    params = self.read_norm_combat_parameters(feature, params_norm)
+                    mean_c = params['mean']
+                    std_c = params['std']
+                else : 
+                    print(
+                        "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
+                            len(controls_subjects)
+                        )
                     )
-                )
-                mean_c = np.mean(vals_array[controls_subjects], axis=0)
-                std_c = np.std(vals_array[controls_subjects], axis=0)
-        vals_combat = (vals_array - mean_c) / std_c
-        # save subject
-        print("Normalisation finished \nSaving data")
-        self.save_cohort_features(feature_norm, vals_combat, included_subjects)
-
+                    mean_c = np.mean(vals_array[controls_subjects], axis=0)
+                    std_c = np.std(vals_array[controls_subjects], axis=0)
+            vals_combat = (vals_array - mean_c) / std_c
+            # save subject
+            print("Normalisation finished \nSaving data")
+            self.save_cohort_features(feature_norm, vals_combat, included_subjects)
+        else:
+            print('No data to normalise')
+            pass
+        
     def asymmetry_subject(self, feature, cohort_for_norm=None, params_norm=None):
         """perform intra normalisation (within subject) and
         inter-normalisation (between subjects relative to controls) and asymetry between hemispheres"""
@@ -699,34 +716,37 @@ class Preprocess:
                 print("exlude subject {}".format(id_sub))
                 included_subjects[k] = False
                 controls_subjects[k] = False
-
-        vals_asym_array = np.array(vals_asym_array)
-        # remove exclude subjects
-        controls_subjects = np.array(controls_subjects)[included_subjects]
-        included_subjects = np.array(self.subject_ids)[included_subjects]
-        # normalise by controls
-        if cohort_for_norm is not None:
-            print("Use other cohort for normalisation")
-            mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, asym=True, 
-                                                           params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
-        else:
-            if params_norm is not None:
-                params = self.read_norm_combat_parameters(feature, params_norm)
-                mean_c = params['mean.asym']
-                std_c = params['std.asym']
+        if vals_asym_array :
+            vals_asym_array = np.array(vals_asym_array)
+            # remove exclude subjects
+            controls_subjects = np.array(controls_subjects)[included_subjects]
+            included_subjects = np.array(self.subject_ids)[included_subjects]
+            # normalise by controls
+            if cohort_for_norm is not None:
+                print("Use other cohort for normalisation")
+                mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, asym=True, 
+                                                               params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
             else:
-                print(
-                    "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
-                        controls_subjects.sum()
+                if params_norm is not None:
+                    params = self.read_norm_combat_parameters(feature, params_norm)
+                    mean_c = params['mean.asym']
+                    std_c = params['std.asym']
+                else:
+                    print(
+                        "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
+                            controls_subjects.sum()
+                        )
                     )
-                )
-                mean_c = np.mean(vals_asym_array[controls_subjects], axis=0)
-                std_c = np.std(vals_asym_array[controls_subjects], axis=0)
-        asym_combat = (vals_asym_array - mean_c) / std_c
-        # save subject
-        print("Asym finished \nSaving data")
-        self.save_cohort_features(feature_asym, asym_combat, included_subjects)
-
+                    mean_c = np.mean(vals_asym_array[controls_subjects], axis=0)
+                    std_c = np.std(vals_asym_array[controls_subjects], axis=0)
+            asym_combat = (vals_asym_array - mean_c) / std_c
+            # save subject
+            print("Asym finished \nSaving data")
+            self.save_cohort_features(feature_asym, asym_combat, included_subjects)
+        else:
+            print('No data to do asym')
+            pass
+        
     def compute_mean_std(self, feature, cohort):
         """get mean and std of all brain for the given cohort and save parameters"""
         cohort_ids = cohort.get_subject_ids(group="both")

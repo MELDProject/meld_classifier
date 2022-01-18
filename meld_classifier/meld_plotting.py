@@ -50,7 +50,8 @@ def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename=
         im = Image.open(out_filename)
         im = im.convert("RGBA")
 
-        fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 25)
+        #fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 25)
+        fnt = ImageFont.load_default()
         f_name = ""
         if feature_names is not None:
             if k == 0:

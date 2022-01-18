@@ -5,19 +5,20 @@ channels:
   - conda-forge
 dependencies:
   - python=3.7
-  - tensorflow
-  - pytest
-  - nibabel
-  - pillow
-  - jupyterlab
-  - ptitprince
-  - h5py
-  - scikit-learn
-  - pip
+  - tensorflow=2.6
+  - pytest=6.2
+  - nibabel=3.2
+  - pillow=8.4
+  - jupyterlab=3.2
+  - ptitprince=0.2
+  - h5py=3.1
+  - pip=21.2
   - pip:
     - matplotlib_surface_plotting
-    - potpourri3d
+    - potpourri3d==0.0.4
 #    - umap-learn
-    - nilearn
+    - nilearn==0.8
     - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
-    - alibi
+    - alibi==0.6
+#    - scikit-learn==1.0
+    - scikit-image==0.18
