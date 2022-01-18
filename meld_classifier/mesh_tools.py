@@ -60,7 +60,6 @@ def calibrate_smoothing(coords, faces, start_v=125000, n_iter=70, cortex_mask=No
     print("End of calibration")
     return line, model(line)
 
-
 def smooth_array(input_array, neighbours, n_iter=70, cortex_mask=None):
     """smooth a matrix of surface data surface data
     input_array: variable to be smoothed n_vert x n_subs
@@ -79,12 +78,15 @@ def smooth_array(input_array, neighbours, n_iter=70, cortex_mask=None):
     else:
         cortex_mask = np.ones(len(neighbours), dtype=bool)
     #neighbours mask & array
-    neighbours_array = np.zeros((len(neighbours),6),dtype=int)
-    neighbours_mask=np.ones((len(neighbours),6),dtype=bool)
-
+    neighbours_array = np.zeros((len(neighbours),7),dtype=int)
+    neighbours_mask=np.ones((len(neighbours),7),dtype=bool)
+    #create masked array
     for ni,n in enumerate(neighbours):
         neighbours_array[ni,:len(neighbours[ni])]=neighbours[ni]
         neighbours_mask[ni,:len(neighbours[ni])]=False
+        neighbours_array[ni,len(neighbours[ni])]=ni
+        neighbours_mask[ni,len(neighbours[ni])]=False
+                         
     size=input_array.shape[1]
     for iteration in np.arange(n_iter):
         arr=np.ma.masked_array(old_array[:,neighbours_array],np.tile(neighbours_mask,(size,1,1)))
