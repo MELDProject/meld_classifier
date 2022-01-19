@@ -7,7 +7,10 @@ If you would like to predict lesions on patients from new epilepsy centres or ne
 Note: Demographic information (e.g age and sex) will be required for this process.
 
 ## Information about the pipeline
-Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation).
+Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation) and activate the meld_classifier environment : 
+```bash
+  conda activate meld_classifier
+```
 
 ### First step - Organising your data!
 You need to organise the MRI data for the patients you want to run the classifier on.
@@ -49,7 +52,7 @@ python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>
 
 ### Script 2 - Feature Preprocessing
 ```bash
-python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_with_subjects_ids> - site <site_code>
+python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_with_subjects_ids> -site <site_code>
 ```
 - The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
 - This script:
@@ -66,7 +69,7 @@ python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_w
 
 ### Script 3 - Lesions prediction & MELD reports
 ```bash
-python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_with_subjects_ids> - site <site_code>
+python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_with_subjects_ids> -site <site_code>
 ```
 - The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
 - Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
