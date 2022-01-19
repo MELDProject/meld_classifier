@@ -132,18 +132,18 @@ if __name__ == "__main__":
      
      
     # setup parameters
-    base_feature_sets = ['.on_lh.curv.sm5.mgh',
-                         '.on_lh.gm_FLAIR_0.5.sm10.mgh',
-                     '.on_lh.wm_FLAIR_1.sm10.mgh',
+    base_feature_sets = ['.on_lh.gm_FLAIR_0.5.sm10.mgh',
+                         '.on_lh.wm_FLAIR_1.sm10.mgh',
+                         '.on_lh.curv.sm5.mgh',
                          '.on_lh.pial.K_filtered.sm20.mgh',
                          '.on_lh.sulc.sm5.mgh',
                          '.on_lh.thickness.sm10.mgh',
                          '.on_lh.w-g.pct.sm10.mgh',
                          ]
 
-    feature_names_sets = ['Mean curvature',
-                         'GM FLAIR (50%)',
-                         ' WM FLAIR (1mm)',
+    feature_names_sets = ['GM FLAIR (50%)',
+                         'WM FLAIR (1mm)',
+                         'Mean curvature',
                          'Intrinsic Curvature',
                          'Sulcal depth',
                          'Cortical thickness',
@@ -196,9 +196,13 @@ if __name__ == "__main__":
                                              order='F', clip=False, fill_value=0, force_resample=False)                
         #initialise parameter for plot
         fig= plt.figure(figsize=(15,8), constrained_layout=True)
-        base_features=base_feature_sets
-        feature_names=feature_names_sets
         features=subj.get_feature_list()
+        if 'FLAIR' in features:
+            base_features=base_feature_sets
+            feature_names=feature_names_sets
+        else :
+            base_features=base_feature_sets[2:]
+            feature_names=feature_names_sets[2:]
         labels_hemis = {}
         features_hemis={}
         predictions={}
@@ -315,4 +319,3 @@ if __name__ == "__main__":
         ax.axis('off')
         # save overview figure
         fig.savefig(f'{output_dir}/inflatbrain_{subject}.png')
-
