@@ -57,4 +57,14 @@ conda env create -f environment.yml
     pip install <package_name>
      ```
  
+   ### I have a package installation error when running the new patient pipeline scripts.
+   * if the error is: It seems that scikit-image has not been built correctly. Your install of scikit-image appears to be broken.
    
+   Reinstall scikit-image as follows:
+   ```bash
+    conda install -c conda-forge scikit-image=0.18
+     ```
+    And individually install llvm-openmp using :
+    ```bash
+    conda install -c conda-forge llvm-openmp
+     ```
