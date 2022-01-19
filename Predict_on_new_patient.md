@@ -47,6 +47,7 @@ python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>
 ```
 - This script runs a FreeSurfer reconstruction on a participant
 - REMINDER: you need to have set up your paths & organised your data before running Script 1 (see Installation)
+- We recommend using the same FreeSurfer version that you used to process your patient's data that was used to train the classifier
 - Within your  MELD folder should be an input folder that contains folders for each participant. 
 - Within each participant folder should be a T1 folder that contains the T1 in nifti format ".nii" and where available a FLAIR folder that contains the FLAIR in nifti format ".nii"
 
