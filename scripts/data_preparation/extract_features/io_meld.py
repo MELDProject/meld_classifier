@@ -134,7 +134,7 @@ def save_subject(fs_id,features,medial_wall,subject_dir, output_dir=None):
                 feature[medial_wall]=0
                 dset=group.require_dataset(f_name,shape=(n_vert,), dtype='float32',compression="gzip", compression_opts=9)
                 dset[:]=feature
-            except nb.py3k.FileNotFoundError:
+            except:
                 if "FLAIR" not in f_name:
                     print('Expected feature '+ f_name + ' was not found. One step in the pipeline has failed')
         lesion_name=os.path.join(subject_dir,fs_id,'xhemi/surf_meld',h+'.on_lh.lesion.mgh')
