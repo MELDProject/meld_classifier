@@ -68,3 +68,13 @@ conda env create -f environment.yml
     ```bash
     conda install -c conda-forge llvm-openmp
      ```
+   * if the error concerned matplotlib
+   
+   Reinstall matplotlib as follows:
+   ```bash
+    pip uninstall matplotlib
+     ```
+    And individually install llvm-openmp using :
+    ```bash
+    pip install matplotlib
+     ```
