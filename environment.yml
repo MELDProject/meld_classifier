@@ -11,6 +11,7 @@ dependencies:
   - pillow=8.4
   - jupyterlab=3.2
   - ptitprince=0.2
+  - scikit-image=0.18
   - h5py=3.1
   - pip=21.2
   - pip:
@@ -20,5 +21,3 @@ dependencies:
     - nilearn==0.8
     - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
     - alibi==0.6
-#    - scikit-learn==1.0
-    - scikit-image==0.18
