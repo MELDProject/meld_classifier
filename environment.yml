@@ -21,3 +21,4 @@ dependencies:
     - nilearn==0.8
     - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
     - alibi==0.6
+    - matplotlib
