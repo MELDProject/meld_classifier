@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import subprocess
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageChops
 from PIL import ImageFont
 from PIL import ImageDraw
 from meld_classifier.dataset import load_combined_hemisphere_data
@@ -11,8 +11,16 @@ import matplotlib_surface_plotting.matplotlib_surface_plotting as msp
 import meld_classifier.paths as paths
 import nibabel as nb
 
-
-
+def trim(im):
+    bg = Image.new(im.mode, im.size, im.getpixel((0,0)))
+    diff = ImageChops.difference(im, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    if bbox:
+        return im.crop(bbox)
+    
+def rotate90(im):
+    return im.transpose(method=Image.ROTATE_90)
 
 def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename="tmp.png"):
     """create a grid of flatmap plots for a single subject"""
@@ -44,12 +52,13 @@ def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename=
             filename=out_filename,
         )
         plt.close()
-        subprocess.call(f"convert {out_filename} -trim ./tmp{random}1.png", shell=True)
-        subprocess.call(f"convert ./tmp{random}1.png -rotate 90 {out_filename}", shell=True)
-        os.remove(f"./tmp{random}1.png")
+#        subprocess.call(f"convert {out_filename} -trim ./tmp{random}1.png", shell=True)
+ #       subprocess.call(f"convert ./tmp{random}1.png -rotate 90 {out_filename}", shell=True)
+  #      os.remove(f"./tmp{random}1.png")
         im = Image.open(out_filename)
         im = im.convert("RGBA")
-
+        im = trim(im)
+        im = rotate90(im)
         #fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 25)
         fnt = ImageFont.load_default()
         f_name = ""

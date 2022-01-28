@@ -3,6 +3,7 @@ import h5py
 import pandas as pd
 import meld_classifier.matplotlib_surface_plotting as msp
 from meld_classifier.meld_cohort import MeldCohort
+from meld_classifier.meld_plotting import trim,rotate90
 import os
 import meld_classifier.paths as paths
 import nibabel as nb

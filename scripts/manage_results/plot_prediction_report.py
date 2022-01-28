@@ -52,9 +52,10 @@ def create_surface_plots(surf,prediction,c):
               base_size=20,
               filename='tmp.png'
              );
-    subprocess.call(f"convert ./tmp.png -trim ./tmp1.png", shell=True)
-    im = Image.open('tmp1.png')
+#    subprocess.call(f"convert ./tmp.png -trim ./tmp1.png", shell=True)
+    im = Image.open('tmp.png')
     im = im.convert("RGBA")
+    im = trim(im)
     im1 = np.array(im)
     msp.plot_surf(surf['coords'],
                                            surf['faces'],prediction,
@@ -64,9 +65,10 @@ def create_surface_plots(surf,prediction,c):
               base_size=20,
               filename='tmp.png'
              );
-    subprocess.call(f"convert ./tmp.png -trim ./tmp1.png", shell=True)
+ #   subprocess.call(f"convert ./tmp.png -trim ./tmp1.png", shell=True)
     im = Image.open('tmp1.png')
     im = im.convert("RGBA")
+    im = trim(im)
     im2 = np.array(im)
     plt.close('all')
     return im1,im2

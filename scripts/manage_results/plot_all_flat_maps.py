@@ -3,6 +3,7 @@ import os
 import json
 from meld_classifier.network_tools import build_model
 from meld_classifier.experiment import get_subject_ids
+from meld_classifier.meld_plotting import trim,rotate90
 import meld_classifier.hdf5_io as io
 import meld_classifier.paths as paths
 import numpy as np
@@ -54,11 +55,13 @@ def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename=
             filename=out_filename,
         )
         plt.close()
-        subprocess.call(f"convert {out_filename} -trim ./tmp{random}1.png", shell=True)
-        subprocess.call(f"convert ./tmp{random}1.png -rotate 90 {out_filename}", shell=True)
-        os.remove(f"./tmp{random}1.png")
+        #subprocess.call(f"convert {out_filename} -trim ./tmp{random}1.png", shell=True)
+        #subprocess.call(f"convert ./tmp{random}1.png -rotate 90 {out_filename}", shell=True)
+        #os.remove(f"./tmp{random}1.png")
         im = Image.open(out_filename)
         im = im.convert("RGBA")
+        im = trim(im)
+        im = rotate90(im)
 
         fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 25)
         f_name = ""
