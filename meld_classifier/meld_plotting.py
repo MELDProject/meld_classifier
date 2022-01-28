@@ -22,7 +22,7 @@ def trim(im):
         return im
     
 def rotate90(im):
-    return im.transpose(method=Image.ROTATE_90)
+    return im.transpose(method=Image.ROTATE_270)
 
 def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename="tmp.png"):
     """create a grid of flatmap plots for a single subject"""
@@ -58,9 +58,9 @@ def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename=
  #       subprocess.call(f"convert ./tmp{random}1.png -rotate 90 {out_filename}", shell=True)
   #      os.remove(f"./tmp{random}1.png")
         im = Image.open(out_filename)
-        im = im.convert("RGBA")
         im = trim(im)
         im = rotate90(im)
+        im = im.convert("RGBA")
         #fnt = ImageFont.truetype("Pillow/Tests/fonts/FreeSansBold.ttf", 25)
         fnt = ImageFont.load_default()
         f_name = ""
