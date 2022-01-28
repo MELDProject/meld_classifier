@@ -1,6 +1,7 @@
 from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from meld_classifier.dataset import load_combined_hemisphere_data, Dataset, normalise_data
+from meld_classifier.meld_plotting import trim,rotate90
 from meld_classifier.training import Trainer
 from meld_classifier.evaluation import Evaluator
 from meld_classifier.paths import (

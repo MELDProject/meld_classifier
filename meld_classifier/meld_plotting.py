@@ -18,6 +18,8 @@ def trim(im):
     bbox = diff.getbbox()
     if bbox:
         return im.crop(bbox)
+    else:
+        return im
     
 def rotate90(im):
     return im.transpose(method=Image.ROTATE_90)
