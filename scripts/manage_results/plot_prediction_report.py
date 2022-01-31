@@ -67,7 +67,7 @@ def create_surface_plots(surf,prediction,c):
               filename='tmp.png'
              );
  #   subprocess.call(f"convert ./tmp.png -trim ./tmp1.png", shell=True)
-    im = Image.open('tmp1.png')
+    im = Image.open('tmp.png')
     im = trim(im)
     im = im.convert("RGBA")
     im2 = np.array(im)
