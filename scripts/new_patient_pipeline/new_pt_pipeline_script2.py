@@ -30,6 +30,10 @@ if __name__ == '__main__':
     parser.add_argument('-site','--site_code',
                         help='Site code',
                         required=True,)
+    parser.add_argument("--withoutflair",
+			action="store_true",
+			default=False,
+			help="do not use flair information") 
     args = parser.parse_args()
     subject_ids=str(args.list_ids)
     site_code=str(args.site_code)
@@ -45,7 +49,10 @@ if __name__ == '__main__':
     sub.check_call(command, shell=True)
 
     # Launch script to preprocess features : smooth, combat harmonised & normalise
-    command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -d {BASE_PATH}")
+    if args.withoutflair:
+        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -d {BASE_PATH} --withoutflair")
+    else:
+        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -d {BASE_PATH}")
     sub.check_call(command, shell=True)
 
     
