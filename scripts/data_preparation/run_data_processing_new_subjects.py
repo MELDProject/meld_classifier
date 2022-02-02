@@ -33,26 +33,39 @@ if __name__ == "__main__":
     parser.add_argument('-d', '--output_dir', 
                         type=str, 
                         help='path to store hdf5 files',
-                        default=BASE_PATH) 
+                        default=BASE_PATH)
+    parser.add_argument("--withoutflair",
+						action="store_true",
+						default=False,
+						help="do not use flair information") 
     args = parser.parse_args()
     subject_ids = np.array(np.loadtxt(args.list_ids, dtype='str',ndmin=1))
     output_dir = args.output_dir   
     dataset_newSubject = os.path.join(BASE_PATH, NEWSUBJECTS_DATASET)
 
     # Set features and smoothed values
-    features = {
-    ".on_lh.thickness.mgh": 10,
-    ".on_lh.w-g.pct.mgh": 10,
-    ".on_lh.pial.K_filtered.sm20.mgh": None,
-    ".on_lh.sulc.mgh": 5,
-    ".on_lh.curv.mgh": 5,
-    ".on_lh.gm_FLAIR_0.25.mgh": 10,
-    ".on_lh.gm_FLAIR_0.5.mgh": 10,
-    ".on_lh.gm_FLAIR_0.75.mgh": 10,
-    ".on_lh.gm_FLAIR_0.mgh": 10,
-    ".on_lh.wm_FLAIR_0.5.mgh": 10,
-    ".on_lh.wm_FLAIR_1.mgh": 10,
-    }
+    if args.withoutflair:
+        features = {
+		".on_lh.thickness.mgh": 10,
+		".on_lh.w-g.pct.mgh" : 10,
+		".on_lh.pial.K_filtered.sm20.mgh": None,
+		'.on_lh.sulc.mgh' : 5,
+		'.on_lh.curv.mgh' : 5,
+			}
+    else:
+        features = {
+		".on_lh.thickness.mgh": 10,
+		".on_lh.w-g.pct.mgh" : 10,
+		".on_lh.pial.K_filtered.sm20.mgh": None,
+		'.on_lh.sulc.mgh' : 5,
+		'.on_lh.curv.mgh' : 5,
+		'.on_lh.gm_FLAIR_0.25.mgh' : 10,
+		'.on_lh.gm_FLAIR_0.5.mgh' : 10,
+		'.on_lh.gm_FLAIR_0.75.mgh' : 10,
+		".on_lh.gm_FLAIR_0.mgh": 10,
+		'.on_lh.wm_FLAIR_0.5.mgh' : 10,
+		'.on_lh.wm_FLAIR_1.mgh' : 10,
+    			}
     feat = Feature()
     features_smooth = [feat.smooth_feat(feature, features[feature]) for feature in features]
     features_combat = [feat.combat_feat(feature) for feature in features_smooth]
