@@ -418,7 +418,7 @@ class Evaluator:
         plt.figure()
         # make colormap asymmetric about optimal threshold
         vcenter = np.clip(self.threshold, 0.01, 0.99)
-        offset = mcolors.DivergingNorm(vmin=0, vcenter=vcenter, vmax=1)
+        offset = mcolors.TwoSlopeNorm(vmin=0, vcenter=vcenter, vmax=1)
         plt.scatter(x_s.ravel(), y_s.ravel(), c=offset(predictions.ravel()), cmap="bwr", vmin=0, vmax=1)
         colours = ["brown", "pink", "gray", "olive"]
         labels = ["tn", "fn", "fp", "tp"]
