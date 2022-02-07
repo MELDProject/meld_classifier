@@ -39,11 +39,10 @@ Before being able to use the classifier on your data, some paths need to be set 
 python scripts/prepare_classifier.py
 ```
 
-This script will ask you for the location of your **MELD data folder** and download the pretrained model and test data to a folder inside your MELD data folder. Please provide the path to where your MELD data is stored on your computer.
-You can also skip the downloading of the test data. For this, append the option `--skip-download-data` to the python call:
-```bash
-python scripts/prepare_classifier.py --skip-download-data
-```
+This script will ask you for the location of your **MELD data folder** and download the pretrained model and test data to a folder inside your MELD data folder. Please provide the path to where you would like to store MRI data to run the classifier on.
+
+
+Note: You can also skip the downloading of the test data. For this, append the option `--skip-download-data` to the python call.
 
 ### FAQs
 Please see our [FAQ](FAQs.md) for common installation problems.
@@ -51,7 +50,8 @@ Please see our [FAQ](FAQs.md) for common installation problems.
 ### Verify installation
 We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient.
 
-TODO add script all 
+cd <path_to_meld_classifier> 
+pytest
 
 ## Usage
 With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.
