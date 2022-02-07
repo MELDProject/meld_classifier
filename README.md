@@ -48,10 +48,13 @@ Note: You can also skip the downloading of the test data. For this, append the o
 Please see our [FAQ](FAQs.md) for common installation problems.
 
 ### Verify installation
-We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient.
+We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient. It takes approximately 15minutes to run.
 
-cd <path_to_meld_classifier> 
+```bash
+cd <path_to_meld_classifier>
+conda activate meld_classifier
 pytest
+```
 
 ## Usage
 With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.
