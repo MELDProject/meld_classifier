@@ -1,4 +1,4 @@
-name: meld_classifier
+name: meld_classifier_3
 channels:
   - defaults
   - pog87
