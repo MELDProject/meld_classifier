@@ -135,14 +135,14 @@ class MeldCohort:
         if self._coords is None:
             surf = mt.load_mesh_geometry(os.path.join(self.data_dir, SURFACE_FILE))
             # spherical 2D coordinates. ignore radius
-            spherical_coords = mt.spherical_np(surf["coords"])[:, 1:]
+        #    spherical_coords = mt.spherical_np(surf["coords"])[:, 1:]
             # surf_coords_norm = (surf['coords']-np.min(surf['coords'],axis=0))/(np.max(surf['coords'],axis=0)-np.min(surf['coords'],axis=0))
-            norm_coords = (spherical_coords - np.min(spherical_coords, axis=0)) / (
-                np.max(spherical_coords, axis=0) - np.min(spherical_coords, axis=0)
-            )
+         #   norm_coords = (spherical_coords - np.min(spherical_coords, axis=0)) / (
+          #      np.max(spherical_coords, axis=0) - np.min(spherical_coords, axis=0)
+          #  )
             # round to have around 1500 unique coordinates
-            rounded_norm_coords = np.round(norm_coords * 5, 1) / 5
-            self._coords = rounded_norm_coords
+          #  rounded_norm_coords = np.round(norm_coords * 5, 1) / 5
+            self._coords = surf["coords"] #rounded_norm_coords
         return self._coords
 
     def read_subject_ids_from_dataset(self):
