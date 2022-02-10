@@ -301,7 +301,7 @@ if __name__ == "__main__":
                 mask = image.math_img(f"(img < {max_v}) & (img > {min_v})", img= imgs[f'pred_{hemi}'])
                 coords = plotting.find_xyz_cut_coords(mask)
                 vmax = np.percentile(imgs['anat'].get_fdata(), 99)
-                display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= False,
+                display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= True,
                                              figure=fig3, axes = ax3,  vmax = vmax)
                 display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='red')
                 display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='red')
