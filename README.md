@@ -6,7 +6,7 @@ https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1
 
 *Code Authors : Hannah Spitzer, Mathilde Ripart, Sophie Adler, Konrad Wagstyl*
 
-![overview](overview.png)
+![overview](images/overview.png)
 
 This package comes with a pretrained model that can be used to predict new subjects. It also contains code for training neural network lesion classifiers on new data.
 
