@@ -44,7 +44,7 @@ if __name__ == '__main__':
         print(f'Freesurfer outputs does not exist for this subject. Unable to perform qc')
     else : 
         #select inputs files T1 and FLAIR
-        T1_file = return_file(os.path.join(subject_fs_folder, 'mri', 'orig.mgz'), 'T1')
+        T1_file = return_file(os.path.join(subject_fs_folder, 'mri', 'orig', '001.mgz'), 'T1')
         FLAIR_file = return_file(os.path.join(subject_fs_folder, 'mri', 'orig', 'FLAIRraw.mgz'), 'FLAIR')
         #select predictions files
         pred_lh_file = return_file(os.path.join(subject_dir, 'predictions', 'lh.prediction.nii*'), 'lh_prediction')
@@ -55,7 +55,7 @@ if __name__ == '__main__':
         if T1_file:
             #create txt file with freeview commands
             with open(file_text, 'w') as f:
-                f.write(f'-v {T1_file}:colormap=grayscale \n')
+                f.write(f'-v {T1_file}:colormap=grayscale -layout 2 \n')
                 if FLAIR_file:
                     f.write(f'-v {FLAIR_file}:colormap=grayscale \n')
                 if (pred_lh_file!=None) & (pred_rh_file!=None):
