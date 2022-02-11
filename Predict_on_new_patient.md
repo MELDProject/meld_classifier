@@ -85,7 +85,7 @@ python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_w
 2. Register the prediction back into the native nifti MRI. Results are stored in inputs/<sub_id>/predictions.
 3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in Results are stored in inputs/<sub_id>/predictions/reports.
 
-### Interpretation of results
+## Interpretation of results
 The precalculated .png images of predicted lesions and their associated saliencies can be used to look at the predicted clusters and why they were detected by the classifier. 
 
 After viewing these images, we recommend then viewing the predictions superimposed on the T1 volume. This will enable:
@@ -93,6 +93,7 @@ After viewing these images, we recommend then viewing the predictions superimpos
 - Performing quality control
 - Viewing the .png images of predicted lesions
 
+### Viewing the predicted clusters
 The .png images of the predicted lesions are saved in the folder:
  /input/<sub_id>/predictions/reports
 
@@ -135,7 +136,8 @@ The features that are included in the saliency image are:
 * **Mean curvature**: Similar to sulcal depth, this indicates whether a vertex is sulcal or gyral. Its utility is mainly in informing the classifier whether a training vertex is gyral or sulcal. Within FCD lesions, it is usually not characterised by high z-scores or high saliency.
 
 If you only provide a T1 image, the FLAIR features will not be included in the saliency plot.
-Viewing the predictions on the T1 and quality control
+
+## Viewing the predictions on the T1 and quality control
 
 It is important to check that the clusters detected are not due to obvious FreeSurfer reconstruction errors, scan artifacts etc.
 
@@ -145,4 +147,33 @@ cd <path_to_meld_classifier>
 conda activate meld_classifier
 python new_pt_qc_script.py -id <sub_id>
 ```
+![qc_surface](images/qc_surface.png)
 
+This will open FreeView and load the T1 and FLAIR (where available) volumes as well as the classifier predictions on the left and right hemispheres. It will also load the FreeSurfer pial and white surfaces. It will look like this:
+
+You can scroll through and find the predicted clusters.
+![qc_surface](images/qc_cluster.png)
+
+Example of a predicted cluster (orange) on the right hemisphere. It is overlaid on a T1 image, with the right hemisphere pial and white surfaces visualised. Red arrows point to the cluster. 
+
+**Things to check for each predicted cluster:**
+
+1. Are there any artifacts in the T1 or FLAIR data that could have caused the classifier to predict that area?
+
+2. Check the .pial and .white surfaces at the locations of any predicted clusters. 
+Are they following the grey-white matter boundary and pial surface? If not, you need to try and establish if this is just a reconstruction error or if the error is due to the presence of an FCD. If it is just an error or due to an artifact, exclude this prediction. If it is due to an FCD, be aware that the centroid  / extent of the lesion may have been missed due to the reconstruction error and that some of the lesion may be adjacent to the predicted cluster. 
+
+Note: the classifier is only able to predict areas within the pial and white surfaces.
+
+## Limitations 
+
+**Limitations to be aware of:**
+
+* If there is a reconstruction error due to an FCD, the classifier will only be able to detect areas within the pial and white surfaces and may miss areas of the lesion that are not correctly segmented by FreeSurfer
+* There will be false positive clusters. You will need to look at the predicted clusters with an experienced radiologist to identify the significance of detected areas
+* The classifier has only been trained on FCD lesions and we do not have data on its ability to detect other pathologies e.g. DNET / ganglioglioma / polymicrogyria. As such, the research tool should only be applied to patients with FCD / suspected FCD
+* Performance of the classifier varies according to MRI field strength, data available (e.g. T1 or T1 and FLAIR) and histopathological subtype. For more details of how the classifier performs in different cohorts, see (https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1)
+
+## How to cite the classifier
+  
+Spitzer, H., Ripart, M., Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. (2021). Interpretable surface-based detection of focal cortical dysplasias: a MELD study. medRxiv, 2021.12.13.21267721.
