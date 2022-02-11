@@ -6,11 +6,14 @@ https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1
 
 *Code Authors : Hannah Spitzer, Mathilde Ripart, Sophie Adler, Konrad Wagstyl*
 
-![overview](overview.png)
+![overview](images/overview.png)
 
 This package comes with a pretrained model that can be used to predict new subjects. It also contains code for training neural network lesion classifiers on new data.
 
-                               
+## Disclaimer
+
+The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA), European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. There is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient's own risk.
+
 ## Installation
 
 ### Prerequisites
@@ -67,5 +70,8 @@ For more details, check out the guides linked below:
 If you'd like to contribute to this code base, have a look at our [contribution guide](DEVELOP.md)
 
 ## Manuscript
-Please check out our [manuscript](TODO) to learn more. 
-An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md)
+Please check out our [manuscript](https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1) to learn more.
+
+An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md).
+
+A guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site is found [here](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing).
