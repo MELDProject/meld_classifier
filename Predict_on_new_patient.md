@@ -1,10 +1,16 @@
 # Predict lesion on a new patient 
 
-With the MELD classifier pipeline, if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient. 
+With the MELD classifier pipeline, if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient.
 Note: No demographic information are required for this process.
+
+We also have a "Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site" (https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
 
 If you would like to predict lesions on patients from new epilepsy centres or new MRI scanners or updated T1 / FLAIR sequences that were not used to train the classifier, you will need to used the Predict_on_patients_from_new_sites pipeline which is under development.
 Note: Demographic information (e.g age and sex) will be required for this process.
+
+## Disclaimer
+
+The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA), European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. There is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient's own risk.
 
 ## Information about the pipeline
 Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation) and activate the meld_classifier environment : 
@@ -27,7 +33,7 @@ Place the T1 nifti file into the T1 folder. Please ensure 'T1' is in the file na
 
 Place the FLAIR nifti file into the FLAIR folder. Please ensure 'FLAIR' is in the file name.
 
-![example](example_folder_structure.png)
+![example](images/example_folder_structure.png)
 
 ### Second step
 Go into the meld_classifier folder 
@@ -38,7 +44,7 @@ Each of the 3 following scripts needs to be run from the 'meld_classifier' folde
 
 ### Overview new patient pipeline
 The pipeline is split into 3 main scripts as illustrated below and detailed after.
-![pipeline_fig](tutorial_pipeline_fig.png)
+![pipeline_fig](images/tutorial_pipeline_fig.png)
 
 
 ### Script 1 - FreeSurfer reconstruction
@@ -78,4 +84,65 @@ python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_w
 1. Run the MELD classifier and predict lesion on new subject
 2. Register the prediction back into the native nifti MRI. Results are stored in inputs/<sub_id>/predictions.
 3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in Results are stored in inputs/<sub_id>/predictions/reports.
+
+### Interpretation of results
+The precalculated .png images of predicted lesions and their associated saliencies can be used to look at the predicted clusters and why they were detected by the classifier. 
+
+After viewing these images, we recommend then viewing the predictions superimposed on the T1 volume. This will enable:
+- Re-review of the T1 /FLAIR at the predicted cluster locations to see if an FCD can now be seen
+- Performing quality control
+- Viewing the .png images of predicted lesions
+
+The .png images of the predicted lesions are saved in the folder:
+ /input/<sub_id>/predictions/reports
+
+The first image is called inflatbrain_<sub_id>.png
+
+![inflated](images/inflatbrain_sub_id.png)
+
+This image tells you the number of predicted clusters and shows on the inflated brain where the clusters are located.
+
+The next images are mri_<sub_id>_<hemi>_c*.png
+
+E.g. 
+
+![mri](images/mri_sub_id_lh_c1.png)
+
+These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<sub_id>_<hemi>_c1.png for cluster 1 and  mri_<sub_id>_<hemi>_c2.png for cluster 2.
+
+Please note: images are NOT shown in radiological convention (we are working on code to do this)
+  
+### Saliency
+  
+The next images are called saliency_<sub_id>_<hemi>_c*.png. Each cluster has a saliency image associated with it. E.g.
+  
+![saliency](images/saliency_sub_id_lh_c1.png)
+  
+These detail:
+* The hemisphere the cluster is on
+* The surface area of the cluster (across the cortical surface)
+* The location of the cluster
+* The z-scores of the patient’s cortical features averaged within the cluster. In this example, the most abnormal features are the intrinsic curvature (folding measure) and the sulcal depth.
+* The saliency of each feature to the network - if a feature is brighter pink, that feature was more important to the network. In this example, the intrinsic curvature is most important to the network’s prediction
+
+The features that are included in the saliency image are:
+* **Grey-white contrast**: indicative of blurring at the grey-white matter boundary, lower z-scores indicate more blurring
+* **Cortical thickness**: higher z-scores indicate thicker cortex, lower z-scores indicate thinner cortex
+* **Sulcal depth**: higher z-scores indicate deeper average sulcal depth within the cluster
+* **Intrinsic curvature**: a measure of cortical deformation that captures folding abnormalities in FCD. Lesions are usually characterised by high z-scores
+* **WM FLAIR**: FLAIR intensity sampled at 1mm below the grey-white matter boundary. Higher z-scores indicate relative FLAIR hyperintensity, lower z-scores indicate relative FLAIR hypointensity
+* **GM FLAIR**: FLAIR intensity sampled at 50% of the cortical thickness. Higher z-scores indicate relative FLAIR hyperintensity, lower z-scores indicate relative FLAIR hypointensity
+* **Mean curvature**: Similar to sulcal depth, this indicates whether a vertex is sulcal or gyral. Its utility is mainly in informing the classifier whether a training vertex is gyral or sulcal. Within FCD lesions, it is usually not characterised by high z-scores or high saliency.
+
+If you only provide a T1 image, the FLAIR features will not be included in the saliency plot.
+Viewing the predictions on the T1 and quality control
+
+It is important to check that the clusters detected are not due to obvious FreeSurfer reconstruction errors, scan artifacts etc.
+
+To do this run: 
+```bash
+cd <path_to_meld_classifier>
+conda activate meld_classifier
+python new_pt_qc_script.py -id <sub_id>
+```
 
