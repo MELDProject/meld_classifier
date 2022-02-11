@@ -70,6 +70,8 @@ For more details, check out the guides linked below:
 If you'd like to contribute to this code base, have a look at our [contribution guide](DEVELOP.md)
 
 ## Manuscript
-Please check out our [manuscript](https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1) to learn more. 
-An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md)
-A guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site is found [here](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing)
+Please check out our [manuscript](https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1) to learn more.
+
+An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md).
+
+A guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site is found [here](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing).
