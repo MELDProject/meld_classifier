@@ -14,10 +14,10 @@ from meld_classifier.paths import MELD_DATA_PATH, FS_SUBJECTS_PATH
 def return_file(path, file_name):
     files = glob.glob(path)
     if len(files)>1 :
-        raise FileNotFoundError(f'Find too much volumes for {file_name}. Check and remove the additional volumes with same key name') 
+        print(f'Find too much volumes for {file_name}. Check and remove the additional volumes with same key name') 
         return None
     elif not files:
-        raise FileNotFoundError(f'Could not find {file_name} volume. Check if name follow the right nomenclature')
+        print(f'Could not find {file_name} volume. Check if name follow the right nomenclature')
         return None
     else:
         return files[0]
@@ -59,8 +59,8 @@ if __name__ == '__main__':
                 if FLAIR_file:
                     f.write(f'-v {FLAIR_file}:colormap=grayscale \n')
                 if (pred_lh_file!=None) & (pred_rh_file!=None):
-                    f.write(f'-v {pred_lh_file}:colormap=jet \n')
-                    f.write(f'-v {pred_rh_file}:colormap=jet \n')
+                    f.write(f'-v {pred_lh_file}:colormap=lut \n')
+                    f.write(f'-v {pred_rh_file}:colormap=lut \n')
                 f.write(f'-f {subject_fs_folder}/surf/lh.white:edgecolor=yellow {subject_fs_folder}/surf/lh.pial:edgecolor=red {subject_fs_folder}/surf/rh.white:edgecolor=yellow {subject_fs_folder}/surf/rh.pial:edgecolor=red \n')
             #launch freeview
             freeview = format(f"freeview -cmd {file_text}")
