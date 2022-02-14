@@ -85,6 +85,15 @@ class PDF(FPDF):
         self.set_fill_color(160,214,190)
         # add texte box info
         self.multi_cell(w=190, h=5, txt=txt , border=1, align='L', fill=True)
+        
+    def info_box_clust(self, txt):
+        self.ln(140)
+        # set font
+        self.set_font('Arial', 'I', 6)
+        #set box color
+        self.set_fill_color(160,214,190)
+        # add text box info
+        self.multi_cell(w=80, h=5, txt=txt , border=1, align='L', fill=True)
     
     def disclaimer_box(self, txt):
         # set font
@@ -283,7 +292,7 @@ if __name__ == "__main__":
         # Loop over hemi
         for i, hemi in enumerate(['lh','rh']):
             #prepare grid plot
-            gs1 = GridSpec(2, 3, width_ratios=[0.3, 1, 1],  wspace=2)
+            gs1 = GridSpec(2, 3, width_ratios=[1, 1, 1],  wspace=0.1, hspace=0.1)
             gs2 = GridSpec(1, 2, width_ratios=[1, 3], wspace=2)
             gs3 = GridSpec(1, 1)
             #get features array
@@ -404,7 +413,7 @@ if __name__ == "__main__":
 
         text_info_1 = "Information: \n The MRI data of this patient has been processed through the MELD surface-based FCD detection algorithm. \n Page 1 of this report will show all detected clusters on an inflated view of the brain. \n Each subsequent page is an individual cluster"
 
-        text_info_2 = "For each cluster, the information below are provided: \n -The hemisphere the cluster is on \n -The surface area of the cluster (across the cortical surface) \n -The location of the cluster \n - The z-scores of the patient’s cortical features averaged within the cluster. \n- The saliency of each feature to the network - if a feature is brighter pink, that feature was more important to the network. \nFor more information, please read the Guide to using the MELD surface-based FCD detection."
+        text_info_2 = "For each cluster, the information below are provided: \n   -The hemisphere the cluster is on \n   -The surface area of the cluster (across the cortical surface) \n   -The location of the cluster \n   -The z-scores of the patient cortical features averaged within the cluster. \n   -The saliency of each feature to the network - if a feature is brighter pink, that feature was more important to the network. \n \n For more information, please read the Guide to using the MELD surface-based FCD detection."
 
         disclaimer = "Disclaimer: The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA),European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. \nThere is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient own risk" 
 
@@ -439,13 +448,16 @@ if __name__ == "__main__":
             #add line contours
             pdf.lines()
             #add header
-            pdf.custom_header(logo, txt1='MRI view & saliencies', txt2=f'cluster {cluster}')
+            pdf.custom_header(logo, txt1='MRI view & saliencies', txt2=f'Cluster {cluster}')
             #add image
             im_mri= glob.glob(os.path.join(output_dir, f'mri_{subject}_*_c{cluster}.png'))[0]
             pdf.imagey(im_mri, 50)
             #add image
             im_sal= glob.glob(os.path.join(output_dir, f'saliency_{subject}_*_c{cluster}.png'))[0]
             pdf.imagey(im_sal, 150)
+            #add info cluster analysis txt only 1st cluster
+            if cluster==1:
+                pdf.info_box_clust(text_info_2)
             #add footer date
             pdf.custom_footer(footer_txt)
         #save pdf
