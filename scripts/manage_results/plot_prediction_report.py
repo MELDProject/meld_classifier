@@ -2,7 +2,6 @@ from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from meld_classifier.dataset import load_combined_hemisphere_data, Dataset, normalise_data
 from meld_classifier.meld_plotting import trim,rotate90
-from meld_classifier.training import Trainer
 from meld_classifier.evaluation import Evaluator
 from meld_classifier.paths import (
     BASE_PATH,
@@ -14,6 +13,7 @@ from meld_classifier.paths import (
     FINAL_SCALING_PARAMS,
     SURFACE_PARTIAL, 
     DEFAULT_HDF5_FILE_ROOT,
+    SCRIPTS_DIR,
 )
 import os
 import json
@@ -34,7 +34,85 @@ from PIL import Image
 import subprocess
 import meld_classifier.mesh_tools as mt
 import meld_classifier.paths as paths
+from datetime import date
+from fpdf import FPDF
 
+class PDF(FPDF):    
+    def lines(self):
+        self.set_line_width(0.0)
+        self.line(5.0,5.0,205.0,5.0) # top one
+        self.line(5.0,292.0,205.0,292.0) # bottom one
+        self.line(5.0,5.0,5.0,292.0) # left one
+        self.line(205.0,5.0,205.0,292.0) # right one
+    
+    def custom_header(self, logo, txt1, txt2=None):
+        # Log
+        self.image(logo, 10, 8, 33)
+        # Arial bold 
+        self.set_font('Arial', 'B', 30)
+        # Move to the right
+        self.cell(80)
+        # Title
+        self.cell(w=30, h=10, txt=txt1, border=0, ln=0, align='C')
+        if txt2 != None:
+            # Arial bold 15
+            self.ln(20)
+            self.cell(80)
+            self.set_font('Arial', 'B', 20)
+            self.cell(w=30, h=5, txt=txt2, border=0, ln=0, align='C')
+        # Line break
+        self.ln(20)
+    
+    def custom_footer(self, txt):
+        # Arial italic 8
+        self.set_font('Arial', 'I', 8)
+        # Position at 1.5 cm from bottom
+        self.set_y(-30)
+        # add text
+        self.cell(w=0, h=0, txt=txt, border=0, ln=2, align='C') 
+        # Date
+        today = date.today()
+        today = today.strftime("%d/%m/%Y")
+        self.cell(w=5, h=8, txt=str(today) , border=0, ln=0, align='L')
+        # Page number
+        self.cell(w=180, h=8, txt='Page ' + str(self.page_no()), border=0, ln=2, align='R')
+                
+    
+    def info_box(self, txt):
+        # set font
+        self.set_font('Arial', 'I', 10)
+        #set box color
+        self.set_fill_color(160,214,190)
+        # add texte box info
+        self.multi_cell(w=190, h=5, txt=txt , border=1, align='L', fill=True)
+        
+    def info_box_clust(self, txt):
+        self.ln(140)
+        # set font
+        self.set_font('Arial', 'I', 6)
+        #set box color
+        self.set_fill_color(160,214,190)
+        # add text box info
+        self.multi_cell(w=80, h=5, txt=txt , border=1, align='L', fill=True)
+    
+    def disclaimer_box(self, txt):
+        # set font
+        self.set_font('Arial', 'I', 6)
+        #set box color
+        self.set_fill_color(240,128,128)
+        # add texte box info
+        self.multi_cell(w=190, h=5, txt=txt , border=1, align='L', fill=True)
+        
+    def subtitle_inflat(self):
+        # Arial bold 15
+        self.set_font('Arial', 'B', 20)
+        # Title
+        self.cell(w=10, h=80, txt='Overview clusters on inflated brain', border=0, ln=2, align='L')
+       
+    def imagey(self,im, y):
+        pdf.image(im, 5, y, link='', type='', w=190, h=297/3)
+
+        
 def load_prediction(subject,hdf5):
     results={}
     with h5py.File(hdf5, "r") as f:
@@ -214,7 +292,7 @@ if __name__ == "__main__":
         # Loop over hemi
         for i, hemi in enumerate(['lh','rh']):
             #prepare grid plot
-            gs1 = GridSpec(2, 3, width_ratios=[0.3, 1, 1],  wspace=2)
+            gs1 = GridSpec(2, 3, width_ratios=[1, 1, 1],  wspace=0.1, hspace=0.1)
             gs2 = GridSpec(1, 2, width_ratios=[1, 3], wspace=2)
             gs3 = GridSpec(1, 1)
             #get features array
@@ -301,7 +379,7 @@ if __name__ == "__main__":
                 mask = image.math_img(f"(img < {max_v}) & (img > {min_v})", img= imgs[f'pred_{hemi}'])
                 coords = plotting.find_xyz_cut_coords(mask)
                 vmax = np.percentile(imgs['anat'].get_fdata(), 99)
-                display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= False,
+                display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= True,
                                              figure=fig3, axes = ax3,  vmax = vmax)
                 display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='red')
                 display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='red')
@@ -322,3 +400,65 @@ if __name__ == "__main__":
         ax.axis('off')
         # save overview figure
         fig.savefig(f'{output_dir}/inflatbrain_{subject}.png')
+        
+        
+        # create PDF overview
+        pdf = PDF()#pdf object
+        pdf=PDF(orientation='P') # landscape
+        pdf=PDF(unit='mm') #unit of measurement
+        pdf=PDF(format='A4') #page format. A4 is the default value of the format, you don't have to specify it.
+
+
+        logo = os.path.join(SCRIPTS_DIR,'MELD_logo.png')
+
+        text_info_1 = "Information: \n The MRI data of this patient has been processed through the MELD surface-based FCD detection algorithm. \n Page 1 of this report will show all detected clusters on an inflated view of the brain. \n Each subsequent page is an individual cluster"
+
+        text_info_2 = "For each cluster, the information below are provided: \n   -The hemisphere the cluster is on \n   -The surface area of the cluster (across the cortical surface) \n   -The location of the cluster \n   -The z-scores of the patient cortical features averaged within the cluster. \n   -The saliency of each feature to the network - if a feature is brighter pink, that feature was more important to the network. \n \n For more information, please read the Guide to using the MELD surface-based FCD detection."
+
+        disclaimer = "Disclaimer: The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA),European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. \nThere is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient own risk" 
+
+        footer_txt="This report was created by Mathilde Ripart, Hannah Spitzer, Sophie Adler and Konrad Wagstyl on behalf of the MELD Project"
+
+        today = date.today()
+
+        #### create main page with overview on inflated brain
+
+        #add page
+        pdf.add_page()
+        #add line contours
+        pdf.lines()
+        #add header
+        pdf.custom_header(logo, txt1='MELD report', txt2=f'Patient ID: {subject}')
+        #add info box
+        pdf.info_box(text_info_1)
+        #add disclaimer box
+        pdf.disclaimer_box(disclaimer)
+        #add image
+        pdf.subtitle_inflat()
+        im_inflat= os.path.join(output_dir, f'inflatbrain_{subject}.png')
+        pdf.imagey(im_inflat,130)
+        #add footer date
+        pdf.custom_footer(footer_txt)
+
+        clusters=range(1,n_clusters+1)
+        #### Create page for each cluster with MRI view and saliencies
+        for cluster in clusters: 
+            #add page
+            pdf.add_page()
+            #add line contours
+            pdf.lines()
+            #add header
+            pdf.custom_header(logo, txt1='MRI view & saliencies', txt2=f'Cluster {cluster}')
+            #add image
+            im_mri= glob.glob(os.path.join(output_dir, f'mri_{subject}_*_c{cluster}.png'))[0]
+            pdf.imagey(im_mri, 50)
+            #add image
+            im_sal= glob.glob(os.path.join(output_dir, f'saliency_{subject}_*_c{cluster}.png'))[0]
+            pdf.imagey(im_sal, 150)
+            #add info cluster analysis txt only 1st cluster
+            if cluster==1:
+                pdf.info_box_clust(text_info_2)
+            #add footer date
+            pdf.custom_footer(footer_txt)
+        #save pdf
+        pdf.output(os.path.join(output_dir,f'MELD_report_{subject}.pdf'),'F')
