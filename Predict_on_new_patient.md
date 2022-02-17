@@ -17,6 +17,12 @@ Before running the below pipeline, ensure that you have [installed MELD classifi
 ```bash
   conda activate meld_classifier
 ```
+Also you need to make sure that Freesurfer is activated in your terminal (you should have some printed FREESURFER paths when opening the terminal). Otherwise you will need to manually activate Freesurfer on each new terminal by running : 
+```bash
+export FREESURFER_HOME=<freesurfer_installation_directory>/freesurfer
+source $FREESURFER_HOME/SetUpFreeSurfer.sh
+```
+with `<freesurfer_installation_directory>` being the path to where your Freesurfer has been installed.
 
 ### First step - Organising your data!
 You need to organise the MRI data for the patients you want to run the classifier on.
