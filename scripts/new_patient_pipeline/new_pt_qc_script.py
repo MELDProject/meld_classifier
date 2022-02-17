@@ -44,8 +44,8 @@ if __name__ == '__main__':
         print(f'Freesurfer outputs does not exist for this subject. Unable to perform qc')
     else : 
         #select inputs files T1 and FLAIR
-        T1_file = return_file(os.path.join(subject_fs_folder, 'mri', 'orig', '001.mgz'), 'T1')
-        FLAIR_file = return_file(os.path.join(subject_fs_folder, 'mri', 'orig', 'FLAIRraw.mgz'), 'FLAIR')
+        T1_file = return_file(os.path.join(subject_dir, 'T1', '*T1*.nii*'), 'T1')
+        FLAIR_file = return_file(os.path.join(subject_dir, 'FLAIR', '*FLAIR*.nii*'), 'FLAIR')
         #select predictions files
         pred_lh_file = return_file(os.path.join(subject_dir, 'predictions', 'lh.prediction.nii*'), 'lh_prediction')
         pred_rh_file = return_file(os.path.join(subject_dir, 'predictions', 'rh.prediction.nii*'), 'rh_prediction')
