@@ -151,7 +151,7 @@ To do this run:
 ```bash
 cd <path_to_meld_classifier>
 conda activate meld_classifier
-python new_pt_qc_script.py -id <sub_id>
+python scripts/new_patient_pipeline/new_pt_qc_script.py -id <sub_id>
 ```
 ![qc_surface](images/qc_surface.png)
 
