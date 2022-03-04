@@ -169,6 +169,25 @@ class Preprocess:
                 else:
                     estimates[param] = feat_dir[param][:]
         return estimates
+    
+    def shrink_combat_estimates(self, estimates):
+        """ shrink combat estimates to reduce size file"""
+        #combined mod.mean with stand.mean
+        stand_mean =  estimates['stand.mean'][:, 0] + estimates['mod.mean'].mean(axis=1)
+        estimates['stand.mean'] = stand_mean
+        #save the number of subjects to un-shrink later
+        estimates['num_subjects']= np.array([estimates['mod.mean'].shape[1]])
+        #remove mod.mean to reduce estimates size
+        del estimates['mod.mean']
+        return estimates
+
+    def unshrink_combat_estimates(self, estimates):
+        """ unshrink combat estimates to use as input in neuroCombatFromTraining"""
+        num_subjects = estimates['num_subjects'][0]
+        mod_mean = np.zeros((len(estimates['stand.mean']),num_subjects ))
+        estimates['mod.mean'] = mod_mean
+        estimates['stand.mean'] = np.tile(estimates['stand.mean'], (num_subjects,1)).T
+        return estimates
 
     def combat_whole_cohort(self, feature_name, outliers_file=None, combat_params_file=None):
         """Harmonise data between site/scanner with age, sex and disease status as covariate
@@ -228,7 +247,8 @@ class Preprocess:
                 )
                 # save combat parameters
                 if combat_params_file is not None:
-                    self.save_norm_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
+                    shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
+                    self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
 
                 post_combat_feature_name = self.feat.combat_feat(feature_name)
 
@@ -326,6 +346,7 @@ class Preprocess:
         """
         # load combat parameters        
         combat_estimates = self.read_norm_combat_parameters(feature_name, combat_params_file)
+        combat_estimates = self.unshrink_combat_estimates(combat_estimates)
         precombat_features = []
         site_scanner = []
         for subject in self.subject_ids:
