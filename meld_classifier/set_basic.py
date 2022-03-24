@@ -942,7 +942,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
-  ]
+  ],
     'fwhm_20': [
         #kernel = 20
         '.combat.on_lh.thickness.mgh', 
