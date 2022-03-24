@@ -32,7 +32,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -63,7 +63,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -94,7 +94,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
          '.combat.on_lh.thickness.sm15.mgh', 
          '.combat.on_lh.w-g.pct.sm15.mgh',
@@ -125,7 +125,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
  
         '.combat.on_lh.thickness.sm20.mgh', 
          '.combat.on_lh.w-g.pct.sm20.mgh',
@@ -156,7 +156,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -187,7 +187,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
     ],
     'fwhm_3': [
         #kernel = 3
@@ -220,7 +220,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -251,7 +251,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -282,7 +282,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
          '.combat.on_lh.thickness.sm15.mgh', 
          '.combat.on_lh.w-g.pct.sm15.mgh',
@@ -313,7 +313,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
  
         '.combat.on_lh.thickness.sm20.mgh', 
          '.combat.on_lh.w-g.pct.sm20.mgh',
@@ -344,7 +344,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -375,7 +375,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
     ],
     'fwhm_5': [
         #kernel = 5
@@ -408,7 +408,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -439,7 +439,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -470,7 +470,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
          '.combat.on_lh.thickness.sm15.mgh', 
          '.combat.on_lh.w-g.pct.sm15.mgh',
@@ -501,7 +501,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
  
         '.combat.on_lh.thickness.sm20.mgh', 
          '.combat.on_lh.w-g.pct.sm20.mgh',
@@ -532,7 +532,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -596,7 +596,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -627,7 +627,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -658,7 +658,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
 
          '.combat.on_lh.thickness.sm15.mgh', 
@@ -690,7 +690,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
  
         '.combat.on_lh.thickness.sm20.mgh', 
          '.combat.on_lh.w-g.pct.sm20.mgh',
@@ -721,7 +721,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -752,7 +752,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
     ],
   'fwhm_15': [
       #kernel = 15
@@ -785,7 +785,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -816,7 +816,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -847,7 +847,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -878,7 +878,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
  
         '.combat.on_lh.thickness.sm20.mgh', 
@@ -910,7 +910,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -941,7 +941,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
   ]
     'fwhm_20': [
         #kernel = 20
@@ -974,7 +974,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -1005,7 +1005,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -1036,7 +1036,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -1067,7 +1067,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
          '.combat.on_lh.thickness.sm15.mgh', 
          '.combat.on_lh.w-g.pct.sm15.mgh',
@@ -1098,7 +1098,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
 
          '.combat.on_lh.thickness.sm25.mgh', 
          '.combat.on_lh.w-g.pct.sm25.mgh',
@@ -1129,7 +1129,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
     ],
   'fwhm_25': [
       #kernel = 25
@@ -1162,7 +1162,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.mgh',
         
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -1193,7 +1193,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm3.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm3.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm3.mgh',
 
         '.combat.on_lh.thickness.sm5.mgh', 
          '.combat.on_lh.w-g.pct.sm5.mgh',
@@ -1224,7 +1224,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh',
 
          '.combat.on_lh.thickness.sm10.mgh', 
          '.combat.on_lh.w-g.pct.sm10.mgh',
@@ -1255,7 +1255,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm10.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm10.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm10.mgh',
 
          '.combat.on_lh.thickness.sm15.mgh', 
          '.combat.on_lh.w-g.pct.sm15.mgh',
@@ -1286,7 +1286,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm15.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm15.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm15.mgh',
  
         '.combat.on_lh.thickness.sm20.mgh', 
          '.combat.on_lh.w-g.pct.sm20.mgh',
@@ -1317,6 +1317,6 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm20.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm20.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh'
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm20.mgh',
   ],
 }
