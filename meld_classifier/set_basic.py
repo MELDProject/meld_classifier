@@ -1,7 +1,7 @@
 ## definitions of different feature sets for experiments
 
 exclude_set = {
-    1: [  
+    'fwhm_0': [  
         #kernel = 0
         '.combat.on_lh.thickness.sm3.mgh', 
          '.combat.on_lh.w-g.pct.sm3.mgh',
@@ -189,7 +189,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
     ],
-    2: [
+    'fwhm_3': [
         #kernel = 3
         '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
@@ -377,7 +377,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
     ],
-    3: [
+    'fwhm_5': [
         #kernel = 5
         '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
@@ -563,10 +563,9 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.thickness.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
-         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
-
+         '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh',
     ],
-    4: [
+    'fwhm_ref': [
          #kernel = 10 
         '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
@@ -755,7 +754,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
     ],
-  5: [
+  'fwhm_15': [
       #kernel = 15
       '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
@@ -944,7 +943,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
   ]
-    6: [
+    'fwhm_20': [
         #kernel = 20
         '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
@@ -1132,7 +1131,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm25.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm25.mgh'
     ],
-  7: [
+  'fwhm_25': [
       #kernel = 25
       '.combat.on_lh.thickness.mgh', 
          '.combat.on_lh.w-g.pct.mgh',
