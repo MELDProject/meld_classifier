@@ -74,7 +74,7 @@ exclude_set = {
         ".combat.on_lh.curv.mgh",
         ".combat.on_lh.sulc.mgh",
         ".inter_z.asym.intra_z.combat.on_lh.curv.mgh",
-        ".inter_z.asym.intra_z.combat.on_lh.sulc.mgh",]
+        ".inter_z.asym.intra_z.combat.on_lh.sulc.mgh",],
      'c': [".inter_z.asym.intra_z.combat.on_lh.curv.mgh",
         ".inter_z.asym.intra_z.combat.on_lh.gm_FLAIR_0.25.sm10.mgh",
         ".inter_z.asym.intra_z.combat.on_lh.gm_FLAIR_0.5.sm10.mgh",
