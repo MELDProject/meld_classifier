@@ -105,6 +105,7 @@ exclude_set = {
          '.inter_z.asym.intra_z.combat.on_lh.w-g.pct.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_0.5.sm5.mgh',
          '.inter_z.asym.intra_z.combat.on_lh.wm_FLAIR_1.sm5.mgh'
+
     ],
     4: [
          '.combat.on_lh.thickness.sm10.mgh', 
