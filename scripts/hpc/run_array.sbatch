@@ -12,7 +12,8 @@
 #! Name of the job:
 #SBATCH -J run-meld
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
-#SBATCH -A CAMBRC-SL3-GPU   #CORE-WCHN-MELD-SL2-GPU  # use CORE-WCHN-MELD-SL2-CPU for CPU only run
+#SBATCH -A CORE-WCHN-MELD-SL2-GPU  # use CORE-WCHN-MELD-SL2-CPU for CPU only run
+#!CAMBRC-SL3-GPU   # CORE-WCHN-MELD-SL2-GPU  # use CORE-WCHN-MELD-SL2-CPU for CPU only run
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total?
@@ -34,7 +35,7 @@
 ## SBATCH --array=0-1
 
 #! Do not change:
-#SBATCH -p pascal
+#SBATCH -p ampere
 
 #! sbatch directives end here (put any additional directives above this line)
 
