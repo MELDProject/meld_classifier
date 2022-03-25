@@ -18,7 +18,7 @@ variable_network_parameters = {
 variable_data_parameters = {
     # each entry here is a parameter and a list of values
     # e.g. 'iteration': [0,1,2,3,4,5]
-    "iteration": [0, 1, 2, 3, 4, 5, 6, 7],
+    "features_to_exclude": ['fwhm_0', 'fwhm_3', 'fwhm_5', 'fwhm_ref', 'fwhm_15', 'fwhm_20', 'fwhm_25'],
 }
 
 ##### default input data parameters #####
@@ -163,5 +163,5 @@ network_parameters = {
     "optimal_threshold": 0.5,
     # `date`: current date, appended to experiment folder name to allow training of the same configuration several times
     # change this to test a network from a different date
-    "date": datetime.datetime.now().strftime("%y-%m-%d"),
+    "date": '22-03-23' , #datetime.datetime.now().strftime("%y-%m-%d"),
 }
