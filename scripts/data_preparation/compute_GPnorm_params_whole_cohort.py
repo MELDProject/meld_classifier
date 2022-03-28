@@ -119,8 +119,7 @@ for feature in features :
         # compute GP params for each vertices
         mu_mat = []
         std_mat = []
-    #     for vertex_index in np.arange(len(cohort.cortex_mask)):
-        for vertex_index in np.arange(100):
+        for vertex_index in np.arange(2*sum(cohort.cortex_mask)):
             y=vals_array[:,vertex_index]
             x = np.array(covars[['ages','sex']])
             mu,std= fit_predict_gpy(y,x,max_age = 80)
