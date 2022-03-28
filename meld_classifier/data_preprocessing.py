@@ -21,6 +21,7 @@ import glob
 import logging
 import random
 import json
+import sys
 from itertools import chain
 import potpourri3d as pp3d
 import meld_classifier.mesh_tools as mt
@@ -247,8 +248,9 @@ class Preprocess:
                 )
                 # save combat parameters
                 if combat_params_file is not None:
-                    shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
-                    self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
+#                     shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
+                    shrink_estimates=dict_combat["estimates"]
+#                     self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
 
                 post_combat_feature_name = self.feat.combat_feat(feature_name)
 
@@ -400,10 +402,18 @@ class Preprocess:
     def calibration_smoothing(self):
         """caliration curve for smoothing surface mesh'"""
         if self._calibration_smoothing is None:
-            p = os.path.join(self.data_dir, SMOOTH_CALIB_FILE)
-            coords, faces = nb.freesurfer.io.read_geometry(p)
-            line, model = mt.calibrate_smoothing(coords, faces, start_v=125000, n_iter=70)
-            self._calibration_smoothing = (line, model)
+            # Use dictionary based on Freesurfer mris_fwhm values
+            y = np.array([0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,])
+            x = np.array([0, 1, 3, 6, 11, 18, 34, 45, 57, 70, 85, 101, 119, 138, 158, 180, 203, 228, 257, 282, 310, 341, 372, 405, 440, 476, 513, 552, 592, 633,])
+            # Uncomment to fit a polynom
+#             model = np.poly1d(np.polyfit(x, y, 3))
+#             x = np.linspace(0, x[-1], x[-1]+1)
+#             y = model(x)
+            # or uncomment to use homemade function to create calibration curve
+#             p = os.path.join(self.data_dir, SMOOTH_CALIB_FILE)
+#             coords, faces = nb.freesurfer.io.read_geometry(p)
+#             x, y = mt.calibrate_smoothing(coords, faces, start_v=125000, n_iter=300)          
+            self._calibration_smoothing = (x, y)
         return self._calibration_smoothing
 
     def smooth_data(self, feature, fwhm):
@@ -416,7 +426,6 @@ class Preprocess:
         vals_matrix_lh = []
         vals_matrix_rh = []
         for id_sub in self.subject_ids:
-            print(id_sub)
             # create subject object
             subj = MeldSubject(id_sub, cohort=self.cohort)
             # smooth data only if the feature exist
@@ -526,7 +535,7 @@ class Preprocess:
             matrix = matrix.append(pd.DataFrame([row]), ignore_index=True)
         # save matrix
         if save_matrix == True:
-            file = os.path.join(BASE_PATH, "matrix_QC_{}.csv".format(hemi))
+            file = os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi))
             matrix.to_csv(file)
             print("Matrix with average features/ROIs for all subject can be found at {}".format(file))
 
@@ -534,7 +543,8 @@ class Preprocess:
 
     def get_outlier_feature(self, feature, hemi):
         """return array of 1 (feature is outlier) and 0 (feature is not outlier) for list of subjects"""
-        df = self.create_features_rois_matrix(feature, hemi, save_matrix=False)
+        df = self.create_features_rois_matrix(feature, hemi, save_matrix=True)
+#         df = pd.read_csv(os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi)), header=0)
         # define if feature is outlier or not
         ids = df.groupby(["site", "scanner"])
         outliers = []

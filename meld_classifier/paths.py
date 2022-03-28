@@ -51,7 +51,7 @@ SURFACE_FILE = os.path.join("fsaverage_sym", "surf", "lh.sphere")
 SURFACE_PARTIAL= os.path.join("fsaverage_sym","surf","lh.partial_inflated")
 BOUNDARY_ZONE_FILE = os.path.join("boundary_zones", "lesion_borderzones.hdf5")
 DK_ATLAS_FILE = os.path.join("fsaverage_sym", "label", "lh.aparc.annot")
-SMOOTH_CALIB_FILE = os.path.join("fsaverage_sym", "surf", "lh.white")
+SMOOTH_CALIB_FILE = os.path.join("fsaverage_sym", "surf", "lh.pial")
 
 # default values
 # filename of hdf5 files

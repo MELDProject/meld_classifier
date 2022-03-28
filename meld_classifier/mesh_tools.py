@@ -6,6 +6,7 @@ import subprocess
 import os
 import potpourri3d as pp3d
 import meld_classifier.paths as paths
+import matplotlib.pyplot as plt
 
 # import paths as paths
 def find_nearest_multi(array, value):
@@ -54,7 +55,7 @@ def calibrate_smoothing(coords, faces, start_v=125000, n_iter=70, cortex_mask=No
     line = np.linspace(0, n_iter, 100)
     try:
         plt.plot(line, model(line))
-        plt.savefig(os.path.join(paths.BASE_PATH, "Images", "calibration_curve_smoothing.png"))
+        plt.savefig(os.path.join(paths.BASE_PATH, "calibration_curve_smoothing.png"))
     except:
         pass
     print("End of calibration")
