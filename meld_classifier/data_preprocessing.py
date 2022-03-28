@@ -693,7 +693,7 @@ class Preprocess:
                 else : 
                     print(
                         "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
-                            len(controls_subjects)
+                            controls_subjects.sum()
                         )
                     )
                     mean_c = np.mean(vals_array[controls_subjects], axis=0)
@@ -766,7 +766,54 @@ class Preprocess:
             self.save_cohort_features(feature_asym, asym_combat, included_subjects)
         else:
             print('No data to do asym')
-            pass
+            pass   
+    
+    def z_score_age_sex_adjusted(self, subject_features, age, sex, mu_mat, std_mat):
+        """apply to single subject"""
+        #extract mu & std for that vertex
+        mu_mat_sub = mu_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
+        std_mat_sub = std_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
+        z_features = (subject_features-mu_mat_sub)/std_mat_sub
+        return z_features
+
+    def GP_normalisation_subject(self, feature, params_norm=None):
+        """perform GP normalisation from controls"""
+        if params_norm is None:
+            print("Parameters for GP normalisation needs to be computed before")
+        else:
+            #load parameters for GP normalisation
+            params = self.read_norm_combat_parameters(feature, params_norm)
+            mu_mat = params['mu_mat']
+            std_mat = params['std_mat']
+            #load covar sex and age for cohort
+            covars = self.covars.copy()
+            # create norm feature name
+            feature_norm = self.feat.norm_GP_feat(feature)
+            # loop over subjects
+            vals_array = []
+            included_subjects = []
+            for k, id_sub in enumerate(self.subject_ids):
+                # create subject object
+                subj = MeldSubject(id_sub, cohort=self.cohort)
+                if subj.has_features(feature):
+                    # load feature's value for this subject
+                    vals_lh = subj.load_feature_values(feature, hemi="lh")
+                    vals_rh = subj.load_feature_values(feature, hemi="rh")
+                    vals = np.array(np.hstack([vals_lh[self.cohort.cortex_mask], vals_rh[self.cohort.cortex_mask]]))
+                    included_subjects.append(id_sub)
+                    # load in covariates - age, sex
+                    age, sex = covars[covars.ID==subject][['ages','sex']].values[0]
+                    # normalise features with GP
+                    feature_norm = self.z_score_age_sex_adjusted(vals, age, sex, mu_mat, std_mat)
+                    # save subject
+                    subj.write_feature_values(feature_norm, feature_norm, hemis=['lh','rh'], hdf5_file_root=self.write_hdf5_file_root)
+                else:
+                    print("No data for normalisation of subject {}".format(id_sub))                
+                included_subjects = np.array(included_subjects)
+                print(f'Normalisation with GP finished for {len(included_subjects)} subjects')
+                
+    def asym_GP_subject(self, feature):
+        """TO DO"""
         
     def compute_mean_std(self, feature, cohort):
         """get mean and std of all brain for the given cohort and save parameters"""
@@ -779,17 +826,17 @@ class Preprocess:
         for id_sub in cohort_ids:
             # create subject object
             subj = MeldSubject(id_sub, cohort=cohort)
-            # append data to compute mean and std if feature exist
-            if subj.has_features(feature):
+            # append data to compute mean and std if feature exist and for FLAIR=0
+            if (not subj.has_features(feature)) & (not 'FLAIR' in feature):
+                pass 
+                print('feature {} does not exist for subject {}'.format(feature,id_sub))
+            else:
                 # load feature's value for this subject
                 vals_lh = subj.load_feature_values(feature, hemi="lh")
                 vals_rh = subj.load_feature_values(feature, hemi="rh")
                 vals = np.array(np.hstack([vals_lh[cohort.cortex_mask], vals_rh[cohort.cortex_mask]]))
                 vals_array.append(vals)
-                included_subj.append(id_sub)
-            else:
-                pass
-        #                 print('feature {} does not exist for subject {}'.format(feature,id_sub))
+                included_subj.append(id_sub)                
         print("Compute mean and std from {} subject".format(len(included_subj)))
         # get mean and std
         vals_array = np.matrix(vals_array)
@@ -846,6 +893,14 @@ class Feature:
     def asym_feat(self, feature):
         self._asym_feat = "".join([".inter_z.asym.intra_z", feature])
         return self._asym_feat
+    
+    def norm_GP_feat(self, feature):
+        self._norm_feat = "".join([".GP_norm", feature])
+        return self._norm_GP_feat
+    
+    def asym_GP_feat(self, feature):
+        self._asym_feat = "".join([".asym", feature])
+        return self._asym_GP_feat
 
     def list_feat(self):
         self._list_feat = [self.smooth, self.combat, self.norm, self.asym]
