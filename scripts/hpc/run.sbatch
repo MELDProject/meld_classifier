@@ -12,7 +12,7 @@
 #! Name of the job:
 #SBATCH -J run-meld
 #! Which project should be charged (NB Wilkes2 projects end in '-GPU'):
-#SBATCH -A CORE-WCHN-MELD-SL2-GPU  # use CORE-WCHN-MELD-SL2-CPU for CPU only run
+#SBATCH -A CAMBRC-SL3-GPU #CORE-WCHN-MELD-SL2-GPU  # use CORE-WCHN-MELD-SL2-CPU for CPU only run
 #! How many whole nodes should be allocated?
 #SBATCH --nodes=1
 #! How many (MPI) tasks will there be in total?
@@ -30,7 +30,7 @@
 ##SBATCH --no-requeue
 
 #! Do not change:
-#SBATCH -p pascal
+#SBATCH -p ampere
 
 #! sbatch directives end here (put any additional directives above this line)
 
@@ -56,9 +56,9 @@ module load miniconda/3
 #source activate ~/.conda/envs/meld
 
 #! Full path to application executable:
-CONDA_PATH="$HOME/.conda/envs/meld"
-MELD_PATH="$HOME/software/meld_classifier"
-application="source activate $CONDA_PATH; $CONDA_PATH/bin/python $MELD_PATH/scripts/per_subject_difficulty.py"
+CONDA_PATH="$HOME/.conda/envs/meld_classifier"
+MELD_PATH="$HOME/software/main_meld/meld_classifier"
+application="source activate $CONDA_PATH; $CONDA_PATH/bin/python $MELD_PATH/scripts/classifier/ensemble.py --exp iteration_22-04-07"
 
 #! Run options for the application:
 options=""

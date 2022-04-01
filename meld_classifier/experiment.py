@@ -340,6 +340,8 @@ class Experiment:
                     "features_to_replace_with_0": features_to_ignore,
                 }
             )
+            self.log.debug('features are:')
+            self.log.debug(features)
             # save updated data_parameters
             self.save_parameters()
         return self.data_parameters["features"], self.data_parameters["features_to_replace_with_0"]

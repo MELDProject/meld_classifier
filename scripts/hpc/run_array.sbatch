@@ -60,7 +60,7 @@ module load rhel7/default-gpu              # REQUIRED - loads the basic environm
 module load miniconda/3
 
 #! Full path to application executable:
-CONDA_PATH="$HOME/.conda/envs/meld"
+CONDA_PATH="$HOME/.conda/envs/meld_classifier"
 MELD_PATH="$HOME/software/meld_classifier"
 application="source activate $CONDA_PATH; $CONDA_PATH/bin/python $MELD_PATH/scripts/classifier/run_single_experiment.py $SLURM_ARRAY_TASK_ID $run_params"
 

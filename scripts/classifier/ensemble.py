@@ -156,7 +156,7 @@ if __name__ == "__main__":
             print("Saving to {} with name {}".format(experiment_dir, experiment_name))
             create_ensemble(experiment_name, experiment_dir, ensemble_experiments, ensemble_folds=args.ensemble_folds)
             # these ensembles can be evaluated on their val set
-            evaluate_ensemble(experiment_name, experiment_dir)
+#            evaluate_ensemble(experiment_name, experiment_dir)
 
             ensemble_experiments = []
 

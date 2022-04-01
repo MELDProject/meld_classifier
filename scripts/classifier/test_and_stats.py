@@ -13,6 +13,7 @@ import subprocess
 
 # run with command:
 # python ./test_and_stats.py --n-splits 100 --experiment-folder iteration_21-04-23/ensemble_21-04-26 --experiment-name ensemble_iteration --plot-images --fold all --saliency --save-per-split-files --run-on-slurm
+# python ./test_and_stats.py --n-splits 100 --experiment-folder iteration_21-04-23/ensemble_21-04-26 --experiment-name ensemble_iteration --plot-images --fold all --saliency --save-per-split-files --run-on-slurm
 
 
 def submit_test_and_stats_array(args, splits_to_run):
@@ -34,6 +35,7 @@ def submit_test_and_stats_array(args, splits_to_run):
             f"test_mode={args.test_mode if args.test_mode else False}",
             f"fold={args.fold}",
             f"save_per_split_files={'--save-per-split-files' if args.save_per_split_files else ''}",
+            f"val_cohort={'--val_cohort' if args.val_cohort else ''}",
         ]
     )
 
@@ -58,6 +60,8 @@ def test_and_stats(args):
     # needs to be passed to load_predict_single_subject and downstream functions (~line 500 in evaluation.py)
 
     subject_ids = exp.data_parameters["test_ids"]
+    if args.val_cohort:
+        subject_ids = exp.data_parameters["val_ids"]
     save_dir = None
 
     # if mode test : load information to predict on new subjects
@@ -84,11 +88,15 @@ def test_and_stats(args):
     suffix = ""
     if args.save_per_split_files:
         suffix = f"_{args.split}"
+    elif args.save_test_name:
+        suffix = f"_{args.experiment_name}"
+        
     print("suffix at start", suffix)
 
     for subject in np.array_split(subject_ids, args.n_splits)[args.split]:
         print("suffix", suffix, "subject", subject)
-        fname = os.path.join(experiment_path, "results", f"predictions_{args.experiment_name}_{args.split}.hdf5")
+        fname = os.path.join(experiment_path, "results", 
+            f"predictions_{args.experiment_name}_{args.split}.hdf5")
         # check if subject already exists
         # TODO might want to change this behaviour at some point
         if os.path.isfile(fname):
@@ -153,6 +161,11 @@ if __name__ == "__main__":
         default="ensemble_0",
     )
     parser.add_argument(
+        "--val-cohort",
+        help="val or test cohort",
+        action="store_true",
+    )
+    parser.add_argument(
         "--plot-images",
         action="store_true",
         help="do the flat-map plotting",
@@ -163,6 +176,11 @@ if __name__ == "__main__":
         "--save-per-split-files",
         action="store_true",
         help="whether to store results for each split in a separate file. Can be concatenated later with 'merge_prediction_files.py'",
+    )
+    parser.add_argument(
+        "--save-test-name",
+        action="store_true",
+        help="save test_results csv with experiment parameter name",
     )
     parser.add_argument(
         "--run-on-slurm",
