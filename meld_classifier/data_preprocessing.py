@@ -21,6 +21,7 @@ import glob
 import logging
 import random
 import json
+import sys
 from itertools import chain
 import potpourri3d as pp3d
 import meld_classifier.mesh_tools as mt
@@ -169,6 +170,25 @@ class Preprocess:
                 else:
                     estimates[param] = feat_dir[param][:]
         return estimates
+    
+    def shrink_combat_estimates(self, estimates):
+        """ shrink combat estimates to reduce size file"""
+        #combined mod.mean with stand.mean
+        stand_mean =  estimates['stand.mean'][:, 0] + estimates['mod.mean'].mean(axis=1)
+        estimates['stand.mean'] = stand_mean
+        #save the number of subjects to un-shrink later
+        estimates['num_subjects']= np.array([estimates['mod.mean'].shape[1]])
+        #remove mod.mean to reduce estimates size
+        del estimates['mod.mean']
+        return estimates
+
+    def unshrink_combat_estimates(self, estimates):
+        """ unshrink combat estimates to use as input in neuroCombatFromTraining"""
+        num_subjects = estimates['num_subjects'][0]
+        mod_mean = np.zeros((len(estimates['stand.mean']),num_subjects ))
+        estimates['mod.mean'] = mod_mean
+        estimates['stand.mean'] = np.tile(estimates['stand.mean'], (num_subjects,1)).T
+        return estimates
 
     def combat_whole_cohort(self, feature_name, outliers_file=None, combat_params_file=None):
         """Harmonise data between site/scanner with age, sex and disease status as covariate
@@ -228,7 +248,9 @@ class Preprocess:
                 )
                 # save combat parameters
                 if combat_params_file is not None:
-                    self.save_norm_combat_parameters(feature_name, dict_combat["estimates"], combat_params_file)
+#                     shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
+                    shrink_estimates=dict_combat["estimates"]
+#                     self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
 
                 post_combat_feature_name = self.feat.combat_feat(feature_name)
 
@@ -326,6 +348,7 @@ class Preprocess:
         """
         # load combat parameters        
         combat_estimates = self.read_norm_combat_parameters(feature_name, combat_params_file)
+        combat_estimates = self.unshrink_combat_estimates(combat_estimates)
         precombat_features = []
         site_scanner = []
         for subject in self.subject_ids:
@@ -379,10 +402,18 @@ class Preprocess:
     def calibration_smoothing(self):
         """caliration curve for smoothing surface mesh'"""
         if self._calibration_smoothing is None:
-            p = os.path.join(self.data_dir, SMOOTH_CALIB_FILE)
-            coords, faces = nb.freesurfer.io.read_geometry(p)
-            line, model = mt.calibrate_smoothing(coords, faces, start_v=125000, n_iter=70)
-            self._calibration_smoothing = (line, model)
+            # Use dictionary based on Freesurfer mris_fwhm values
+            y = np.array([0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,])
+            x = np.array([0, 1, 3, 6, 11, 18, 34, 45, 57, 70, 85, 101, 119, 138, 158, 180, 203, 228, 257, 282, 310, 341, 372, 405, 440, 476, 513, 552, 592, 633,])
+            # Uncomment to fit a polynom
+#             model = np.poly1d(np.polyfit(x, y, 3))
+#             x = np.linspace(0, x[-1], x[-1]+1)
+#             y = model(x)
+            # or uncomment to use homemade function to create calibration curve
+#             p = os.path.join(self.data_dir, SMOOTH_CALIB_FILE)
+#             coords, faces = nb.freesurfer.io.read_geometry(p)
+#             x, y = mt.calibrate_smoothing(coords, faces, start_v=125000, n_iter=300)          
+            self._calibration_smoothing = (x, y)
         return self._calibration_smoothing
 
     def smooth_data(self, feature, fwhm):
@@ -395,7 +426,6 @@ class Preprocess:
         vals_matrix_lh = []
         vals_matrix_rh = []
         for id_sub in self.subject_ids:
-            print(id_sub)
             # create subject object
             subj = MeldSubject(id_sub, cohort=self.cohort)
             # smooth data only if the feature exist
@@ -505,7 +535,7 @@ class Preprocess:
             matrix = matrix.append(pd.DataFrame([row]), ignore_index=True)
         # save matrix
         if save_matrix == True:
-            file = os.path.join(BASE_PATH, "matrix_QC_{}.csv".format(hemi))
+            file = os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi))
             matrix.to_csv(file)
             print("Matrix with average features/ROIs for all subject can be found at {}".format(file))
 
@@ -513,7 +543,8 @@ class Preprocess:
 
     def get_outlier_feature(self, feature, hemi):
         """return array of 1 (feature is outlier) and 0 (feature is not outlier) for list of subjects"""
-        df = self.create_features_rois_matrix(feature, hemi, save_matrix=False)
+        df = self.create_features_rois_matrix(feature, hemi, save_matrix=True)
+#         df = pd.read_csv(os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi)), header=0)
         # define if feature is outlier or not
         ids = df.groupby(["site", "scanner"])
         outliers = []
@@ -672,7 +703,7 @@ class Preprocess:
                 else : 
                     print(
                         "Use same cohort for normalisation \n Compute mean and std from {} controls".format(
-                            len(controls_subjects)
+                            controls_subjects.sum()
                         )
                     )
                     mean_c = np.mean(vals_array[controls_subjects], axis=0)
@@ -745,7 +776,54 @@ class Preprocess:
             self.save_cohort_features(feature_asym, asym_combat, included_subjects)
         else:
             print('No data to do asym')
-            pass
+            pass   
+    
+    def z_score_age_sex_adjusted(self, subject_features, age, sex, mu_mat, std_mat):
+        """apply to single subject"""
+        #extract mu & std for that vertex
+        mu_mat_sub = mu_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
+        std_mat_sub = std_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
+        z_features = (subject_features-mu_mat_sub)/std_mat_sub
+        return z_features
+
+    def GP_normalisation_subject(self, feature, params_norm=None):
+        """perform GP normalisation from controls"""
+        if params_norm is None:
+            print("Parameters for GP normalisation needs to be computed before")
+        else:
+            #load parameters for GP normalisation
+            params = self.read_norm_combat_parameters(feature, params_norm)
+            mu_mat = params['mu_mat']
+            std_mat = params['std_mat']
+            #load covar sex and age for cohort
+            covars = self.covars.copy()
+            # create norm feature name
+            feature_norm = self.feat.norm_GP_feat(feature)
+            # loop over subjects
+            vals_array = []
+            included_subjects = []
+            for k, id_sub in enumerate(self.subject_ids):
+                # create subject object
+                subj = MeldSubject(id_sub, cohort=self.cohort)
+                if subj.has_features(feature):
+                    # load feature's value for this subject
+                    vals_lh = subj.load_feature_values(feature, hemi="lh")
+                    vals_rh = subj.load_feature_values(feature, hemi="rh")
+                    vals = np.array(np.hstack([vals_lh[self.cohort.cortex_mask], vals_rh[self.cohort.cortex_mask]]))
+                    included_subjects.append(id_sub)
+                    # load in covariates - age, sex
+                    age, sex = covars[covars.ID==subject][['ages','sex']].values[0]
+                    # normalise features with GP
+                    feature_norm = self.z_score_age_sex_adjusted(vals, age, sex, mu_mat, std_mat)
+                    # save subject
+                    subj.write_feature_values(feature_norm, feature_norm, hemis=['lh','rh'], hdf5_file_root=self.write_hdf5_file_root)
+                else:
+                    print("No data for normalisation of subject {}".format(id_sub))                
+                included_subjects = np.array(included_subjects)
+                print(f'Normalisation with GP finished for {len(included_subjects)} subjects')
+                
+    def asym_GP_subject(self, feature):
+        """TO DO"""
         
     def compute_mean_std(self, feature, cohort):
         """get mean and std of all brain for the given cohort and save parameters"""
@@ -758,17 +836,17 @@ class Preprocess:
         for id_sub in cohort_ids:
             # create subject object
             subj = MeldSubject(id_sub, cohort=cohort)
-            # append data to compute mean and std if feature exist
-            if subj.has_features(feature):
+            # append data to compute mean and std if feature exist and for FLAIR=0
+            if (not subj.has_features(feature)) & (not 'FLAIR' in feature):
+                pass 
+                print('feature {} does not exist for subject {}'.format(feature,id_sub))
+            else:
                 # load feature's value for this subject
                 vals_lh = subj.load_feature_values(feature, hemi="lh")
                 vals_rh = subj.load_feature_values(feature, hemi="rh")
                 vals = np.array(np.hstack([vals_lh[cohort.cortex_mask], vals_rh[cohort.cortex_mask]]))
                 vals_array.append(vals)
-                included_subj.append(id_sub)
-            else:
-                pass
-        #                 print('feature {} does not exist for subject {}'.format(feature,id_sub))
+                included_subj.append(id_sub)                
         print("Compute mean and std from {} subject".format(len(included_subj)))
         # get mean and std
         vals_array = np.matrix(vals_array)
@@ -825,6 +903,14 @@ class Feature:
     def asym_feat(self, feature):
         self._asym_feat = "".join([".inter_z.asym.intra_z", feature])
         return self._asym_feat
+    
+    def norm_GP_feat(self, feature):
+        self._norm_feat = "".join([".GP_norm", feature])
+        return self._norm_GP_feat
+    
+    def asym_GP_feat(self, feature):
+        self._asym_feat = "".join([".asym", feature])
+        return self._asym_GP_feat
 
     def list_feat(self):
         self._list_feat = [self.smooth, self.combat, self.norm, self.asym]

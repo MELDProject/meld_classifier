@@ -19,7 +19,7 @@
 #! The skylake/skylake-himem nodes have 32 CPUs (cores) each.
 #SBATCH --ntasks=64
 #! How much wallclock time will be required?
-#SBATCH --time=01:00:00
+#SBATCH --time=02:00:00
 #! What types of email messages do you wish to receive?
 #SBATCH --mail-type=FAIL
 #! Uncomment this to prevent the job from being requeued (e.g. if
@@ -27,7 +27,7 @@
 ##SBATCH --no-requeue
 
 #! For 6GB per CPU, set "-p skylake"; for 12GB per CPU, set "-p skylake-himem": 
-#SBATCH -p skylake-himem
+#SBATCH -p skylake
 
 #! sbatch directives end here (put any additional directives above this line)
 
@@ -60,9 +60,9 @@ module load miniconda/3
 
 #! Full path to application executable: 
 CONDA_PATH="$HOME/.conda/envs/meld"
-MELD_PATH="$HOME/software/meld_classifier"
-application="source activate $CONDA_PATH; $CONDA_PATH/bin/python $MELD_PATH/scripts/Run_combat_save_combat_parameters.py; $CONDA_PATH/bin/python $MELD_PATH/scripts/Normalise_combat_data.py"
-
+MELD_PATH="$HOME/software/main_meld/meld_classifier"
+#! application="source activate $CONDA_PATH; $CONDA_PATH/bin/python $MELD_PATH/scripts/Run_combat_save_combat_parameters.py; $CONDA_PATH/bin/python $MELD_PATH/scripts/Normalise_comba"
+application="source activate $CONDA_PATH; bash $MELD_PATH/scripts/classifier/test_script.sh 3"
 #! Run options for the application:
 options=""
 

@@ -18,8 +18,8 @@ variable_network_parameters = {
 variable_data_parameters = {
     # each entry here is a parameter and a list of values
     # e.g. 'iteration': [0,1,2,3,4,5]
-#    "iteration": [0, 1, 2, 3, 4, 5],
-
+    "iteration": [0, 1, 2, 3, 4, 5,6,7,8,9],
+##"features_to_exclude": ['c','c+a','c+a+n'],
 }
 
 ##### default input data parameters #####
@@ -72,14 +72,15 @@ data_parameters = {
     "group": "both",
     # `features_to_exclude`: features that should be excluded from training.
     # the entire feature name has to be specified, except for FLAIR features, which can be excluded using 'FLAIR'
-    "features_to_exclude": [  # exclude unsmoothed curv and sulc features
-        ".combat.on_lh.curv.mgh",
-        ".combat.on_lh.sulc.mgh",
-        ".inter_z.asym.intra_z.combat.on_lh.curv.mgh",
-        ".inter_z.asym.intra_z.combat.on_lh.sulc.mgh",
-        ".inter_z.intra_z.combat.on_lh.curv.mgh",
-        ".inter_z.intra_z.combat.on_lh.sulc.mgh",
-    ],
+    "features_to_exclude": 'c', # ['c','c+a','c+a+n'],
+#    "features_to_exclude": [  # exclude unsmoothed curv and sulc features
+ #       ".combat.on_lh.curv.mgh",
+  #      ".combat.on_lh.sulc.mgh",
+   #     ".inter_z.asym.intra_z.combat.on_lh.curv.mgh",
+    #    ".inter_z.asym.intra_z.combat.on_lh.sulc.mgh",
+     #   ".inter_z.intra_z.combat.on_lh.curv.mgh",
+     #   ".inter_z.intra_z.combat.on_lh.sulc.mgh",
+    #],
     # TODO comment
     # Possible values: ['coords'] Make sure it's in list otherwise loops over string
     "universal_features": [],
@@ -107,6 +108,9 @@ data_parameters = {
     ##### parameters for Dataset() creation #####
     # `batch_size`: number of samples per batch
     "batch_size": 1024,
+    # `normalise`: normalise feature values with pre-computed parameters
+    # pass the json file containing the parameters. Or pass False
+    "normalise": "normalise_params_6_with0.json",
     ##### selection of lesion/normal vertices for training #####
     # `contra`: where to sample normal vertices from.
     # If True, only sample normal vertices from contralateral hemisphere
@@ -172,5 +176,5 @@ network_parameters = {
     "optimal_threshold": 0.5,
     # `date`: current date, appended to experiment folder name to allow training of the same configuration several times
     # change this to test a network from a different date
-    "date": datetime.datetime.now().strftime("%y-%m-%d"),
+    "date": "22-03-03", # datetime.datetime.now().strftime("%y-%m-%d"),
 }

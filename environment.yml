@@ -1,4 +1,4 @@
-name: meld_classifier_3
+name: meld_classifier
 channels:
   - defaults
   - pog87
@@ -13,6 +13,7 @@ dependencies:
   - ptitprince=0.2
   - scikit-image=0.18
   - h5py=3.1
+  - fpdf=1.7
   - pip=21.2
   - pip:
     - matplotlib_surface_plotting
