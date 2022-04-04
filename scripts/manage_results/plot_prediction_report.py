@@ -278,7 +278,7 @@ if __name__ == "__main__":
         #initialise parameter for plot
         fig= plt.figure(figsize=(15,8), constrained_layout=True)
         features=subj.get_feature_list()
-        if 'FLAIR' in features:
+        if 'FLAIR' in '.'.join(features):
             base_features=base_feature_sets
             feature_names=feature_names_sets
         else :
