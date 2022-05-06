@@ -39,20 +39,11 @@ if __name__ == '__main__':
     site_code=str(args.site_code)
     scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
     
-    # Create the output directory to store the surface-based features processed 
-    output_dir= os.path.join(BASE_PATH, f'MELD_{site_code}')
-    os.makedirs(output_dir, exist_ok=True)
-
-    # Launch script to extract surface-based features from freesurfer outputs
-    fs_folder = FS_SUBJECTS_PATH
-    command = format(f"bash {scripts_dir}/data_preparation/meld_pipeline.sh {fs_folder} {site_code} {subject_ids} {scripts_dir}/data_preparation/extract_features {output_dir}")
-    sub.check_call(command, shell=True)
-
-    # Launch script to preprocess features : smooth, combat harmonised & normalise
+    # Launch script to preprocess features : combat harmonised & normalise
     if args.withoutflair:
-        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -d {BASE_PATH} --withoutflair")
+        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -site {site_code} -d {BASE_PATH} --withoutflair")
     else:
-        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -d {BASE_PATH}")
+        command = format(f"python {scripts_dir}/data_preparation/run_data_processing_new_subjects.py -ids {subject_ids} -site {site_code} -d {BASE_PATH}")
     sub.check_call(command, shell=True)
 
     

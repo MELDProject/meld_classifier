@@ -22,11 +22,13 @@ import logging
 import random
 import json
 import sys
+import pickle
 from itertools import chain
 import potpourri3d as pp3d
 import meld_classifier.mesh_tools as mt
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from neuroCombat import neuroCombat, neuroCombatFromTraining
+import meld_classifier.distributedCombat as dc
 
 
 class Preprocess:
@@ -103,9 +105,11 @@ class Preprocess:
                 else:
                     print("skipping ", ids)
 
-    def load_covars(self, subject_ids=None):
+    def load_covars(self, subject_ids=None, demographic_file=None):
         if subject_ids is None:
             subject_ids = self.subject_ids
+        if demographic_file is None:
+            demographic_file = DEMOGRAPHIC_FEATURES_FILE
         covars = pd.DataFrame()
         ages = []
         sex = []
@@ -113,7 +117,7 @@ class Preprocess:
         sites_scanners = []
         for subject in subject_ids:
             subj = MeldSubject(subject, cohort=self.cohort)
-            a, s = subj.get_demographic_features(["Age at preop", "Sex"])
+            a, s = subj.get_demographic_features(["Age at preop", "Sex"], csv_file = demographic_file)
             ages.append(a)
             sex.append(s)
             group.append(subj.is_patient)
@@ -248,9 +252,9 @@ class Preprocess:
                 )
                 # save combat parameters
                 if combat_params_file is not None:
-#                     shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
-                    shrink_estimates=dict_combat["estimates"]
-#                     self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
+                    shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
+#                     shrink_estimates = dict_combat["estimates"]
+                    self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
 
                 post_combat_feature_name = self.feat.combat_feat(feature_name)
 
@@ -260,84 +264,102 @@ class Preprocess:
             print('no data to combat harmonised')
             pass
         
-    def combat_new_site(
+    def get_combat_new_site_parameters(
         self,
-        feature_name,
-        new_site_code,
-        ref_cohort,
-        new_outliers_file=None,
+        feature,
+        demographic_file,
     ):
-        """Harmonise new site data to post-combat whole cohort and save in
-        new hdf5 file. New sites are run individually currently.
-        assumes that the base cohort is the post-combat cohort
+        """Harmonise new site data to post-combat whole cohort and save combat parameters in
+        new hdf5 file. 
         Args:
             feature_name (str): name of the feature
-            outliers_file : outliers file for the new cohort
 
         """
-        # read morphological outliers from new cohort only
-        if new_outliers_file is not None:
-            outliers = list(pd.read_csv(os.path.join(BASE_PATH, new_outliers_file), header=0)["ID"])
-        else:
-            outliers = []
-
-        # make empty for all subjects
-        ref_subject_ids = ref_cohort.get_subject_ids(lesional_only=False)
-        combined_ids = ref_subject_ids + self.subject_ids
-        combat_subject_include = np.zeros(len(combined_ids), dtype=bool)
-        new_site_codes = np.ones(len(combined_ids), dtype=int)
-        new_site_codes[: len(ref_subject_ids)] = 0
-        # load in both combat normalised and new cohort
-        precombat_features = []
-        cohorts = [ref_cohort, self.cohort]
-        # need pre combat and post combat feature names, loading in post for the whole cohort,
-        # pre for the new cohort.
-        post_combat_feature_name = self.feat.combat_feat(feature_name)
-        feature_names = [post_combat_feature_name, feature_name]
-        for k, subject in enumerate(combined_ids):
+        site_code=self.site_codes[0]
+        site_combat_path = os.path.join(BASE_PATH,'distributed_combat')
+        if not os.path.isdir(site_combat_path):
+            os.makedirs(site_combat_path)
+        
+        listids = self.subject_ids    
+        site_codes = np.zeros(len(listids))
+        precombat_features=[]
+        combat_subject_include = np.zeros(len(listids), dtype=bool)
+        demos=[]
+        for k, subject in enumerate(listids):
             # get the reference index and cohort object for the site, 0 whole cohort, 1 new cohort
-            site_code_index = new_site_codes[k]
-            cohort = cohorts[site_code_index]
-            subj = MeldSubject(subject, cohort=cohort)
+            site_code_index = site_codes[k]
+            subj = MeldSubject(subject, cohort=self.cohort)
             # exclude outliers and subject without feature
-            if (subj.has_features(feature_names[site_code_index])) & (subject not in outliers):
-                lh = subj.load_feature_values(feature_names[site_code_index], hemi="lh")[self.cohort.cortex_mask]
-                rh = subj.load_feature_values(feature_names[site_code_index], hemi="rh")[self.cohort.cortex_mask]
+            if (subj.has_features(feature)) :
+                lh = subj.load_feature_values(feature, hemi="lh")[self.cohort.cortex_mask]
+                rh = subj.load_feature_values(feature, hemi="rh")[self.cohort.cortex_mask]
                 combined_hemis = np.hstack([lh, rh])
                 precombat_features.append(combined_hemis)
                 combat_subject_include[k] = True
             else:
                 combat_subject_include[k] = False
-        if precombat_features:
-            precombat_features = np.array(precombat_features)
-            # load in covariates - age, sex, group, site and scanner,
-            # set site_scanner to 0 for existing cohort
-            covars = pd.concat([self.load_covars(ref_subject_ids), self.covars])
-            covars["site_scanner"][: len(ref_subject_ids)] = "H0"
-            covars = covars[combat_subject_include].copy()
-
-            # function to check for single subjects
-            covars, precombat_features = self.remove_isolated_subs(covars, precombat_features)
-
-            dict_combat = neuroCombat(
-                precombat_features.T,
-                covars,
-                batch_col="site_scanner",
-                categorical_cols=["sex", "group"],
-                continuous_cols=["ages"],
-                ref_batch="H0",
-            )
-
-            print("Combat finished \n Saving data")
-            # only save out new subjects
-            ids_to_save = np.array(covars[covars["site_scanner"] != "H0"]["ID"])
-            self.save_cohort_features(
-                post_combat_feature_name, dict_combat["data"].T[covars["site_scanner"] != "H0"], ids_to_save
-            )
-        else:
-            print('No data to combat harmonised')
-            pass
-
+              
+        
+        # load in covariates - age, sex, group, site and scanner unless provided    
+        new_site_covars = self.load_covars(subject_ids=np.array(listids)[np.array(combat_subject_include)], demographic_file=demographic_file).copy()
+        N=len(new_site_covars)
+        bat = pd.Series(pd.Categorical(np.repeat(site_code, N),
+                                       categories=['H0', site_code]))
+        new_site_covars['site_scanner']=bat
+        
+        # apply distributed combat
+        print('step1')
+        new_site_data = np.array(precombat_features).T 
+        dc.distributedCombat_site(new_site_data,
+                                  bat, 
+                                  new_site_covars[['ages','sex','group']], 
+                                  file=os.path.join(site_combat_path,f"{site_code}_{feature}_summary.pickle"), 
+                              ref_batch = 'H0')
+        print('step2')
+        dc_out = dc.distributedCombat_central(
+            [os.path.join(site_combat_path,f'MELD_{feature}.pickle'),
+             os.path.join(site_combat_path,f"{site_code}_{feature}_summary.pickle")], ref_batch = 'H0'
+        )
+        # third, use variance estimates from full MELD cohort
+        dc_out['var_pooled'] = pd.read_pickle(os.path.join(site_combat_path,f'MELD_{feature}_var.pickle')).ravel()
+        for c in ['ages','sex','group']:
+            new_site_covars[c]=new_site_covars[c].astype(np.float64)      
+        print('step3')
+        pickle_file = os.path.join(site_combat_path,f"{site_code}_{feature}_harmonisation_params_test.pickle")
+        _=dc.distributedCombat_site(
+            pd.DataFrame(new_site_data), bat, new_site_covars[['ages','sex','group']], 
+            file=pickle_file,
+             central_out=dc_out, 
+            ref_batch = 'H0'
+        )
+        #open pickle, shrink estimates and save in hdf5 and delete pickle
+        with open(pickle_file, 'rb') as f:
+            params = pickle.load(f)
+        #filter name keys
+        target_dict = {'batch':'batches', 'delta_star':'delta.star', 'var_pooled':'var.pooled',
+           'gamma_star':'gamma.star', 'stand_mean':'stand.mean', 'mod_mean': 'mod.mean', 
+           'parametric': 'del', 'eb':'del', 'mean_only':'del', 'mod':'del', 'ref_batch':'del', 'beta_hat':'del', 
+          }
+        estimates = params['estimates'].copy()
+        for key in target_dict.keys():  
+            if target_dict[key]=='del':
+                estimates.pop(key)
+            else:
+                estimates[target_dict[key]] = estimates.pop(key)
+        for key in estimates.keys():
+            if key in ['batches', 'a_prior', 'b_prior', 't2', 'gamma_bar']:
+                estimates[key]=[estimates[key]]        
+            estimates[key] = np.array(estimates[key])
+        #shrink estimates
+        shrink_estimates = self.shrink_combat_estimates(estimates)
+        #save estimates and delete pickle file
+        combat_params_file=os.path.join(BASE_PATH,f'{self.write_hdf5_file_root})
+        self.save_norm_combat_parameters(feature, shrink_estimates, combat_params_file )
+        os.remove(pickle_file)
+        
+        return shrink_estimates, estimates, new_site_covars
+       
+     
     def combat_new_subject(self, feature_name, combat_params_file):
         """Harmonise new subject data with Combat parameters from whole cohort
             and save in new hdf5 file
@@ -783,10 +805,13 @@ class Preprocess:
         #extract mu & std for that vertex
         mu_mat_sub = mu_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
         std_mat_sub = std_mat[:,np.round(age).astype(int), np.round(sex).astype(int)]
+        # clip std to remove high values 
+        std_mat_sub = np.clip(std_mat_sub, a_min = np.percentile(std_mat_sub, 0.1), a_max = np.percentile(std_mat_sub, 99.9))
+        #normalise
         z_features = (subject_features-mu_mat_sub)/std_mat_sub
         return z_features
 
-    def GP_normalisation_subject(self, feature, params_norm=None):
+    def GP_normalisation_subject(self, feature, params_norm=None, asym=False):
         """perform GP normalisation from controls"""
         if params_norm is None:
             print("Parameters for GP normalisation needs to be computed before")
@@ -812,19 +837,25 @@ class Preprocess:
                     vals = np.array(np.hstack([vals_lh[self.cohort.cortex_mask], vals_rh[self.cohort.cortex_mask]]))
                     included_subjects.append(id_sub)
                     # load in covariates - age, sex
-                    age, sex = covars[covars.ID==subject][['ages','sex']].values[0]
+                    age, sex = covars[covars.ID==id_sub][['ages','sex']].values[0]
+                    if age >= 80:
+                        age = 79
                     # normalise features with GP
-                    feature_norm = self.z_score_age_sex_adjusted(vals, age, sex, mu_mat, std_mat)
+                    vals_norm = self.z_score_age_sex_adjusted(vals, age, sex, mu_mat, std_mat)
                     # save subject
-                    subj.write_feature_values(feature_norm, feature_norm, hemis=['lh','rh'], hdf5_file_root=self.write_hdf5_file_root)
+                    subj.write_feature_values(feature_norm, vals_norm, hemis=['lh','rh'], hdf5_file_root=self.write_hdf5_file_root)
+                    # do asym if flag
+                    if asym==True:
+                        feature_asym = self.feat.asym_GP_feat(feature_norm)
+                        vals_asym = self.compute_asym(vals_norm)
+                        subj.write_feature_values(feature_asym, vals_asym, hemis=['lh','rh'], hdf5_file_root=self.write_hdf5_file_root)
+                        
                 else:
                     print("No data for normalisation of subject {}".format(id_sub))                
-                included_subjects = np.array(included_subjects)
-                print(f'Normalisation with GP finished for {len(included_subjects)} subjects')
+            included_subjects = np.array(included_subjects)
+            print(f'Normalisation with GP finished for {len(included_subjects)} subjects')
                 
-    def asym_GP_subject(self, feature):
-        """TO DO"""
-        
+
     def compute_mean_std(self, feature, cohort):
         """get mean and std of all brain for the given cohort and save parameters"""
         cohort_ids = cohort.get_subject_ids(group="both")
@@ -905,11 +936,11 @@ class Feature:
         return self._asym_feat
     
     def norm_GP_feat(self, feature):
-        self._norm_feat = "".join([".GP_norm", feature])
+        self._norm_GP_feat = "".join([".GP_norm", feature])
         return self._norm_GP_feat
     
     def asym_GP_feat(self, feature):
-        self._asym_feat = "".join([".asym", feature])
+        self._asym_GP_feat = "".join([".asym", feature])
         return self._asym_GP_feat
 
     def list_feat(self):

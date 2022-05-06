@@ -31,7 +31,6 @@ for sub in $subjects
     mris_apply_reg --src "$sub"/xhemi/classifier/rh."$m".mgh --trg "$sub"/xhemi/classifier/rh."$m"_on_rh.mgh  \
     --streg $SUBJECTS_DIR/fsaverage_sym/surf/lh.sphere.reg $SUBJECTS_DIR/fsaverage_sym/surf/rh.sphere.left_right
 
-
     mris_apply_reg --src "$sub"/xhemi/classifier/rh."$m"_on_rh.mgh --trg "$sub"/surf/rh."$m".mgh\
     --streg $SUBJECTS_DIR/fsaverage_sym/surf/rh.sphere.reg $SUBJECTS_DIR/"$sub"/surf/rh.sphere.reg
     
@@ -40,14 +39,22 @@ for sub in $subjects
 
     #Map from surface back to vol
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz \
-    --hemi lh --surfval "$sub"/surf/lh."$m".mgh --fillribbon
+    --hemi lh --surfval "$sub"/surf/lh."$m".mgh --fillribbon --float2int
 
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/rh."$m".mgz \
-    --hemi rh --surfval "$sub"/surf/rh."$m".mgh --fillribbon
-
+    --hemi rh --surfval "$sub"/surf/rh."$m".mgh --fillribbon --float2int
+    
+    #Register back to original volume
+    mri_vol2vol --mov $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --targ $SUBJECTS_DIR/"$sub"/mri/orig/001.mgz  --regheader --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --nearest
+    
+    mri_vol2vol --mov $SUBJECTS_DIR/"$sub"/mri/rh."$m".mgz --targ $SUBJECTS_DIR/"$sub"/mri/orig/001.mgz  --regheader --o $SUBJECTS_DIR/"$sub"/mri/rh."$m".mgz --nearest
+    
     #convert to nifti
-    mri_convert "$sub"/mri/lh."$m".mgz "$sub"/mri/lh."$m".nii
-    mri_convert "$sub"/mri/rh."$m".mgz "$sub"/mri/rh."$m".nii
+    mri_convert "$sub"/mri/lh."$m".mgz "$sub"/mri/lh."$m".nii -rt nearest
+    mri_convert "$sub"/mri/rh."$m".mgz "$sub"/mri/rh."$m".nii -rt nearest
+    
+    #resample size
+    
 
 #     #combine vols from left and right hemis
 #     fslmaths "$sub"/mri/lh."$m".nii \

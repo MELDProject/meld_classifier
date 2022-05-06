@@ -4,7 +4,7 @@
 ## that contains the T1 in nifti format ".nii" and where available a FLAIR 
 ## folder that contains the FLAIR in nifti format ".nii"
 
-## To run : python new_pt_pipeline_script1.py -id <sub_id>
+## To run : python new_pt_pipeline_script1.py -id <sub_id> -site <site_code>
 
 
 import os
@@ -12,7 +12,7 @@ import sys
 import argparse
 import subprocess as sub
 import glob
-from meld_classifier.paths import MELD_DATA_PATH, FS_SUBJECTS_PATH
+from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, FS_SUBJECTS_PATH
         
 if __name__ == '__main__':
 
@@ -21,11 +21,18 @@ if __name__ == '__main__':
     parser.add_argument('-id','--id_subj',
                         help='Subject ID.',
                         required=True,)
+    parser.add_argument('-site','--site_code',
+                        help='Site code',
+                        required=True,)
     args = parser.parse_args()
     subject=str(args.id_subj)
+    site_code=str(args.site_code)
+    scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
     
-    # get subject folder and fs folder 
+    # get subject folder
     subject_dir = os.path.join(MELD_DATA_PATH,'input',subject)
+    
+    #### FREESURFER RECON-ALL #####
     
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
@@ -75,5 +82,25 @@ if __name__ == '__main__':
     print(f"INFO : Results will be stored in {fs_folder}")
     sub.check_call(command, shell=True)
     
-
+    #### EXTRACT SURFACE-BASED FEATURES #####
+    # Create the output directory to store the surface-based features processed 
+    output_dir= os.path.join(BASE_PATH, f'MELD_{site_code}')
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create temporary list of ids
+    subject_ids=os.path.join(BASE_PATH, 'subject_for_freesurfer.txt')
+    with open(file_tmp, 'w') as f:
+        f.write(subject)
+    
+    # Launch script to extract surface-based features from freesurfer outputs
+    command = format(f"bash {scripts_dir}/data_preparation/meld_pipeline.sh {fs_folder} {site_code} {subject_ids} {scripts_dir}/data_preparation/extract_features {output_dir}")
+    sub.check_call(command, shell=True)
+    
+    #### SMOOTH FEATURES #####
+    # Launch script to smooth features
+    command = format(f"python {scripts_dir}/data_preparation/run_data_smoothing_new_subjects.py -ids {subject_ids} -d {BASE_PATH}")
+    sub.check_call(command, shell=True)
+    
+    #delete temporary list ids
+    os.remove(subject_ids)
     
