@@ -19,7 +19,7 @@ import glob
 import logging
 import meld_classifier.mesh_tools as mt
 import scipy
-
+import time
 
 class MeldCohort:
     """Class to define cohort-level parameters such as subject ids, mesh"""
@@ -548,6 +548,20 @@ class MeldSubject:
             else:
                 self.log.debug(f"missing feature: {feature} set to zero")
         return feature_values
+    
+    def load_features_values(self, features, hemi="lh"):
+        """
+        Load and return values of specified features.
+        """
+        feature_values = np.zeros((NVERT,len(features)),dtype=np.float32)
+        with self.cohort._site_hdf5(self.site_code, self.group) as f:
+            surf_dir = f[self.surf_dir_path(hemi)]
+            for f_i,feature in enumerate(features):
+                if feature in surf_dir.keys():
+                    feature_values[:,f_i] = surf_dir[feature][:]
+                else:
+                    self.log.debug(f"missing feature: {feature} set to zero")
+        return feature_values
 
     def load_feature_lesion_data(self, features, hemi="lh", features_to_ignore=[]):
         """
@@ -563,18 +577,8 @@ class MeldSubject:
 
         """
         # load all features
-        feature_values = []
-        for feature in features:
-            if feature in features_to_ignore:
-                # append zeros for features_to_ignore
-                feature_values.append(np.zeros(NVERT, dtype=np.float32))
-            else:
-                # read feature_values
-                feature_values.append(self.load_feature_values(feature, hemi=hemi))
-        feature_values = np.stack(feature_values, axis=-1)
-        # load lesion data
+        feature_values = self.load_features_values(features,hemi=hemi)
         lesion_values = np.ceil(self.load_feature_values(".on_lh.lesion.mgh", hemi=hemi)).astype(int)
-
         return feature_values, lesion_values
 
     def load_boundary_zone(self, max_distance=40, feat_name=".on_lh.boundary_zone.mgh"):
