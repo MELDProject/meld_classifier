@@ -39,10 +39,10 @@ for sub in $subjects
 
     #Map from surface back to vol
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz \
-    --hemi lh --surfval "$sub"/surf/lh."$m".mgh --fillribbon --float2int
+    --hemi lh --surfval "$sub"/surf/lh."$m".mgh --fillribbon 
 
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/rh."$m".mgz \
-    --hemi rh --surfval "$sub"/surf/rh."$m".mgh --fillribbon --float2int
+    --hemi rh --surfval "$sub"/surf/rh."$m".mgh --fillribbon 
     
     #Register back to original volume
     mri_vol2vol --mov $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --targ $SUBJECTS_DIR/"$sub"/mri/orig/001.mgz  --regheader --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --nearest

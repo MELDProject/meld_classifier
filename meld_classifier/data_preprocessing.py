@@ -129,7 +129,7 @@ class Preprocess:
         covars["site_scanner"] = sites_scanners
         covars["ID"] = subject_ids
 
-        #         #clean missing values in demographics
+        #clean missing values in demographics
         covars["ages"] = covars.groupby("site_scanner").transform(lambda x: x.fillna(x.mean()))["ages"]
         covars["sex"] = covars.groupby("site_scanner").transform(lambda x: x.fillna(random.choice([0, 1])))["sex"]
         return covars
@@ -253,7 +253,6 @@ class Preprocess:
                 # save combat parameters
                 if combat_params_file is not None:
                     shrink_estimates = self.shrink_combat_estimates(dict_combat["estimates"])
-#                     shrink_estimates = dict_combat["estimates"]
                     self.save_norm_combat_parameters(feature_name, shrink_estimates, combat_params_file)
 
                 post_combat_feature_name = self.feat.combat_feat(feature_name)
@@ -302,11 +301,15 @@ class Preprocess:
         
         # load in covariates - age, sex, group, site and scanner unless provided    
         new_site_covars = self.load_covars(subject_ids=np.array(listids)[np.array(combat_subject_include)], demographic_file=demographic_file).copy()
-        N=len(new_site_covars)
-        bat = pd.Series(pd.Categorical(np.repeat(site_code, N),
-                                       categories=['H0', site_code]))
-        new_site_covars['site_scanner']=bat
-        
+        #check site_scanner codes are the same for all subjects
+        if len(new_site_covars['site_scanner'].unique())==1:
+            site_scanner = new_site_covars['site_scanner'].unique()[0]
+        else:
+            print('Subjects on the list come from different site or scanner.\
+            Make sure all your subject come from same site and scanner for the harmonisation process')
+            sys.exit()
+        bat = pd.Series(pd.Categorical(np.array(new_site_covars['site_scanner']),
+                                       categories=['H0', site_scanner]))       
         # apply distributed combat
         print('step1')
         new_site_data = np.array(precombat_features).T 
@@ -347,17 +350,22 @@ class Preprocess:
             else:
                 estimates[target_dict[key]] = estimates.pop(key)
         for key in estimates.keys():
-            if key in ['batches', 'a_prior', 'b_prior', 't2', 'gamma_bar']:
-                estimates[key]=[estimates[key]]        
+            if key in ['a_prior', 'b_prior', 't2', 'gamma_bar']:
+                estimates[key]=[estimates[key]]
+            if key == 'batches':
+                estimates[key]=np.array([estimates[key][0]]).astype('object')
+            if key=='var.pooled':
+                estimates[key]=estimates[key][:,np.newaxis]
+            if key in ['gamma.star', 'delta.star']:
+                estimates[key]=estimates[key][np.newaxis,:]
             estimates[key] = np.array(estimates[key])
         #shrink estimates
         shrink_estimates = self.shrink_combat_estimates(estimates)
         #save estimates and delete pickle file
-        combat_params_file=os.path.join(BASE_PATH,f'{self.write_hdf5_file_root})
-        self.save_norm_combat_parameters(feature, shrink_estimates, combat_params_file )
+        combat_params_file=os.path.join(BASE_PATH, self.write_hdf5_file_root.format(site_code=site_code))
+        self.save_norm_combat_parameters(feature, shrink_estimates, combat_params_file)
         os.remove(pickle_file)
-        
-        return shrink_estimates, estimates, new_site_covars
+        return estimates, shrink_estimates
        
      
     def combat_new_subject(self, feature_name, combat_params_file):

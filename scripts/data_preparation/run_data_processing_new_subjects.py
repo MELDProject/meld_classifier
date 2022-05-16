@@ -28,8 +28,10 @@ def create_dataset_file(subjects, output_path):
 def which_combat_file(site_code):
     file_site=os.path.join(BASE_PATH, f'MELD_{site_code}', f'{site_code}_combat_parameters.hdf5')
     if site_code in MELD_SITE_CODES:
+        print('Use combat parameters from MELD cohort')
         return os.path.join(BASE_PATH,COMBAT_PARAMS_FILE)
     elif os.path.isfile(file_site):
+        print(f'Use combat parameters from new site {file_site}')
         return file_site
     else:
         sys.exit('No parameters for combat harmonisation were found for this site code. You need to harmonise your new data with the new_site_harmonisation_script.py before to run this script')

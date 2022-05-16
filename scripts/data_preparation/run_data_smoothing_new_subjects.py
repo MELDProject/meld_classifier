@@ -40,16 +40,7 @@ if __name__ == "__main__":
     dataset_newSubject = os.path.join(BASE_PATH, NEWSUBJECTS_DATASET)
 
     # Set features and smoothed values
-    if args.withoutflair:
-        features = {
-		".on_lh.thickness.mgh": 10,
-		".on_lh.w-g.pct.mgh" : 10,
-		".on_lh.pial.K_filtered.sm20.mgh": None,
-		'.on_lh.sulc.mgh' : 5,
-		'.on_lh.curv.mgh' : 5,
-			}
-    else:
-        features = {
+    features = {
 		".on_lh.thickness.mgh": 10,
 		".on_lh.w-g.pct.mgh" : 10,
 		".on_lh.pial.K_filtered.sm20.mgh": None,

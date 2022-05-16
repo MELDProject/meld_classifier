@@ -69,12 +69,12 @@ if __name__ == '__main__':
         
     #create cohort for the new subject
     c_smooth= MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_smoothed.hdf5', 
-                       dataset=dataset_newSite)
+                       dataset=dataset_newSubject)
     #create object combat
     combat =Preprocess(c_smooth,
-                           site_codes=[new_site_code],
-                           write_hdf5_file_root="MELD_{}/_{}_combat_parameters.hdf5",
-                           data_dir=site_combat_path)
+                           site_codes=[site_code],
+                           write_hdf5_file_root="MELD_{site_code}/{site_code}_combat_parameters.hdf5",
+                           data_dir=output_dir)
     #features names
     for feature in features_smooth:
         print(feature)
