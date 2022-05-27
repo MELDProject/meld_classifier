@@ -24,11 +24,10 @@ site_codes=['H2', 'H3','H4','H5','H6','H7','H9','H10','H11','H12','H14','H15','H
                   'H21','H23','H24','H26',]
 c_combat =  MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_combat_6.hdf5', dataset=None,
                       data_dir=MELD_DATA_PATH)
-listids = c_combat.get_subject_ids(site_codes=site_codes, lesional_only=True)
 
 preprocessor=Preprocess(c_combat)
 #load in precombat data
-ref_subject_ids = c_combat.get_subject_ids(lesional_only=False)
+ref_subject_ids = c_combat.get_subject_ids(site_codes=site_codes, lesional_only=False)
 
 #get feature names
 features = {

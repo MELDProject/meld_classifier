@@ -381,6 +381,7 @@ class Preprocess:
         combat_estimates = self.unshrink_combat_estimates(combat_estimates)
         precombat_features = []
         site_scanner = []
+        subjects_included=[]
         for subject in self.subject_ids:
             subj = MeldSubject(subject, cohort=self.cohort)
             if subj.has_features(feature_name):
@@ -389,15 +390,15 @@ class Preprocess:
                 combined_hemis = np.hstack([lh, rh])
                 precombat_features.append(combined_hemis)
                 site_scanner.append(subj.site_code + "_" + subj.scanner)
+                subjects_included.append(subject)
         #if matrix empty, pass
         if precombat_features:
             precombat_features = np.array(precombat_features)
             site_scanner = np.array(site_scanner)
             dict_combat = neuroCombatFromTraining(dat=precombat_features.T, batch=site_scanner, estimates=combat_estimates)
-
             post_combat_feature_name = self.feat.combat_feat(feature_name)
             print("Combat finished \n Saving data")
-            self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(self.subject_ids))
+            self.save_cohort_features(post_combat_feature_name, dict_combat["data"].T, np.array(subjects_included))
         else:
             print('No data to combat harmonised')
             pass

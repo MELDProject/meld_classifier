@@ -46,7 +46,7 @@ if __name__ == '__main__':
     
     # Register prediction back to nifti volume
     output_dir = os.path.join(MELD_DATA_PATH,'input')
-    command = format(f"bash {scripts_dir}/manage_results/register_back_to_xhemi.sh {FS_SUBJECTS_PATH} {list_ids} {output_dir}")
+    command = format(f"bash {scripts_dir}/manage_results/register_back_to_xhemi.sh {FS_SUBJECTS_PATH} {list_ids} {output_dir} {scripts_dir}/manage_results")
     sub.check_call(command, shell=True)
       
     # Create individual reports of each identified cluster
