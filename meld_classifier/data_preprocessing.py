@@ -421,9 +421,9 @@ class Preprocess:
         covars = covars[~mask]
         return covars, precombat_features
 
-    def correct_sulc_freesurfer(self, vals):
+    def correct_sulc_freesurfer(self, vals, mask):
         """this function normalized sulcul feature in cm when values are in mm (depending on Freesurfer version used)"""
-        if np.mean(vals, axis=0) > 0.2:
+        if np.mean(vals[mask], axis=0) > 0.2:
             vals = vals / 10
         else:
             pass
@@ -446,8 +446,15 @@ class Preprocess:
 #             x, y = mt.calibrate_smoothing(coords, faces, start_v=125000, n_iter=300)          
             self._calibration_smoothing = (x, y)
         return self._calibration_smoothing
-
-    def smooth_data(self, feature, fwhm):
+    
+    def clip_data(self, vals, params):
+        min_p = float(params['min_percentile'])
+        max_p = float(params['max_percentile'])
+        num = (vals < min_p).sum() + (vals > max_p).sum()
+        vals = np.clip(vals, min_p, max_p)
+        return vals, num
+    
+    def smooth_data(self, feature, fwhm, clipping_params):
         """smooth features with given fwhm for all subject and save in new hdf5 file"""
         # create smooth name
         feature_smooth = self.feat.smooth_feat(feature, fwhm)
@@ -466,8 +473,16 @@ class Preprocess:
                 vals_rh = subj.load_feature_values(feature, hemi="rh")
                 # harmonise sulcus data from freesurfer v5 and v6
                 if feature == ".on_lh.sulc.mgh":
-                    vals_lh = self.correct_sulc_freesurfer(vals_lh)
-                    vals_rh = self.correct_sulc_freesurfer(vals_rh)
+                    vals_lh = self.correct_sulc_freesurfer(vals_lh, self.cohort.cortex_mask)
+                    vals_rh = self.correct_sulc_freesurfer(vals_rh, self.cohort.cortex_mask)
+                # clip data to remove outliers vertices
+                if clipping_params!=None:
+                    with open(os.path.join(BASE_PATH,clipping_params), "r") as f:
+                        params = json.loads(f.read())
+                        vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
+                        vals_rh, num_rh = self.clip_data(vals_rh, params[feature])
+#                         if num_lh + num_rh > 0:
+#                             print(f'{num_lh + num_rh} vertices clipped for {id_sub}')
                 vals_matrix_lh.append(vals_lh)
                 vals_matrix_rh.append(vals_rh)
                 subject_include.append(id_sub)
@@ -555,7 +570,7 @@ class Preprocess:
                 feat_values = subj.load_feature_values(feature, hemi)
                 # correct sulcus values if in mm
                 if feature == ".on_lh.sulc.mgh":
-                    feat_values = self.correct_sulc_freesurfer(feat_values)
+                    feat_values = self.correct_sulc_freesurfer(feat_values, self.cohort.cortex_mask)
                 # calculate mean thickness & std per ROI
                 for roi, r in rois_s.items():
                     row[roi + "." + feature] = np.mean(feat_values[self.vertex_i == r])
@@ -809,6 +824,7 @@ class Preprocess:
             print('No data to do asym')
             pass   
     
+    #test for review paper
     def z_score_age_sex_adjusted(self, subject_features, age, sex, mu_mat, std_mat):
         """apply to single subject"""
         #extract mu & std for that vertex
@@ -819,7 +835,8 @@ class Preprocess:
         #normalise
         z_features = (subject_features-mu_mat_sub)/std_mat_sub
         return z_features
-
+    
+    #test for review paper
     def GP_normalisation_subject(self, feature, params_norm=None, asym=False):
         """perform GP normalisation from controls"""
         if params_norm is None:
