@@ -57,14 +57,6 @@ for sub in $subjects
     mri_convert "$sub"/mri/lh."$m".mgz "$sub"/mri/lh."$m".nii -rt nearest
     mri_convert "$sub"/mri/rh."$m".mgz "$sub"/mri/rh."$m".nii -rt nearest
     
-    #resample size
-    
-
-#     #combine vols from left and right hemis
-#     fslmaths "$sub"/mri/lh."$m".nii \
-#     -add "$sub"/mri/rh."$m".nii \
-#     "$sub"/mri/"$m".nii
-    
     #move files
     if [ ! -d "$OUTPUT_DIR"/"$sub"/predictions ]
     then
@@ -73,5 +65,7 @@ for sub in $subjects
     mv "$sub"/mri/lh."$m".nii "$OUTPUT_DIR"/"$sub"/predictions/lh."$m".nii
     mv "$sub"/mri/rh."$m".nii "$OUTPUT_DIR"/"$sub"/predictions/rh."$m".nii
     
+    #combine vols from left and right hemis
+    mri_concat --i "$OUTPUT_DIR"/"$sub"/predictions/lh."$m".nii --i "$OUTPUT_DIR"/"$sub"/predictions/rh."$m".nii --o "$OUTPUT_DIR"/"$sub"/predictions/"$m".nii --combine
     
     done

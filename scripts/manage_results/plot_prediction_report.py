@@ -122,12 +122,12 @@ def load_prediction(subject,hdf5):
 
 def create_surface_plots(surf,prediction,c):
     """plot and reload surface images"""
-    
+    cmap, colors =  load_cmap()
     msp.plot_surf(surf['coords'],
                                            surf['faces'],prediction,
               rotate=[90],
               mask=prediction==0,pvals=np.ones_like(c.cortex_mask),
-              colorbar=False,vmin=0,vmax=1,cmap='rainbow',
+              colorbar=False,vmin=1,vmax=len(colors) ,cmap=cmap,
               base_size=20,
               filename='tmp.png'
              );
@@ -140,7 +140,7 @@ def create_surface_plots(surf,prediction,c):
                                            surf['faces'],prediction,
               rotate=[270],
               mask=prediction==0,pvals=np.ones_like(c.cortex_mask),
-              colorbar=False,vmin=0,vmax=1,cmap='rainbow',
+              colorbar=False,vmin=1,vmax=len(colors),cmap=cmap,
               base_size=20,
               filename='tmp.png'
              );
@@ -191,7 +191,18 @@ def save_mgh(filename, array, demo):
     mmap[:, 0, 0] = array[:]
     output = nb.MGHImage(mmap, demo.affine, demo.header)
     nb.save(output, filename)
-    
+
+def load_cmap():
+    """ create the colors dictionarry for the clusters"""
+    from matplotlib.colors import ListedColormap
+    colors = ['red', 'gold', 'blue', 'green', 'darkviolet',
+              'fuchsia', 'orange', 'cyan', 'lime', 'slateblue',
+              'lightcoral', 'darkgoldenrod', 'cornflowerblue', 'mediumaquamarine','indigo',
+              'salmon','khaki','powderblue','olive','plum']
+    dict_c = dict(zip(np.arange(1, len(colors)+1), colors))
+    cmap = ListedColormap(colors) 
+    return cmap, dict_c
+
 if __name__ == "__main__":
     # Set up experiment
     parser = argparse.ArgumentParser(description="create mgh file with predictions from hdf5 arrays")
@@ -236,6 +247,9 @@ if __name__ == "__main__":
     hemis = ["lh", "rh"]
     c = MeldCohort(hdf5_file_root=DEFAULT_HDF5_FILE_ROOT)
     surf = mt.load_mesh_geometry(os.path.join(paths.BASE_PATH,SURFACE_PARTIAL))
+    
+    # load cmap and colors
+    cmap, colors = load_cmap()
     
     # select predictions files
     if args.fold == None: 
@@ -364,7 +378,8 @@ if __name__ == "__main__":
                 f' cluster {int(cluster)} on {hemi} hemi', ' ',
                 f' size cluster = {size_clust} cm2', ' ',
                 f' location =  {location}'))
-                props = dict(boxstyle='round', facecolor='gray', alpha=0.5)
+                print(int(cluster))
+                props = dict(boxstyle='round', facecolor=colors[int(cluster)], alpha=0.5)
                 ax2 = fig2.add_subplot(gs2[0, 0])
                 ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=18,
                         verticalalignment='top', bbox=props)
@@ -381,8 +396,8 @@ if __name__ == "__main__":
                 vmax = np.percentile(imgs['anat'].get_fdata(), 99)
                 display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= True,
                                              figure=fig3, axes = ax3,  vmax = vmax)
-                display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='red')
-                display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='red')
+                display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='darkred')
+                display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='darkred')
                 # save figure for each cluster
 #                 fig3.tight_layout()
                 fig3.savefig(f'{output_dir}/mri_{subject}_{hemi}_c{int(cluster)}.png')
@@ -461,4 +476,7 @@ if __name__ == "__main__":
             #add footer date
             pdf.custom_footer(footer_txt)
         #save pdf
-        pdf.output(os.path.join(output_dir,f'MELD_report_{subject}.pdf'),'F')
+        file_path=os.path.join(output_dir,f'MELD_report_{subject}.pdf')
+        pdf.output(file_path,'F')
+
+    print(f'MELD prediction report ready at {file_path}')
