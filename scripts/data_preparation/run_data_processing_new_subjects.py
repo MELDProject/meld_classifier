@@ -2,9 +2,9 @@
 
 """
 Pipeline to prepare data from new patients : 
-1) smoothed data 
-2) combat normalise ( ! make sure your combat parameters & info dict are updated)
-3) inter & intra normalisation
+1) combat harmonise (make sure you have computed the combat parameters for your site prior)
+2) inter & intra normalisation
+3) Save data in the "combat" hdf5 matrix
 """
 
 

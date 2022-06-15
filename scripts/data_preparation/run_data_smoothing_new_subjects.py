@@ -1,10 +1,10 @@
 #!/bin/sh
 
 """
-Pipeline to prepare data from new patients : 
-1) smoothed data 
-2) combat normalise ( ! make sure your combat parameters & info dict are updated)
-3) inter & intra normalisation
+Pipeline to smooth features from new subject : 
+1) Clip extremes values 
+2) Smooth data with kernel provided
+3) Save data in the "smoothed" hdf5 matrix
 """
 
 
@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from meld_classifier.data_preprocessing import Preprocess, Feature
-from meld_classifier.paths import BASE_PATH, NORM_CONTROLS_PARAMS_FILE, COMBAT_PARAMS_FILE, NEWSUBJECTS_DATASET
+from meld_classifier.paths import BASE_PATH, NEWSUBJECTS_DATASET, CLIPPING_PARAMS_FILE
 
 def create_dataset_file(subjects, output_path):
     df=pd.DataFrame()
@@ -71,6 +71,6 @@ if __name__ == "__main__":
                            data_dir=output_dir)
     for feature in np.sort(list(set(features))):
         print(feature)
-        smoothing.smooth_data(feature, features[feature])
+        smoothing.smooth_data(feature, features[feature], clipping_params=CLIPPING_PARAMS_FILE)
     
    

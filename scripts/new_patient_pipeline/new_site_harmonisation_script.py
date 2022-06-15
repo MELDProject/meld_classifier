@@ -1,5 +1,5 @@
 ## This script harmonise data from a new site or new scanner that were not part of the MELD training 
-## Needs to have at leat *** subjects, with MELD ids listed in a txt file
+## Needs to have at leat 30 subjects, with MELD ids listed in a txt file
 ## need to provide the demographic csv file and the new site code
 
 
@@ -13,7 +13,7 @@ import pandas as pd
 import numpy as np
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from meld_classifier.data_preprocessing import Preprocess, Feature
-from meld_classifier.paths import BASE_PATH, COMBAT_PARAMS_FILE, NEWSUBJECTS_DATASET
+from meld_classifier.paths import BASE_PATH, NEWSUBJECTS_DATASET
  
 def create_dataset_file(subjects, output_path):
     df=pd.DataFrame()

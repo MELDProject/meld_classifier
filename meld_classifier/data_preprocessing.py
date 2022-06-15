@@ -423,7 +423,7 @@ class Preprocess:
 
     def correct_sulc_freesurfer(self, vals, mask):
         """this function normalized sulcul feature in cm when values are in mm (depending on Freesurfer version used)"""
-        if np.mean(vals[mask], axis=0) > 0.2:
+        if np.mean(abs(vals)[mask], axis=0) > 2:
             vals = vals / 10
         else:
             pass
@@ -448,6 +448,7 @@ class Preprocess:
         return self._calibration_smoothing
     
     def clip_data(self, vals, params):
+        """ clip data to remove very extreme feature values """
         min_p = float(params['min_percentile'])
         max_p = float(params['max_percentile'])
         num = (vals < min_p).sum() + (vals > max_p).sum()
@@ -480,9 +481,7 @@ class Preprocess:
                     with open(os.path.join(BASE_PATH,clipping_params), "r") as f:
                         params = json.loads(f.read())
                         vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
-                        vals_rh, num_rh = self.clip_data(vals_rh, params[feature])
-#                         if num_lh + num_rh > 0:
-#                             print(f'{num_lh + num_rh} vertices clipped for {id_sub}')
+                        vals_rh, num_rh = self.clip_data(vals_rh, params[feature]);
                 vals_matrix_lh.append(vals_lh)
                 vals_matrix_rh.append(vals_rh)
                 subject_include.append(id_sub)
@@ -824,7 +823,7 @@ class Preprocess:
             print('No data to do asym')
             pass   
     
-    #test for review paper
+    #test for paper revisions
     def z_score_age_sex_adjusted(self, subject_features, age, sex, mu_mat, std_mat):
         """apply to single subject"""
         #extract mu & std for that vertex
@@ -836,7 +835,7 @@ class Preprocess:
         z_features = (subject_features-mu_mat_sub)/std_mat_sub
         return z_features
     
-    #test for review paper
+    #test for paper revisions
     def GP_normalisation_subject(self, feature, params_norm=None, asym=False):
         """perform GP normalisation from controls"""
         if params_norm is None:

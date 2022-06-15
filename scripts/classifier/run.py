@@ -99,7 +99,7 @@ if __name__ == "__main__":
     data_parameters = config.data_parameters
     
     #if features_to_exclude is referring to a template set, replace
-    if data_parameters['features_to_exclude'] in exclude_set.keys():
+    if data_parameters['features_to_exclude'] in np.array(exclude_set.keys()):
         data_parameters['features_to_exclude'] = exclude_set[data_parameters['features_to_exclude']]
     # create list of experiments to run
     experiment_parameters = []

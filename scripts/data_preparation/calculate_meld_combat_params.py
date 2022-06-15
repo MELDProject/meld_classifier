@@ -1,5 +1,7 @@
-### script to calculate reference combat parameters to use in distributed harmonisation
-from meld_classifier.paths import BASE_PATH, EXPERIMENT_PATH,MELD_DATA_PATH
+### script to calculate reference combat parameters from MELD cohort to use in distributed harmonisation for new site
+
+
+from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 import os
 import numpy as np
@@ -22,8 +24,10 @@ if not os.path.isdir(site_combat_path):
 
 site_codes=['H2', 'H3','H4','H5','H6','H7','H9','H10','H11','H12','H14','H15','H16','H17','H18','H19',
                   'H21','H23','H24','H26',]
-c_combat =  MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_combat_6.hdf5', dataset=None,
+c_combat =  MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_combat_6.hdf5', dataset='MELD_dataset_V6.csv',
                       data_dir=MELD_DATA_PATH)
+
+outliers_file='list_outliers_qc_6.csv'
 
 preprocessor=Preprocess(c_combat)
 #load in precombat data
@@ -47,6 +51,11 @@ feat = Feature()
 features_smooth = [feat.smooth_feat(feature, features[feature]) for feature in features]
 features_combat = [feat.combat_feat(feature) for feature in features_smooth]
 
+# read morphological outliers from cohort.
+if outliers_file is not None:
+    outliers = list(pd.read_csv(os.path.join(BASE_PATH, outliers_file), header=0)["ID"])
+else:
+    outliers = []
 
 for fi,feature in enumerate(features_smooth):
     print("harmonising :", feature)
@@ -58,10 +67,9 @@ for fi,feature in enumerate(features_smooth):
     for k, subject in enumerate(ref_subject_ids):
         # get the reference index and cohort object for the site, 0 whole cohort, 1 new cohort
         site_code_index = new_site_codes[k]
-
         subj = MeldSubject(subject, cohort=c_combat)
         # exclude outliers and subject without feature
-        if (subj.has_features(features_combat[fi])) :
+        if (subj.has_features(features_combat[fi])) & (subject not in outliers) :
             lh = subj.load_feature_values(features_combat[fi], hemi="lh")[c_combat.cortex_mask]
             rh = subj.load_feature_values(features_combat[fi], hemi="rh")[c_combat.cortex_mask]
             combined_hemis = np.hstack([lh, rh])

@@ -195,12 +195,37 @@ def save_mgh(filename, array, demo):
 def load_cmap():
     """ create the colors dictionarry for the clusters"""
     from matplotlib.colors import ListedColormap
-    colors = ['red', 'gold', 'blue', 'green', 'darkviolet',
-              'fuchsia', 'orange', 'cyan', 'lime', 'slateblue',
-              'lightcoral', 'darkgoldenrod', 'cornflowerblue', 'mediumaquamarine','indigo',
-              'salmon','khaki','powderblue','olive','plum']
+    import numpy as np
+    colors =  [
+        [255,0,0],     #red
+        [255,215,0],   #gold
+        [0,0,255],     #blue
+        [0,128,0],     #green
+        [148,0,211],   #darkviolet
+        [255,0,255],   #fuchsia
+        [255,165,0],   #orange
+        [0,255,255],   #cyan
+        [0,255,0],     #lime
+        [106,90,205],  #slateblue
+        [240,128,128], #lightcoral
+        [184,134,11],  #darkgoldenrod
+        [100,149,237], #cornflowerblue
+        [102,205,170], #mediumaquamarine
+        [75,0,130],    #indigo
+        [250,128,114], #salmon
+        [240,230,140], #khaki
+        [176,224,230], #powderblue
+        [128,128,0],   #olive
+        [221,160,221], #plum
+        [255,127,80],  #coral
+        [255,250,205], #lemonchiffon
+        [240,255,255], #azure
+        [152,251,152], #palegreen
+        [255,192,203], #pink
+    ]
+    colors=np.array(colors)/255
     dict_c = dict(zip(np.arange(1, len(colors)+1), colors))
-    cmap = ListedColormap(colors) 
+    cmap = ListedColormap(colors)
     return cmap, dict_c
 
 if __name__ == "__main__":
