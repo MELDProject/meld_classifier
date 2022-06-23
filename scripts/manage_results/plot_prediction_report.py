@@ -122,12 +122,12 @@ def load_prediction(subject,hdf5):
 
 def create_surface_plots(surf,prediction,c):
     """plot and reload surface images"""
-    
+    cmap, colors =  load_cmap()
     msp.plot_surf(surf['coords'],
                                            surf['faces'],prediction,
               rotate=[90],
               mask=prediction==0,pvals=np.ones_like(c.cortex_mask),
-              colorbar=False,vmin=0,vmax=1,cmap='rainbow',
+              colorbar=False,vmin=1,vmax=len(colors) ,cmap=cmap,
               base_size=20,
               filename='tmp.png'
              );
@@ -140,7 +140,7 @@ def create_surface_plots(surf,prediction,c):
                                            surf['faces'],prediction,
               rotate=[270],
               mask=prediction==0,pvals=np.ones_like(c.cortex_mask),
-              colorbar=False,vmin=0,vmax=1,cmap='rainbow',
+              colorbar=False,vmin=1,vmax=len(colors),cmap=cmap,
               base_size=20,
               filename='tmp.png'
              );
@@ -191,7 +191,43 @@ def save_mgh(filename, array, demo):
     mmap[:, 0, 0] = array[:]
     output = nb.MGHImage(mmap, demo.affine, demo.header)
     nb.save(output, filename)
-    
+
+def load_cmap():
+    """ create the colors dictionarry for the clusters"""
+    from matplotlib.colors import ListedColormap
+    import numpy as np
+    colors =  [
+        [255,0,0],     #red
+        [255,215,0],   #gold
+        [0,0,255],     #blue
+        [0,128,0],     #green
+        [148,0,211],   #darkviolet
+        [255,0,255],   #fuchsia
+        [255,165,0],   #orange
+        [0,255,255],   #cyan
+        [0,255,0],     #lime
+        [106,90,205],  #slateblue
+        [240,128,128], #lightcoral
+        [184,134,11],  #darkgoldenrod
+        [100,149,237], #cornflowerblue
+        [102,205,170], #mediumaquamarine
+        [75,0,130],    #indigo
+        [250,128,114], #salmon
+        [240,230,140], #khaki
+        [176,224,230], #powderblue
+        [128,128,0],   #olive
+        [221,160,221], #plum
+        [255,127,80],  #coral
+        [255,250,205], #lemonchiffon
+        [240,255,255], #azure
+        [152,251,152], #palegreen
+        [255,192,203], #pink
+    ]
+    colors=np.array(colors)/255
+    dict_c = dict(zip(np.arange(1, len(colors)+1), colors))
+    cmap = ListedColormap(colors)
+    return cmap, dict_c
+
 if __name__ == "__main__":
     # Set up experiment
     parser = argparse.ArgumentParser(description="create mgh file with predictions from hdf5 arrays")
@@ -237,6 +273,9 @@ if __name__ == "__main__":
     c = MeldCohort(hdf5_file_root=DEFAULT_HDF5_FILE_ROOT)
     surf = mt.load_mesh_geometry(os.path.join(paths.BASE_PATH,SURFACE_PARTIAL))
     
+    # load cmap and colors
+    cmap, colors = load_cmap()
+    
     # select predictions files
     if args.fold == None: 
         hdf_predictions = os.path.join(exp_path, "results", f"predictions_{args.experiment_name}.hdf5")
@@ -278,7 +317,7 @@ if __name__ == "__main__":
         #initialise parameter for plot
         fig= plt.figure(figsize=(15,8), constrained_layout=True)
         features=subj.get_feature_list()
-        if 'FLAIR' in features:
+        if 'FLAIR' in '.'.join(features):
             base_features=base_feature_sets
             feature_names=feature_names_sets
         else :
@@ -364,7 +403,8 @@ if __name__ == "__main__":
                 f' cluster {int(cluster)} on {hemi} hemi', ' ',
                 f' size cluster = {size_clust} cm2', ' ',
                 f' location =  {location}'))
-                props = dict(boxstyle='round', facecolor='gray', alpha=0.5)
+                print(int(cluster))
+                props = dict(boxstyle='round', facecolor=colors[int(cluster)], alpha=0.5)
                 ax2 = fig2.add_subplot(gs2[0, 0])
                 ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=18,
                         verticalalignment='top', bbox=props)
@@ -381,8 +421,8 @@ if __name__ == "__main__":
                 vmax = np.percentile(imgs['anat'].get_fdata(), 99)
                 display = plotting.plot_anat(t1_file, colorbar=False, cut_coords=coords, draw_cross= True,
                                              figure=fig3, axes = ax3,  vmax = vmax)
-                display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='red')
-                display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='red')
+                display.add_contours(prediction_file_lh, filled=True, alpha=0.7, levels=[0.5], colors='darkred')
+                display.add_contours(prediction_file_rh, filled=True, alpha=0.7, levels=[0.5], colors='darkred')
                 # save figure for each cluster
 #                 fig3.tight_layout()
                 fig3.savefig(f'{output_dir}/mri_{subject}_{hemi}_c{int(cluster)}.png')
@@ -461,4 +501,7 @@ if __name__ == "__main__":
             #add footer date
             pdf.custom_footer(footer_txt)
         #save pdf
-        pdf.output(os.path.join(output_dir,f'MELD_report_{subject}.pdf'),'F')
+        file_path=os.path.join(output_dir,f'MELD_report_{subject}.pdf')
+        pdf.output(file_path,'F')
+
+    print(f'MELD prediction report ready at {file_path}')

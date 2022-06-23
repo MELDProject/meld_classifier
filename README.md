@@ -58,6 +58,11 @@ cd <path_to_meld_classifier>
 conda activate meld_classifier
 pytest
 ```
+Note: If you ran into errors at this stage and need help, you can re-ran the command below to save the terminal outputs in a txt file, and provide it to us as support.
+  ```bash
+  pytest | tee pytest_errors.log
+  ```
+  You will find this pytest_errors.log file in <path_to_meld_classifier>. 
 
 ## Usage
 With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.

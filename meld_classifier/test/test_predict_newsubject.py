@@ -6,11 +6,11 @@
 # - the prediction registration back to native MRI using scripts.manage_results.register_back_to_xhemi.sh
 # It checks outputs exists and compare the prediction with the expected one.
 
-
 import subprocess
 import os
 import pytest
 import h5py
+import numpy as np
 import nibabel as nb
 from meld_classifier.paths import MELD_DATA_PATH
 from meld_classifier.download_data import get_test_input
@@ -73,23 +73,23 @@ def test_predict_newsubject():
     assert os.path.isdir(path_prediction_subject)
 
     # delete txt file 
-
+    os.remove(list_txt_file_path)
+    
     ## compare results prediction with expected one
     # compare prediction hdf5 
     exp_path = os.path.join(MELD_DATA_PATH, data_parameters['experiment_folder'])    
     prediction = load_prediction(subject, os.path.join(exp_path, data_parameters['prediction_hdf5_file']))
     expected_prediction = load_prediction(subject,os.path.join(exp_path, data_parameters['expected_prediction_hdf5_file']))
     for hemi in ['lh','rh']:
-        assert (prediction[hemi] == expected_prediction[hemi]).all()
+        diff_sum = (np.abs(prediction[hemi] - expected_prediction[hemi])).sum()
+        print(f'Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
+        assert diff_sum <= 10
 
     # compare prediction on mri native
     mri_path = os.path.join(MELD_DATA_PATH,'input',subject)
     for hemi in ['lh','rh']:
         prediction_nii = nb.load(os.path.join(mri_path,data_parameters['prediction_nii_file'].format(hemi))).get_fdata()
         expected_prediction_nii = nb.load(os.path.join(mri_path,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
-        assert (prediction_nii == expected_prediction_nii).all()
-
-
-
-
-test_predict_newsubject()
+        diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
+        print(f'Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
+        assert diff_sum <= 10

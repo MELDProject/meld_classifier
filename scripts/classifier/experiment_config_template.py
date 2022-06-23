@@ -18,7 +18,8 @@ variable_network_parameters = {
 variable_data_parameters = {
     # each entry here is a parameter and a list of values
     # e.g. 'iteration': [0,1,2,3,4,5]
-    "iteration": [0, 1, 2, 3, 4, 5],
+#    "iteration": [0, 1, 2, 3, 4, 5],
+
 }
 
 ##### default input data parameters #####

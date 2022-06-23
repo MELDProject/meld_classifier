@@ -4,7 +4,7 @@
 ## that contains the T1 in nifti format ".nii" and where available a FLAIR 
 ## folder that contains the FLAIR in nifti format ".nii"
 
-## To run : python new_pt_pipeline_script1.py -id <sub_id>
+## To run : python new_pt_pipeline_script1.py -id <sub_id> -site <site_code>
 
 
 import os
@@ -12,7 +12,7 @@ import sys
 import argparse
 import subprocess as sub
 import glob
-from meld_classifier.paths import MELD_DATA_PATH, FS_SUBJECTS_PATH
+from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR,  MELD_DATA_PATH, FS_SUBJECTS_PATH
         
 if __name__ == '__main__':
 
@@ -21,11 +21,18 @@ if __name__ == '__main__':
     parser.add_argument('-id','--id_subj',
                         help='Subject ID.',
                         required=True,)
+    parser.add_argument('-site','--site_code',
+                        help='Site code',
+                        required=True,)
     args = parser.parse_args()
     subject=str(args.id_subj)
+    site_code=str(args.site_code)
+    scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
     
-    # get subject folder and fs folder 
+    # get subject folder
     subject_dir = os.path.join(MELD_DATA_PATH,'input',subject)
+    
+    #### FREESURFER RECON-ALL #####
     
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
@@ -37,9 +44,10 @@ if __name__ == '__main__':
     # If freesurfer outputs already exist for this subject, continue running from where it stopped
     # Else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(os.path.join(fs_folder, subject)):
-        print(f'Freesurfer outputs already exists for subject {subject}. \nFS will be continued from where it stopped')
-        recon_all = format("$FREESURFER_HOME/bin/recon-all -sd {} -s {} -FLAIRpial -all -no-isrunning"
-                   .format(fs_folder, subject,))
+        print(f'STEP 1:Freesurfer outputs already exists for subject {subject}. \nFreesurfer will be skipped')
+#         recon_all = format("$FREESURFER_HOME/bin/recon-all -sd {} -s {} -FLAIRpial -all -no-isrunning"
+#                    .format(fs_folder, subject,))
+        pass
     else : 
         #select inputs files T1 and FLAIR
         T1_file = glob.glob(os.path.join(subject_dir, 'T1', '*.nii*'))
@@ -61,19 +69,41 @@ if __name__ == '__main__':
             isflair = True     
         #setup cortical segmentation command
         if isflair == True:
-            print('Segmentation using T1 and FLAIR')
+            print('STEP 1:Segmentation using T1 and FLAIR')
             recon_all = format("$FREESURFER_HOME/bin/recon-all -sd {} -s {} -i {} -FLAIR {} -FLAIRpial -all"
                        .format(fs_folder, subject, T1_file, FLAIR_file))
         else:
-            print('Segmentation using T1 only')
+            print('STEP 1:Segmentation using T1 only')
             recon_all = format("$FREESURFER_HOME/bin/recon-all -sd {} -s {} -i {} -all"
                            .format(fs_folder, subject, T1_file))
     
-    #call freesurfer 
-    command = ini_freesurfer + ';' + recon_all
-    print(f"INFO : Start cortical parcellation for {subject} (up to 36h). Please wait")
-    print(f"INFO : Results will be stored in {fs_folder}")
+        #call freesurfer 
+        command = ini_freesurfer + ';' + recon_all
+        print(f"INFO : Start cortical parcellation for {subject} (up to 36h). Please wait")
+        print(f"INFO : Results will be stored in {fs_folder}")
+        sub.check_call(command, shell=True)
+    
+    #### EXTRACT SURFACE-BASED FEATURES #####
+    # Create the output directory to store the surface-based features processed 
+    output_dir= os.path.join(BASE_PATH, f'MELD_{site_code}')
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Create temporary list of ids
+    subject_ids=os.path.join(BASE_PATH, 'subject_for_freesurfer.txt')
+    with open(subject_ids, 'w') as f:
+        f.write(subject)
+    
+    # Launch script to extract surface-based features from freesurfer outputs
+    print('STEP 2: Extract surface-based features')
+    command = format(f"bash {scripts_dir}/data_preparation/meld_pipeline.sh {fs_folder} {site_code} {subject_ids} {scripts_dir}/data_preparation/extract_features {output_dir}")
     sub.check_call(command, shell=True)
     
-
+    #### SMOOTH FEATURES #####
+    # Launch script to smooth features
+    print('STEP 3: SMOOTH FEATURES')
+    command = format(f"python {scripts_dir}/data_preparation/run_data_smoothing_new_subjects.py -ids {subject_ids} -d {BASE_PATH}")
+    sub.check_call(command, shell=True)
+    
+    #delete temporary list ids
+    os.remove(subject_ids)
     

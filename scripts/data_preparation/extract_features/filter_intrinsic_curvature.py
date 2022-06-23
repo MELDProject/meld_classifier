@@ -1,6 +1,6 @@
 ##############################################################################
 
-# This script calculated the absolute (modulus) intrinsic curvature 
+# This script calculated the absolute (modulus) intrinsic curvature and filter it
 
 #import relevant packages
 import numpy as np
@@ -11,31 +11,20 @@ import os
 
 #parse commandline arguments pointing to subject_dir etc
 parser = argparse.ArgumentParser(description='filter intrinsic curvature')
-parser.add_argument('subject_dir', type=str,
-                    help='path to subject dir')
-parser.add_argument('subject_ids',
+parser.add_argument('input', type=str,
+                    help='path to the file')
+parser.add_argument('output',
                     type=str,
-                    help='text file with ids')
+                    help='path to the output file')
 
 args = parser.parse_args()
+file= str(args.input)
 
-
-#save subjects dir and subject ids. import the text file containing subject ids
-subject_dir=args.subject_dir
-subject_ids=str(args.subject_ids)
-print(subject_ids)
-subject_ids=np.array(np.loadtxt(subject_ids, dtype='str',ndmin=1))
-print(subject_ids)
-# subject_ids=np.array(subject_ids.split(' '))
-
-hemis=['lh','rh']
-
-for h in hemis:
-    for s in subject_ids:
-        if not os.path.isfile(os.path.join(subject_dir, s,'xhemi/surf_meld', h+'.pial.K_filtered.mgh')):
-            demo = nb.load(os.path.join(subject_dir, s, 'surf_meld', h + '.pial.K.mgh'))
-            curvature=io.load_mgh(os.path.join(subject_dir, s, 'surf_meld', h + '.pial.K.mgh'))
-            curvature=np.absolute(curvature)
-            io.save_mgh(os.path.join(subject_dir, s, 'surf_meld', h+'.pial.K_filtered.mgh'),curvature,demo)
+# if not os.path.isfile(file):
+demo = nb.load(file)
+curvature=io.load_mgh(file)
+curvature=np.absolute(curvature)
+curvature = np.clip(curvature, 0, 20)
+io.save_mgh(args.output,curvature,demo)
 
 

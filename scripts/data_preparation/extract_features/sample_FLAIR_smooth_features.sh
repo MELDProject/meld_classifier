@@ -59,8 +59,9 @@ do
     mris_convert -c "$s"/surf/"$h".curv "$s"/surf/"$h".white "$s"/surf_meld/"$h".curv.mgh
     mris_convert -c "$s"/surf/"$h".sulc "$s"/surf/"$h".white "$s"/surf_meld/"$h".sulc.mgh
     mris_convert -c "$s"/surf/"$h".pial.K.crv "$s"/surf/"$h".white "$s"/surf_meld/"$h".pial.K.mgh
-    mris_calc --output "$s"/surf_meld/"$h".pial.K_filtered.mgh "$s"/surf_meld/"$h".pial.K.mgh abs
-     mris_fwhm --s "$s" --hemi "$h" --cortex --smooth-only --fwhm 20\
+    echo "Filtering and smoothing intrinsic curvature"
+    python "$script_dir"/filter_intrinsic_curvature.py "$s"/surf_meld/"$h".pial.K.mgh "$s"/surf_meld/"$h".pial.K_filtered.mgh
+    mris_fwhm --s "$s" --hemi "$h" --cortex --smooth-only --fwhm 20\
     --i "$s"/surf_meld/"$h".pial.K_filtered.mgh --o "$s"/surf_meld/"$h".pial.K_filtered.sm20.mgh
     
     mris_convert -c "$s"/surf/"$h".thickness "$s"/surf/"$h".white "$s"/surf_meld/"$h".thickness.mgh

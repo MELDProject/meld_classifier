@@ -23,3 +23,4 @@ dependencies:
     - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
     - alibi==0.6
     - matplotlib
+    - patsy
