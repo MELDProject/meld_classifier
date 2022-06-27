@@ -58,7 +58,7 @@ cd <path_to_meld_classifier>
 conda activate meld_classifier
 pytest
 ```
-Note: If you ran into errors at this stage and need help, you can re-ran the command below to save the terminal outputs in a txt file, and provide it to us as support.
+Note: If you run into errors at this stage and need help, you can re-run the command below to save the terminal outputs in a txt file, and send it to us. We can then work with you to solve any problems.
   ```bash
   pytest | tee pytest_errors.log
   ```
