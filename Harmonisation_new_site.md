@@ -48,10 +48,10 @@ python scripts/update_meld_classifier.py
 
 ## Compute the harmonisation paramaters 
 
-The harmonisation parameters are computed using Combat Distributed [REF ??]
+The harmonisation parameters are computed using [Distributed Combat](https://doi.org/10.1016/j.neuroimage.2021.118822)
 To get these parameters you will need a small cohort of subjects acquired from the same scanner and under the same protocol (sequence, parameters, ...).
 Subjects can be controls and/or patients, but we advise to use ***at least 30 subjects*** to enable an accurate harmonisation. 
-Make sure the data are quality (i.e no blurring, no artefacts, no cavities in the brain).
+Try to ensure the data are high quality (i.e no blurring, no artefacts, no cavities in the brain).
 
 ### First step - Organising your data!
 You will need to organise the MRI data of the subjects
