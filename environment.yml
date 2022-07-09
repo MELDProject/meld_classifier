@@ -1,4 +1,4 @@
-name: meld_classifier
+name: meld_classifier_newrelease
 channels:
   - defaults
   - pog87
@@ -20,7 +20,7 @@ dependencies:
     - potpourri3d==0.0.4
 #    - umap-learn
     - nilearn==0.8
-    - git+https://github.com/kwagstyl/neuroCombat.git@estimates_shrink
+    - neuroCombat==0.2.12
     - alibi==0.6
-    - matplotlib
-    - patsy
+    - patsy==0.5.2
+    - matplotlib==3.5.1

@@ -22,14 +22,14 @@ if __name__ == '__main__':
 
     print("Only downloading new data")
     #TODO: change
-    url = "https://figshare.com/ndownloader/files/35935322?private_link=961d477ae30c9fc99640"
+    url = "https://figshare.com/ndownloader/files/36007619?private_link=961d477ae30c9fc99640"
     test_data_dir = MELD_DATA_PATH
     os.makedirs(test_data_dir, exist_ok=True)
     print('downloading update data from June 2022 release to '+ test_data_dir)
     with tempfile.TemporaryDirectory() as tmpdirname:
         # download to tmpdir
-        _fetch_url(url, os.path.join(tmpdirname, "updateJune2022_data.tar.gz"))
+        _fetch_url(url, os.path.join(tmpdirname, "updateJune2022_data2.tar.gz"))
         # unpack
-        shutil.unpack_archive(os.path.join(tmpdirname, "updateJune2022_data.tar.gz"), test_data_dir)
+        shutil.unpack_archive(os.path.join(tmpdirname, "updateJune2022_data2.tar.gz"), test_data_dir)
     print(f"\nunpacked data to {test_data_dir}")      
     print("Done.")
