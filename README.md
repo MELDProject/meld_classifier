@@ -58,17 +58,17 @@ cd <path_to_meld_classifier>
 conda activate meld_classifier
 pytest
 ```
-Note: If you ran into errors at this stage and need help, you can re-ran the command below to save the terminal outputs in a txt file, and provide it to us as support.
+Note: If you run into errors at this stage and need help, you can re-run the command below to save the terminal outputs in a txt file, and send it to us. We can then work with you to solve any problems.
   ```bash
   pytest | tee pytest_errors.log
   ```
   You will find this pytest_errors.log file in <path_to_meld_classifier>. 
 
 ## Usage
-With this package, you can use the provided classifier predict new subjects from existing and new sites. In addition, you can train your own classifier model.
+With this package, you can use the provided classifier to predict subjects from existing and new sites. For new site, you will need to harmonise your data first. In addition, you can train your own classifier model.
 For more details, check out the guides linked below:
 - [Predict new subjects (existing site)](Predict_on_new_patient.md)
-- Predict new subjects (new site) : COMING SOON
+- [Harmonise your data (new site)](Harmonisation_new_site.md)
 - [Train and evaluate models](Training_and_evaluating_models.md)
 
 ## Contribute
