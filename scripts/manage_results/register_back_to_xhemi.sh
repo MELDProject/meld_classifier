@@ -36,17 +36,17 @@ for sub in $subjects
     --streg $SUBJECTS_DIR/fsaverage_sym/surf/rh.sphere.reg $SUBJECTS_DIR/"$sub"/surf/rh.sphere.reg
     
     #correct from interpolation error
-    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/rh."$m".mgh -output "$sub"/surf/rh."$m"_corr.mgh
-    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/lh."$m".mgh -output "$sub"/surf/lh."$m"_corr.mgh
+    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/rh."$m".mgh -output "$sub"/surf/rh."$m"_corr.mgh -hemi rh
+    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/lh."$m".mgh -output "$sub"/surf/lh."$m"_corr.mgh -hemi lh
     
 ##  11. Convert from .mgh to .nii
 
     #Map from surface back to vol
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz \
-    --hemi lh --surfval "$sub"/surf/lh."$m"_corr.mgh --fillribbon 
+    --hemi lh --surfval "$sub"/surf/lh."$m".mgh --fillribbon 
 
     mri_surf2vol --identity "$sub" --template $SUBJECTS_DIR/"$sub"/mri/T1.mgz --o $SUBJECTS_DIR/"$sub"/mri/rh."$m".mgz \
-    --hemi rh --surfval "$sub"/surf/rh."$m"_corr.mgh --fillribbon 
+    --hemi rh --surfval "$sub"/surf/rh."$m".mgh --fillribbon 
     
     #Register back to original volume
     mri_vol2vol --mov $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --targ $SUBJECTS_DIR/"$sub"/mri/orig/001.mgz  --regheader --o $SUBJECTS_DIR/"$sub"/mri/lh."$m".mgz --nearest
