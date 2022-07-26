@@ -478,6 +478,7 @@ class Preprocess:
                     vals_rh = self.correct_sulc_freesurfer(vals_rh, self.cohort.cortex_mask)
                 # clip data to remove outliers vertices
                 if clipping_params!=None:
+                    print(f'Clip data to remove very extreme values using {clipping_params}')
                     with open(os.path.join(BASE_PATH,clipping_params), "r") as f:
                         params = json.loads(f.read())
                         vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
