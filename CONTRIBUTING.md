@@ -40,9 +40,15 @@ Creating a relase
 We use `bump2version` (``pip install bump2version``) to keep track of version numbering. 
 Version numbers follow the convention of ``major.minor.patch``.
 
-To update the current version and create a new version tag, simply call:
+1. Create a new branch for this release:
+
+    git checkout -b release/VERSION
+
+2. Update the current version and create a new version tag:
 
     bump2version {major,minor,patch}
     git push --tags
 
-Edit and publish the relase on github (under the "tags" Tab) and add release notes.
+3. Create and merge a PR for the bump2version commit.
+
+4. Edit and publish the relase on github (under the "tags" Tab) and add release notes.
