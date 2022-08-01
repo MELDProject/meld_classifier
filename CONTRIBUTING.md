@@ -1,5 +1,5 @@
 Contributing guide
-~~~~~~~~~~~~~~~~~~
+==================
 
 Contributing to meld_classifier
 -------------------------------
@@ -40,7 +40,7 @@ Creating a relase
 We use `bump2version` (``pip install bump2version``) to keep track of version numbering. 
 Version numbers follow the convention of ``major.minor.patch``.
 
-To update the current version and create a new version tag, simply call::
+To update the current version and create a new version tag, simply call:
 
     bump2version {major,minor,patch}
     git push --tags
