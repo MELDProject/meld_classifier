@@ -1,10 +1,10 @@
-name: meld_classifier_newrelease
+name: meld_classifier
 channels:
   - defaults
   - pog87
   - conda-forge
 dependencies:
-  - python=3.7
+  - python=3.8
   - tensorflow=2.6
   - pytest=6.2
   - nibabel=3.2
@@ -24,3 +24,7 @@ dependencies:
     - alibi==0.6
     - patsy==0.5.2
     - matplotlib==3.5.1
+    - torch==1.12
+    - torchvision==0.13
+    - SimpleITK==2.1.1
+    - git+https://github.com/Deep-MI/LaPy.git
