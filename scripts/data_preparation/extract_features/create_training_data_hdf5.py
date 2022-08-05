@@ -6,46 +6,55 @@
 import numpy as np
 import nibabel as nb
 import argparse
-import io_meld as io
-import h5py
+from scripts.data_preparation.extract_features.io_meld import save_subject
 import os
 
-#parse commandline arguments pointing to subject_dir etc
-parser = argparse.ArgumentParser(description='create feature matrix for all subjects')
-parser.add_argument('subject_dir', type=str,
-                    help='path to subject dir')
-parser.add_argument('subject_ids',
-                    type=str,
-                    help='textfile containing list of subject ids')
-parser.add_argument('output_dir',
-                    type=str,
-                    help='textfile containing list of subject ids')
-
-args = parser.parse_args()
-
-
-#save subjects dir and subject ids. import the text file containing subject ids
-subject_dir=args.subject_dir
-subject_ids=args.subject_ids
-output_dir=args.output_dir
-subject_ids=np.array(np.loadtxt(subject_ids, dtype='str', ndmin=1))
-# subject_ids=np.array(subject_ids.split(' '))
-
-
-#list features
-features = np.array(['.on_lh.thickness.mgh', '.on_lh.w-g.pct.mgh', '.on_lh.curv.mgh','.on_lh.sulc.mgh',
-    '.on_lh.gm_FLAIR_0.75.mgh', '.on_lh.gm_FLAIR_0.5.mgh', '.on_lh.gm_FLAIR_0.25.mgh',
-    '.on_lh.gm_FLAIR_0.mgh', '.on_lh.wm_FLAIR_0.5.mgh', '.on_lh.wm_FLAIR_1.mgh',
-    '.on_lh.pial.K_filtered.sm20.mgh'])
-n_vert=163842
-cortex_label=nb.freesurfer.io.read_label(os.path.join(subject_dir,'fsaverage_sym/label/lh.cortex.label'))
-medial_wall = np.delete(np.arange(n_vert),cortex_label)
+def create_training_data_hdf5(subject, subject_dir, output_dir):
+    #list features
+    features = np.array(['.on_lh.thickness.mgh', '.on_lh.w-g.pct.mgh', '.on_lh.curv.mgh','.on_lh.sulc.mgh',
+        '.on_lh.gm_FLAIR_0.75.mgh', '.on_lh.gm_FLAIR_0.5.mgh', '.on_lh.gm_FLAIR_0.25.mgh',
+        '.on_lh.gm_FLAIR_0.mgh', '.on_lh.wm_FLAIR_0.5.mgh', '.on_lh.wm_FLAIR_1.mgh',
+        '.on_lh.pial.K_filtered.sm20.mgh'])
+    n_vert=163842
+    cortex_label=nb.freesurfer.io.read_label(os.path.join(subject_dir,'fsaverage_sym/label/lh.cortex.label'))
+    medial_wall = np.delete(np.arange(n_vert),cortex_label)
+    save_subject(subject,features,medial_wall, subject_dir, output_dir)
 
 
 
-for subject in subject_ids:
-    print("saving subject " + subject + "...")
-    io.save_subject(subject,features,medial_wall, subject_dir, output_dir)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='create feature matrix for all subjects')
+    #TODO think about how to best pass a list
+    parser.add_argument('-id','--id',
+                        help='Subjects ID',
+                        required=False,
+                        default=None)
+    parser.add_argument('-ids','--list_ids',
+                        help='Subjects IDs in a text file',
+                        required=False,
+                        default=None)
+    parser.add_argument('-sd','--subjects_dir',
+                        help='Subjects directory...',
+                        required=True,)
+    parser.add_argument('-od','--output_dir',
+                        type=str,
+                        help='output directory to save hdf5',
+                        required=True,)
+    args = parser.parse_args()
 
 
+    #save subjects dir and subject ids. import the text file containing subject ids
+    subject_dir=args.subjects_dir
+    output_dir=args.output_dir
+    if args.subject_ids:
+        subject_ids=np.array(np.loadtxt(args.subject_ids, dtype='str', ndmin=1))
+    elif args.id:
+        subject_ids=[args.id]
+    else:
+        print('No ids were provided')
+        subject_ids=None
 
+    if subject_ids:
+        for subject in subject_ids:
+            print("saving subject " + subject + "...")
+            create_training_data_hdf5(subject, subject_dir, output_dir)

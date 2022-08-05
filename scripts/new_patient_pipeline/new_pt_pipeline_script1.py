@@ -19,8 +19,9 @@ import glob
 import tempfile
 from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR, MELD_DATA_PATH, FS_SUBJECTS_PATH
 import pandas as pd
-from scripts.data_preparation.extract_features.create_xhemi import run_parallel
-
+from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
+from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5
+from os.path import join as opj
 
 def init(lock):
     global starting
@@ -40,15 +41,15 @@ def fastsurfer_subject(subject, fs_folder):
     # get subject folder
     # if freesurfer outputs already exist for this subject, continue running from where it stopped
     # else, find inputs T1 and FLAIR and run FS
-    if os.path.isdir(os.path.join(fs_folder, subject_id)):
+    if os.path.isdir(opj(fs_folder, subject_id)):
         print(f"STEP 1:Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
         return
 
     # select inputs files T1 and FLAIR
     if subject_t1_path == '':
         # assume meld data structure
-        subject_dir = os.path.join(MELD_DATA_PATH, "input", subject_id)
-        subject_t1_path = glob.glob(os.path.join(subject_dir, "T1", "*T1*.nii*"))
+        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)
+        subject_t1_path = glob.glob(opj(subject_dir, "T1", "*T1*.nii*"))
 
         # check T1 and FLAIR exist
         if len(subject_t1_path) > 1:
@@ -90,15 +91,15 @@ def fastsurfer_flair(subject, fs_folder):
         subject_id = subject
         subject_flair_path =''
 
-    if os.path.isfile(os.path.join(fs_folder, subject_id, "mri", "FLAIR.mgz")):
+    if os.path.isfile(opj(fs_folder, subject_id, "mri", "FLAIR.mgz")):
         print(f"STEP 1.2: Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
         return
 
     if subject_flair_path == '':
         # get subject folder
         #assume meld data structure
-        subject_dir = os.path.join(MELD_DATA_PATH, "input", subject_id)
-        subject_flair_path = glob.glob(os.path.join(subject_dir, "FLAIR", "*FLAIR*.nii*"))
+        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)
+        subject_flair_path = glob.glob(opj(subject_dir, "FLAIR", "*FLAIR*.nii*"))
 
         if len(subject_flair_path) > 1:
             raise FileNotFoundError(
@@ -140,15 +141,15 @@ def freesurfer_subject(subject, fs_folder):
     # get subject folder
     # If freesurfer outputs already exist for this subject, continue running from where it stopped
     # Else, find inputs T1 and FLAIR and run FS
-    if os.path.isdir(os.path.join(fs_folder, subject_id)):
+    if os.path.isdir(opj(fs_folder, subject_id)):
         print(f"STEP 1: Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
         return
 
     # select inputs files T1 and FLAIR
     if subject_t1_path == '':
         # assume meld data structure
-        subject_dir = os.path.join(MELD_DATA_PATH, "input", subject_id)
-        subject_t1_path = glob.glob(os.path.join(subject_dir, "T1", "*T1*.nii*"))
+        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)
+        subject_t1_path = glob.glob(opj(subject_dir, "T1", "*T1*.nii*"))
         # check T1 exists
         if len(subject_t1_path) > 1:
             raise FileNotFoundError(
@@ -161,8 +162,8 @@ def freesurfer_subject(subject, fs_folder):
 
     if subject_flair_path == '':
         # assume meld data structure
-        subject_dir = os.path.join(MELD_DATA_PATH, "input", subject_id)   
-        subject_flair_path = glob.glob(os.path.join(subject_dir, "FLAIR", "*FLAIR*.nii*"))
+        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)   
+        subject_flair_path = glob.glob(opj(subject_dir, "FLAIR", "*FLAIR*.nii*"))
         # check FLAIR exists
         if len(subject_flair_path) > 1:
             raise FileNotFoundError(
@@ -205,7 +206,7 @@ def freesurfer_subject(subject, fs_folder):
 def extract_features(subject, scripts_dir, fs_folder, site_code=""):
     # Launch script to extract surface-based features from freesurfer outputs
     
-        #TODO: enable BIDS format
+    #TODO: enable BIDS format
     if type(subject) == dict:
         subject_id = subject['id']
     else:
@@ -218,23 +219,42 @@ def extract_features(subject, scripts_dir, fs_folder, site_code=""):
         except ValueError:
             print("Could not recover site code from", subject_id)
             sys.exit(-1)
+    
     #### EXTRACT SURFACE-BASED FEATURES #####
     # Create the output directory to store the surface-based features processed
-    output_dir = os.path.join(BASE_PATH, f"MELD_{site_code}")
+    output_dir = opj(BASE_PATH, f"MELD_{site_code}")
     os.makedirs(output_dir, exist_ok=True)
     # Create temporary list of ids
     tmp = tempfile.NamedTemporaryFile(mode="w")
     with open(tmp.name, 'w') as f:
         f.write(subject_id) 
     
-    command = format(
-        f"bash {scripts_dir}/data_preparation/meld_pipeline.sh {fs_folder} {site_code} {tmp.name} {scripts_dir}/data_preparation/extract_features {output_dir}"
-    )
-    try:
-        sub.check_call(command, shell=True)  # ,stdout=sub.DEVNULL)
-    except sub.CalledProcessError as e:
-        print(f'ERROR STEP 2 : feature extraction has failed for {subject_id}')
-        return
+    #path to scripts
+    scripts_dir_temp=opj(scripts_dir,'data_preparation/extract_features')
+
+    #register to symmetric fsaverage xhemi
+    print("INFO: Creating registration to template surface")
+    create_xhemi(subject_id, fs_folder)
+
+    #create basic features
+    #TODO:pythonify bash scripts
+    print("INFO: Sampling features in native space")
+    command=format(f"bash {scripts_dir_temp}/sample_FLAIR_smooth_features.sh {fs_folder} {tmp.name} {scripts_dir_temp}")
+    sub.check_call(command, shell=True, stdout=sub.PIPE)
+       
+    #move features and lesions to template
+    #TODO:pythonify bash scripts
+    print("INFO: Moving features to template surface")
+    command=format(f"bash {scripts_dir_temp}/move_to_xhemi_flip.sh {fs_folder} {tmp.name}")
+    sub.check_call(command, shell=True, stdout=sub.PIPE)
+    
+    print("INFO: Moving lesion masks to template surface")
+    command=format(f"bash {scripts_dir_temp}/lesion_labels.sh {fs_folder} {tmp.name}")
+    sub.check_call(command, shell=True, stdout=sub.PIPE)
+
+    #create training_data matrix for all patients and controls.
+    print("INFO: creating final training data matrix")
+    create_training_data_hdf5(subject_id, fs_folder, output_dir )
      
     tmp.close()
     # os.remove(tmp.name)
@@ -296,10 +316,10 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20,
 
 
     ### EXTRACT SURFACE-BASED FEATURES ###
-    scripts_dir = os.path.join(SCRIPTS_DIR, "scripts")
+    scripts_dir = opj(SCRIPTS_DIR, "scripts")
 
     # parallelize create xhemi because it takes a while!
-    run_parallel(subject_list, fs_folder, num_procs=num_procs)
+    run_parallel_xhemi(subject_list, fs_folder, num_procs=num_procs)
 
     # Launch script to extract features
     for subject in subject_list:
@@ -321,7 +341,6 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
     os.makedirs(fs_folder, exist_ok=True)
-    arguments = []
 
     if use_fastsurfer:
         ## first processing stage with fastsurfer: segmentation
@@ -337,12 +356,12 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
         freesurfer_subject(subject,fs_folder)
     
     ### EXTRACT SURFACE-BASED FEATURES ###
-    scripts_dir = os.path.join(SCRIPTS_DIR, "scripts")
+    scripts_dir = opj(SCRIPTS_DIR, "scripts")
 
     # Launch script to extract features
     extract_features(subject, scripts_dir=scripts_dir, fs_folder=fs_folder, site_code=site_code)
 
-    #### SMOOTH FEATURES #####
+    # #### SMOOTH FEATURES #####
     # Launch script to smooth features
     smooth_features(subject, scripts_dir=scripts_dir,)
 

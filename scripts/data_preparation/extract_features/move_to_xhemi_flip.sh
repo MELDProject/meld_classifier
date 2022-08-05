@@ -41,9 +41,6 @@ do
     if [ ! -e "$s"/xhemi/surf_meld/rh.on_lh."$m2" ];  then
     mris_apply_reg --src "$s"/surf_meld/rh."$m2" --trg "$s"/xhemi/surf_meld/rh.on_lh."$m2"    --streg $SUBJECTS_DIR/"$s"/xhemi/surf/lh.fsaverage_sym.sphere.reg     $SUBJECTS_DIR/fsaverage_sym/surf/lh.sphere.reg
     fi
-#     # Asymmetry NO NEED ANYMORE
-#     mris_calc --output "$s"/xhemi/surf_meld/lh.asym.on_lh."$m2" "$s"/xhemi/surf_meld/lh.on_lh."$m2" sub "$s"/xhemi/surf_meld/rh.on_lh."$m2"
-#     mris_calc --output "$s"/xhemi/surf_meld/rh.asym.on_lh."$m2" "$s"/xhemi/surf_meld/zeros.mgh sub "$s"/xhemi/surf_meld/lh.asym.on_lh."$m2"
 
   done
 
