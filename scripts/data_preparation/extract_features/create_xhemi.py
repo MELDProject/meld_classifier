@@ -41,9 +41,9 @@ def run_parallel_xhemi(subject_ids, subjects_dir, num_procs = 10,template = 'fsa
 if __name__ == '__main__':
     parser = ArgumentParser(description="register the participant's data to the  bilaterally symmetrical template")
     #TODO think about how to best pass a list
-    # parser.add_argument('-ids','--list_ids',
-    #                     help='Subjects IDs in a text file',
-    #                     required=True,)
+    parser.add_argument('-ids','--list_ids',
+                        help='Subjects IDs in a text file',
+                        required=True,)
     parser.add_argument('-id','--id',
                         help='Subjects ID',
                         required=True,)
