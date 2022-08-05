@@ -46,10 +46,10 @@ if __name__ == '__main__':
     #save subjects dir and subject ids. import the text file containing subject ids
     subject_dir=args.subjects_dir
     output_dir=args.output_dir
-    if args.subject_ids:
-        subject_ids=np.array(np.loadtxt(args.subject_ids, dtype='str', ndmin=1))
+    if args.list_ids:
+        subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1))
     elif args.id:
-        subject_ids=[args.id]
+        subject_ids=np.array([args.id])
     else:
         print('No ids were provided')
         subject_ids=None
