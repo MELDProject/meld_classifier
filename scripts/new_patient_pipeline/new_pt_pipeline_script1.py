@@ -371,13 +371,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="perform cortical parcellation using recon-all from freesurfer")
     parser.add_argument(
         "-id",
-        "--id_subj",
+        "--id",
         help="Subject ID.",
         default="",
         required=False,
     )
     parser.add_argument(
-        "-sl",
+        "-ids",
         "--subject_list",
         default="",
         help="Relative path to subject List containing id and site_code.",
@@ -391,7 +391,6 @@ if __name__ == "__main__":
         required=True,
     )
     parser.add_argument(
-        "-fs", 
         "--fastsurfer", 
         help="use fastsurfer instead of freesurfer", 
         required=False, 
@@ -399,19 +398,18 @@ if __name__ == "__main__":
         action="store_true",
     )
     parser.add_argument(
-        "-p", 
-        "--parallel", 
+        "--parallelise", 
         help="parallelise segmentation", 
         required=False,
         default=False,
         action="store_true",
         )
     args = parser.parse_args()
-    subject = str(args.id_subj)
+    subject = str(args.id)
     site_code = str(args.site_code)
-    subject_list = str(args.subject_list)
+    subject_list = str(args.list_ids)
     use_fastsurfer = args.fastsurfer
-    use_parallel = args.parallel
+    use_parallel = args.parallelise
     print(args)
 
     if subject_list != "":
