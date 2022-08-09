@@ -8,6 +8,7 @@
 
 
 import os
+import numpy as np
 from sqlite3 import paramstyle
 import sys
 import argparse
@@ -21,6 +22,9 @@ from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR, MELD_DATA_PATH, FS_SUB
 import pandas as pd
 from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
 from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5
+from scripts.data_preparation.extract_features.sample_FLAIR_smooth_features import sample_flair_smooth_features
+from scripts.data_preparation.extract_features.lesion_labels import lesion_labels
+from scripts.data_preparation.extract_features.move_to_xhemi_flip import move_to_xhemi_flip
 from os.path import join as opj
 
 def init(lock):
@@ -42,7 +46,7 @@ def fastsurfer_subject(subject, fs_folder):
     # if freesurfer outputs already exist for this subject, continue running from where it stopped
     # else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(opj(fs_folder, subject_id)):
-        print(f"STEP 1:Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
+        print(f"STEP 1: Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped")
         return
 
     # select inputs files T1 and FLAIR
@@ -62,7 +66,7 @@ def fastsurfer_subject(subject, fs_folder):
             subject_t1_path = subject_t1_path[0]
 
     # setup cortical segmentation command
-    print("STEP 1: Segmentation using T1 only with FastSurfer")
+    print(f"STEP 1: Segmentation using T1 only with FastSurfer for {subject_id}")
     command = format(
         "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu".format(fs_folder, subject_id, subject_t1_path)
     )
@@ -71,11 +75,7 @@ def fastsurfer_subject(subject, fs_folder):
     print(f"INFO : Start cortical parcellation for {subject_id} (up to 2h). Please wait")
     print(f"INFO : Results will be stored in {fs_folder}")
     starting.acquire()  # no other process can get it until it is released
-    try:
-        proc = sub.check_call(command, shell=True, stdout=sub.DEVNULL)
-    except sub.CalledProcessError as e:
-        print(f'ERROR STEP 1 : Segmentation has failed for {subject_id}')
-        return    
+    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     print(f"INFO : Finished cortical parcellation for {subject_id} !")
@@ -117,11 +117,7 @@ def fastsurfer_flair(subject, fs_folder):
     command = format(
         "recon-all -sd {} -subject {} -FLAIR {} -FLAIRpial -autorecon3".format(fs_folder, subject_id, subject_flair_path)
     )
-    try:
-        proc = sub.check_call(command, shell=True, stdout=sub.DEVNULL)
-    except sub.CalledProcessError as e:
-        print(f'ERROR STEP 1.2 : Segmentation has failed for {subject_id}')
-        return 
+    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
     proc.wait()
     print("finished FLAIRpial for subject", subject_id)
 
@@ -178,7 +174,7 @@ def freesurfer_subject(subject, fs_folder):
 
     # setup cortical segmentation command
     if isflair == True:
-        print("STEP 1: Segmentation using T1 and FLAIR with Freesurfer for {subject_id}")
+        print(f"STEP 1: Segmentation using T1 and FLAIR with Freesurfer for {subject_id}")
         command = format(
             "$FREESURFER_HOME/bin/recon-all -sd {} -s {} -i {} -FLAIR {} -FLAIRpial -all".format(
                 fs_folder, subject_id, subject_t1_path, subject_flair_path
@@ -194,11 +190,7 @@ def freesurfer_subject(subject, fs_folder):
     print(f"INFO : Start cortical parcellation for {subject_id} (up to 36h). Please wait")
     print(f"INFO : Results will be stored in {fs_folder}")
     starting.acquire()  # no other process can get it until it is released
-    try:
-        proc = sub.check_call(command, shell=True, stdout=sub.PIPE)
-    except sub.CalledProcessError as e:
-        print(f'ERROR STEP 1 : Segmentation has failed for {subject_id}')
-        return    
+    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     print(f"INFO : Finished cortical parcellation for {subject_id} !")
@@ -229,28 +221,20 @@ def extract_features(subject, scripts_dir, fs_folder, site_code=""):
     with open(tmp.name, 'w') as f:
         f.write(subject_id) 
     
-    #path to scripts
-    scripts_dir_temp=opj(scripts_dir,'data_preparation/extract_features')
-
     #register to symmetric fsaverage xhemi
     print("INFO: Creating registration to template surface")
     create_xhemi(subject_id, fs_folder)
 
     #create basic features
-    #TODO:pythonify bash scripts
     print("INFO: Sampling features in native space")
-    command=format(f"bash {scripts_dir_temp}/sample_FLAIR_smooth_features.sh {fs_folder} {tmp.name} {scripts_dir_temp}")
-    sub.check_call(command, shell=True, stdout=sub.PIPE)
+    sample_flair_smooth_features(subject_id, fs_folder)
        
     #move features and lesions to template
-    #TODO:pythonify bash scripts
     print("INFO: Moving features to template surface")
-    command=format(f"bash {scripts_dir_temp}/move_to_xhemi_flip.sh {fs_folder} {tmp.name}")
-    sub.check_call(command, shell=True, stdout=sub.PIPE)
+    move_to_xhemi_flip(subject_id, fs_folder)
     
     print("INFO: Moving lesion masks to template surface")
-    command=format(f"bash {scripts_dir_temp}/lesion_labels.sh {fs_folder} {tmp.name}")
-    sub.check_call(command, shell=True, stdout=sub.PIPE)
+    lesion_labels(subject_id, fs_folder)
 
     #create training_data matrix for all patients and controls.
     print("INFO: creating final training data matrix")
@@ -357,12 +341,9 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     
     ### EXTRACT SURFACE-BASED FEATURES ###
     scripts_dir = opj(SCRIPTS_DIR, "scripts")
-
-    # Launch script to extract features
     extract_features(subject, scripts_dir=scripts_dir, fs_folder=fs_folder, site_code=site_code)
 
-    # #### SMOOTH FEATURES #####
-    # Launch script to smooth features
+    ### SMOOTH FEATURES ###
     smooth_features(subject, scripts_dir=scripts_dir,)
 
 
@@ -378,7 +359,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-ids",
-        "--subject_list",
+        "--list_ids",
         default="",
         help="Relative path to subject List containing id and site_code.",
         required=False,
@@ -405,33 +386,40 @@ if __name__ == "__main__":
         action="store_true",
         )
     args = parser.parse_args()
-    subject = str(args.id)
     site_code = str(args.site_code)
-    subject_list = str(args.list_ids)
     use_fastsurfer = args.fastsurfer
     use_parallel = args.parallelise
+    list_ids=args.list_ids
+    id=args.id
     print(args)
 
-    if subject_list != "":
-        if subject != "":
+    if list_ids!="":
+        if id != "":
             print("Ignoring  subject id because list provided...")
         try:
-            sub_list_df = pd.read_csv(subject_list)
-        except ValueError:
-            print("Could not open, subject_list")
-            sys.exit(-1)
-        if use_parallel:   
-            print('Run subjects in parallel') 
-            run_subjects_segmentation_and_smoothing_parallel(list(sub_list_df.participant_id.values), site_code = site_code, use_fastsurfer = use_fastsurfer)
+            sub_list_df = pd.read_csv(list_ids)
+            subject_ids=np.array(sub_list_df.participant_id.values)
+        except:
+            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1))
         else:
+            print("Could not open, subject_list")
+            sys.exit(-1)     
+        if use_parallel:
+            #launch segmentation and feature extraction in parallel
+            print('Run subjects in parallel') 
+            run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer)
+        else:
+            #launch segmentation and feature extraction for each subject one after another
             print('Run subjects one after another')
-            for subject in list(sub_list_df.participant_id.values):
-                run_subject_segmentation_and_smoothing(subject,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+            for subject_id in subject_ids:
+                run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
     else:
-        if subject == "":
+        if id == "":
             print("Please specify both subject and site_code...")
         else:
-            run_subject_segmentation_and_smoothing(subject,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+            #launch segmentation and feature extraction for 1 subject
+            subject_id=id
+            run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
 
 
 

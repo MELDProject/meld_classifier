@@ -4,8 +4,7 @@ from functools import partial
 import os
 from os.path import join as opj
 import shutil
-import subprocess
-import subprocess as sub
+from subprocess import Popen,  STDOUT, DEVNULL
 from argparse import ArgumentParser
 import multiprocessing
 
@@ -22,15 +21,14 @@ def create_xhemi(subject_id, subjects_dir,template = 'fsaverage_sym'):
 
     if not os.path.isfile(opj(subjects_dir,subject_id,'surf','lh.fsaverage_sym.sphere.reg')):
         command = f'SUBJECTS_DIR={subjects_dir} surfreg --s {subject_id} --t {template} --lh'    
-        proc = sub.Popen(command, shell=True, stdout = sub.DEVNULL)
+        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc.wait()
 
     if not os.path.isfile(opj(subjects_dir,subject_id,'xhemi','surf','lh.fsaverage_sym.sphere.reg')):
         command = f'SUBJECTS_DIR={subjects_dir} surfreg --s {subject_id} --t {template} --lh --xhemi'
-        proc = sub.Popen(command, shell=True, stdout = sub.DEVNULL)
+        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc.wait()
 
-            
 
 def run_parallel_xhemi(subject_ids, subjects_dir, num_procs = 10,template = 'fsaverage_sym' ):
     pass
