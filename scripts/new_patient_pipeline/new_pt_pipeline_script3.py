@@ -10,6 +10,7 @@
 
 
 import os
+import sys
 import numpy as np
 import pandas as pd
 import argparse
@@ -86,18 +87,29 @@ if __name__ == '__main__':
                         help='Split subjects list in chunk to avoid data overload',)
 
     args = parser.parse_args()
-    site_code=str(args.site_code)   
+    no_prediction_nifti = args.no_prediction_nifti
+    no_report = args.no_report 
+    split = args.split
+    subject_id=None
+    subject_ids=None
+    site_code=str(args.site_code)
+
     if args.list_ids:
         try:
-            sub_list_df = pd.read_csv(args.list_ids)
-            subject_ids=np.array(sub_list_df.participant_id.values)
+            sub_list_df=pd.read_csv(args.list_ids)
+            subject_ids=np.array(sub_list_df.ID.values)
         except:
-            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1))     
+            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1)) 
+        else:
+                print(f"ERROR: Could not open {subject_ids}")
+                sys.exit(-1)                
     elif args.id:
+        subject_id=args.id
         subject_ids=np.array([args.id])
     else:
-        print('No ids were provided')
-        subject_ids=None
+        print('ERROR: No ids were provided')
+        print("ERROR: Please specify both subject(s) and site_code ...")
+        sys.exit(-1)
     
     # initialise variables
     scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
@@ -111,7 +123,7 @@ if __name__ == '__main__':
     
     #split the subject in group of 5 if big number of subjects
     chunked_subject_list = list()
-    if args.split: 
+    if split: 
         chunk_size = min(len(subject_ids), 5)
         for i in range(0, len(subject_ids), chunk_size):
             chunked_subject_list.append(subject_ids[i : i + chunk_size])
@@ -132,7 +144,7 @@ if __name__ == '__main__':
                         experiment_name=experiment_name, 
                         hdf5_file_root= DEFAULT_HDF5_FILE_ROOT)
         
-        if (not args.no_prediction_nifti) & (not args.no_report):        
+        if (not no_prediction_nifti) & (not no_report):        
             # Register predictions to native space
             print('STEP1: move predictions into volume')
             move_predictions_to_mgh(subject_ids=subject_ids_chunk, 
@@ -145,7 +157,7 @@ if __name__ == '__main__':
                                       subjects_dir=subjects_dir, 
                                       output_dir=predictions_output_dir)
         
-        if (not args.no_report):
+        if (not no_report):
             # Create individual reports of each identified cluster
             print('STEP3: Create pdf report')
             generate_prediction_report(

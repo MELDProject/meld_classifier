@@ -16,15 +16,17 @@ import subprocess as sub
 import threading
 import multiprocessing
 from functools import partial
-import glob
 import tempfile
-from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR, MELD_DATA_PATH, FS_SUBJECTS_PATH
+import glob
+from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR, MELD_DATA_PATH, FS_SUBJECTS_PATH, CLIPPING_PARAMS_FILE
 import pandas as pd
 from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
 from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5
 from scripts.data_preparation.extract_features.sample_FLAIR_smooth_features import sample_flair_smooth_features
 from scripts.data_preparation.extract_features.lesion_labels import lesion_labels
 from scripts.data_preparation.extract_features.move_to_xhemi_flip import move_to_xhemi_flip
+from meld_classifier.meld_cohort import MeldCohort
+from meld_classifier.data_preprocessing import Preprocess
 from os.path import join as opj
 
 def init(lock):
@@ -195,31 +197,13 @@ def freesurfer_subject(subject, fs_folder):
     proc.wait()
     print(f"INFO : Finished cortical parcellation for {subject_id} !")
 
-def extract_features(subject, scripts_dir, fs_folder, site_code=""):
+def extract_features(subject_id, fs_folder, output_dir):
     # Launch script to extract surface-based features from freesurfer outputs
-    
-    #TODO: enable BIDS format
-    if type(subject) == dict:
-        subject_id = subject['id']
-    else:
-        subject_id = subject
-    
     print("STEP 2: Extract surface-based features", subject_id)
-    if site_code == "":
-        try:
-            site_code = subject_id.split("_")[1]  ##according to current MELD naming convention TODO
-        except ValueError:
-            print("Could not recover site code from", subject_id)
-            sys.exit(-1)
     
     #### EXTRACT SURFACE-BASED FEATURES #####
     # Create the output directory to store the surface-based features processed
-    output_dir = opj(BASE_PATH, f"MELD_{site_code}")
     os.makedirs(output_dir, exist_ok=True)
-    # Create temporary list of ids
-    tmp = tempfile.NamedTemporaryFile(mode="w")
-    with open(tmp.name, 'w') as f:
-        f.write(subject_id) 
     
     #register to symmetric fsaverage xhemi
     print("INFO: Creating registration to template surface")
@@ -237,39 +221,47 @@ def extract_features(subject, scripts_dir, fs_folder, site_code=""):
     lesion_labels(subject_id, fs_folder)
 
     #create training_data matrix for all patients and controls.
-    print("INFO: creating final training data matrix")
+    print("INFO: Creating final training data matrix")
     create_training_data_hdf5(subject_id, fs_folder, output_dir )
      
-    tmp.close()
-    # os.remove(tmp.name)
+def create_dataset_file(subjects, output_path):
+    df=pd.DataFrame()
+    subjects_id = [subject for subject in subjects]
+    df['subject_id']=subjects_id
+    df['split']=['test' for subject in subjects]
+    df.to_csv(output_path)
 
-def smooth_features(subject, scripts_dir):
-    
-    #TODO: enable BIDS format
-    if type(subject) == dict:
-        subject_id = subject['id']
+def smooth_features_new_subjects(subject_ids, output_dir):
+    features = {
+        ".on_lh.thickness.mgh": 10,
+        ".on_lh.w-g.pct.mgh": 10,
+        ".on_lh.pial.K_filtered.sm20.mgh": None,
+        ".on_lh.sulc.mgh": 5,
+        ".on_lh.curv.mgh": 5,
+        ".on_lh.gm_FLAIR_0.25.mgh": 10,
+        ".on_lh.gm_FLAIR_0.5.mgh": 10,
+        ".on_lh.gm_FLAIR_0.75.mgh": 10,
+        ".on_lh.gm_FLAIR_0.mgh": 10,
+        ".on_lh.wm_FLAIR_0.5.mgh": 10,
+        ".on_lh.wm_FLAIR_1.mgh": 10,
+    }
 
-    else:
-        subject_id = subject
+    if isinstance(subject_ids, str):
+        subject_ids=[subject_ids]
 
-    # Create temporary list of ids
     tmp = tempfile.NamedTemporaryFile(mode="w")
-    with open(tmp.name, 'w') as f:
-        f.write(subject_id) 
-        
-    # Launch script to smooth features
-    print("STEP 3: SMOOTH FEATURES")
-    command = format(
-        f"python {scripts_dir}/data_preparation/run_data_smoothing_new_subjects.py -ids {tmp.name} -d {BASE_PATH}"
-    )
-    try:
-        sub.check_call(command, shell=True, stdout=sub.DEVNULL)  
-    except sub.CalledProcessError as e:
-        print(f'ERROR STEP 3 : smoothing has failed for {subject_id}')
-        return 
-    tmp.close()
-    # os.remove(subject_ids.name)
+    create_dataset_file(subject_ids, tmp.name)
+    
+    c_raw = MeldCohort(hdf5_file_root="{site_code}_{group}_featurematrix.hdf5", dataset=tmp.name, data_dir=BASE_PATH)
+    smoothing = Preprocess(c_raw, write_hdf5_file_root="{site_code}_{group}_featurematrix_smoothed.hdf5", data_dir=output_dir)
+    
+    print('INFO: smoothing features')
+    for feature in np.sort(list(set(features))):
+        print(feature)
+        smoothing.smooth_data(feature, features[feature], clipping_params=CLIPPING_PARAMS_FILE)
 
+    tmp.close()
+    
 def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20, site_code="", use_fastsurfer=False):
     # parallel version of the pipeline, finish each stage for all subjects first
 
@@ -280,7 +272,6 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20,
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
     os.makedirs(fs_folder, exist_ok=True)
-    arguments = []
 
     if use_fastsurfer:
         ## first processing stage with fastsurfer: segmentation
@@ -300,24 +291,23 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20,
 
 
     ### EXTRACT SURFACE-BASED FEATURES ###
-    scripts_dir = opj(SCRIPTS_DIR, "scripts")
+    output_dir = opj(BASE_PATH, f"MELD_{site_code}")
 
     # parallelize create xhemi because it takes a while!
     run_parallel_xhemi(subject_list, fs_folder, num_procs=num_procs)
 
     # Launch script to extract features
     for subject in subject_list:
-        extract_features(subject, scripts_dir=scripts_dir, fs_folder=fs_folder, site_code=site_code)
+        extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     #### SMOOTH FEATURES #####
-    # Launch script to smooth features
-    ###TODO: parallelize here
+    #TODO: parallelise here
     for subject in subject_list:
-        smooth_features(subject, scripts_dir=scripts_dir,)
+        smooth_features_new_subjects(subject, output_dir=output_dir)
 
 def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False):
     # pipeline to segment the brain, exract surface-based features and smooth features for 1 subject
-
+    
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
     sub.check_call(ini_freesurfer, shell=True, stdout=sub.DEVNULL)
@@ -340,11 +330,11 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
         freesurfer_subject(subject,fs_folder)
     
     ### EXTRACT SURFACE-BASED FEATURES ###
-    scripts_dir = opj(SCRIPTS_DIR, "scripts")
-    extract_features(subject, scripts_dir=scripts_dir, fs_folder=fs_folder, site_code=site_code)
+    output_dir = opj(BASE_PATH, f"MELD_{site_code}")
+    extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     ### SMOOTH FEATURES ###
-    smooth_features(subject, scripts_dir=scripts_dir,)
+    smooth_features_new_subjects(subject, output_dir=output_dir)
 
 
 if __name__ == "__main__":
@@ -389,21 +379,31 @@ if __name__ == "__main__":
     site_code = str(args.site_code)
     use_fastsurfer = args.fastsurfer
     use_parallel = args.parallelise
-    list_ids=args.list_ids
-    id=args.id
+    subject_id=None
+    subject_ids=None
     print(args)
 
-    if list_ids!="":
-        if id != "":
-            print("Ignoring  subject id because list provided...")
+    if args.list_ids:
         try:
-            sub_list_df = pd.read_csv(list_ids)
-            subject_ids=np.array(sub_list_df.participant_id.values)
+            sub_list_df=pd.read_csv(args.list_ids)
+            subject_ids=np.array(sub_list_df.ID.values)
         except:
-            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1))
+            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1)) 
         else:
-            print("Could not open, subject_list")
-            sys.exit(-1)     
+                print(f"ERROR: Could not open {subject_ids}")
+                sys.exit(-1)                
+    elif args.id:
+        subject_id=args.id
+        subject_ids=np.array([args.id])
+    else:
+        print('ERROR: No ids were provided')
+        print("ERROR: Please specify both subject(s) and site_code ...")
+        sys.exit(-1) 
+    
+    if subject_id != None:
+        #launch segmentation and feature extraction for 1 subject
+        run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+    else:
         if use_parallel:
             #launch segmentation and feature extraction in parallel
             print('Run subjects in parallel') 
@@ -411,15 +411,36 @@ if __name__ == "__main__":
         else:
             #launch segmentation and feature extraction for each subject one after another
             print('Run subjects one after another')
-            for subject_id in subject_ids:
-                run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
-    else:
-        if id == "":
-            print("Please specify both subject and site_code...")
-        else:
-            #launch segmentation and feature extraction for 1 subject
-            subject_id=id
-            run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+            for subj in subject_ids:
+                run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+
+    # if list_ids!="":
+    #     if id != "":
+    #         print("Ignoring  subject id because list provided...")
+    #     try:
+    #         sub_list_df = pd.read_csv(list_ids)
+    #         subject_ids=np.array(sub_list_df.ID.values)
+    #     except:
+    #         subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1))
+    #     else:
+    #         print("Could not open, subject_list")
+    #         sys.exit(-1)     
+    #     if use_parallel:
+    #         #launch segmentation and feature extraction in parallel
+    #         print('Run subjects in parallel') 
+    #         run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer)
+    #     else:
+    #         #launch segmentation and feature extraction for each subject one after another
+    #         print('Run subjects one after another')
+    #         for subject_id in subject_ids:
+    #             run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+    # else:
+    #     if id == "":
+    #         print("Please specify both subject and site_code...")
+    #     else:
+    #         #launch segmentation and feature extraction for 1 subject
+    #         subject_id=id
+    #         run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
 
 
 

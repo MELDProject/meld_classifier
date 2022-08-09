@@ -89,7 +89,7 @@ def sample_flair_smooth_features(subject_id, subjects_dir):
         proc.wait()
 
         # get thickness
-        print(f'INFO: Get calculate curvature for {subject_id}')
+        print(f'INFO: Get thickness and white-greay matter contrast for {subject_id}')
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.thickness {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.thickness.mgh"
         proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc.wait()
