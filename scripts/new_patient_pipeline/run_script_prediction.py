@@ -65,26 +65,33 @@ if __name__ == '__main__':
     #parse commandline arguments 
     parser = argparse.ArgumentParser(description='')
     #TODO think about how to best pass a list
-    parser.add_argument('-id','--id',
-                        help='Subjects ID',
+    parser.add_argument("-id","--id",
+                        help="Subject ID.",
+                        default="",
                         required=False,
-                        default=None)
-    parser.add_argument('-ids','--list_ids',
-                        help='Subjects IDs',
+                        )
+    parser.add_argument("-ids","--list_ids",
+                        default="",
+                        help="File containing list of ids. Can be txt or csv with 'ID' column",
                         required=False,
-                        default=None)
-    parser.add_argument('-site','--site_code',
-                        help='Site code',
-                        required=True,)
+                        )
+    parser.add_argument("-site",
+                        "--site_code",
+                        help="Site code",
+                        default="",
+                        required=True,
+                        )
     parser.add_argument('--no_prediction_nifti',
                         action="store_true",
-                        help='Only predict. Does not produce prediction on native T1, nor report',)
+                        help='Only predict. Does not produce prediction on native T1, nor report',
+                        )
     parser.add_argument('--no_report',
                         action="store_true",
                         help='Predict and map back into native T1. Does not produce report',)
     parser.add_argument('--split',
                         action="store_true",
-                        help='Split subjects list in chunk to avoid data overload',)
+                        help='Split subjects list in chunk to avoid data overload',
+                        )
 
     args = parser.parse_args()
     no_prediction_nifti = args.no_prediction_nifti
@@ -94,22 +101,23 @@ if __name__ == '__main__':
     subject_ids=None
     site_code=str(args.site_code)
 
-    if args.list_ids:
+    if args.list_ids != '':
+        list_ids=opj(MELD_DATA_PATH, args.list_ids)
         try:
-            sub_list_df=pd.read_csv(args.list_ids)
+            sub_list_df=pd.read_csv(list_ids)
             subject_ids=np.array(sub_list_df.ID.values)
         except:
-            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1)) 
+            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
         else:
                 print(f"ERROR: Could not open {subject_ids}")
                 sys.exit(-1)                
-    elif args.id:
+    elif args.id != '':
         subject_id=args.id
         subject_ids=np.array([args.id])
     else:
         print('ERROR: No ids were provided')
         print("ERROR: Please specify both subject(s) and site_code ...")
-        sys.exit(-1)
+        sys.exit(-1) 
     
     # initialise variables
     scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
@@ -135,7 +143,7 @@ if __name__ == '__main__':
     for subject_ids_chunk in chunked_subject_list:
         print(f'INFO: run prediction on {subject_ids_chunk}')
         
-        # predict on new subjects 
+        #predict on new subjects 
         predict_subjects(subject_ids=subject_ids_chunk, 
                         output_dir=classifier_output_dir,  
                         plot_images=True, 
@@ -145,19 +153,19 @@ if __name__ == '__main__':
                         hdf5_file_root= DEFAULT_HDF5_FILE_ROOT)
         
         if (not no_prediction_nifti) & (not no_report):        
-            # Register predictions to native space
+            #Register predictions to native space
             print('STEP1: move predictions into volume')
             move_predictions_to_mgh(subject_ids=subject_ids_chunk, 
                                     subjects_dir=subjects_dir, 
                                     prediction_file=prediction_file)
 
-            # Register prediction back to nifti volume
+            #Register prediction back to nifti volume
             print('STEP2: move prediction back to native space')
             register_subject_to_xhemi(subject_ids=subject_ids_chunk, 
                                       subjects_dir=subjects_dir, 
                                       output_dir=predictions_output_dir)
         
-        if (not no_report):
+        if not no_report:
             # Create individual reports of each identified cluster
             print('STEP3: Create pdf report')
             generate_prediction_report(

@@ -5,18 +5,15 @@ Pipeline to prepare data from new patients :
 3) Save data in the "combat" hdf5 matrix
 """
 
-#TODO:update
-## To run : python new_pt_pirpine_script2.py -ids <text_file_with_subject_ids>  -site <site_code>
+## To run : python run_script_preprocessing.py -site <site_code> -ids <text_file_with_subject_ids> 
 
-
-from distutils.log import error
 import os
 import sys
 import argparse
-import subprocess as sub
 import pandas as pd
 import numpy as np
 import tempfile
+from os.path import join as opj
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.data_preprocessing import Preprocess, Feature
 from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, NORM_CONTROLS_PARAMS_FILE, COMBAT_PARAMS_FILE, MELD_SITE_CODES
@@ -41,14 +38,19 @@ def which_combat_file(site_code):
         print(f'INFO: Could not find combat parameters for {site_code}')
         return 'None'
 
-def check_demographic_file(demographic_file):
-    #check demographic file is adequate
+def check_demographic_file(demographic_file, subject_ids):
+    #check demographic file has the right columns
     try:
         df = pd.read_csv(demographic_file)
         df[['ID', 'Sex', 'Age at preoperative']]
-        return demographic_file
     except Exception as e:
-        print(f"ERROR: error with the demographic file provided for the harmonisation. \n {e}")
+        print(f"ERROR: Error with the demographic file provided for the harmonisation. \n {e}")
+        os.sys.exit(-1)
+    #check demographic file has the right subjects
+    if set(subject_ids).issubset(set(np.array(df['ID']))):
+        return demographic_file
+    else:
+        print('ERROR: Missing subject in the demographic file')
         os.sys.exit(-1)
 
 
@@ -161,7 +163,7 @@ def new_site_harmonisation(subject_ids, demographic_file, output_dir=BASE_PATH, 
     tmp = tempfile.NamedTemporaryFile(mode="w")
     create_dataset_file(subject_ids, tmp.name)
 
-    check_demographic_file(demographic_file)
+    check_demographic_file(demographic_file, subject_ids)
    
     ### COMBAT DISTRIBUTED DATA ###
     #-----------------------------------------------------------------------------------------------
@@ -188,73 +190,88 @@ if __name__ == '__main__':
     #parse commandline arguments 
     parser = argparse.ArgumentParser(description='data-processing on new subject')
     #TODO think about how to best pass a list
-    parser.add_argument('-id','--id',
-                        help='Subjects ID',
+    parser.add_argument("-id","--id",
+                        help="Subject ID.",
+                        default="",
                         required=False,
-                        default=None)
-    parser.add_argument('-ids','--list_ids',
-                        help='Subjects IDs',
+                        )
+    parser.add_argument("-ids","--list_ids",
+                        default="",
+                        help="File containing list of ids. Can be txt or csv with 'ID' column",
                         required=False,
-                        default=None)
-    parser.add_argument('-site','--site_code',
-                        help='Site code',
-                        required=True,)
+                        )
+    parser.add_argument("-site",
+                        "--site_code",
+                        help="Site code",
+                        default="",
+                        required=True,
+                        )
     parser.add_argument('-d', '--output_dir', 
                         type=str, 
                         help='path to store hdf5 files',
                         required=False,
-                        default=BASE_PATH) 
+                        default=BASE_PATH,
+                        ) 
     parser.add_argument('-demos', '--demographic_file', 
                         type=str, 
                         help='provide the demographic files for the harmonisation',
                         required=False,
-                        default=None)
+                        default=None,
+                        )
     parser.add_argument('--harmo_only', 
                         action="store_true", 
                         help='only compute the harmonisation combat parameters, no further process',
                         required=False,
-                        default=False)
+                        default=False,
+                        )
     parser.add_argument("--withoutflair",
                         action="store_true",
                         default=False,
-                        help="do not use flair information")
+                        help="do not use flair information",
+                        )
 
     
     args = parser.parse_args()
     site_code=str(args.site_code)
     output_dir = args.output_dir
     harmonisation_only = args.harmo_only
+    withoutflair=args.withoutflair
 
-    if args.list_ids:
+    if args.list_ids != '':
+        list_ids=opj(MELD_DATA_PATH, args.list_ids)
         try:
-            sub_list_df = pd.read_csv(args.list_ids)
+            sub_list_df=pd.read_csv(list_ids)
             subject_ids=np.array(sub_list_df.ID.values)
         except:
-            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1))     
-    elif args.id:
+            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
+        else:
+                print(f"ERROR: Could not open {subject_ids}")
+                sys.exit(-1)                
+    elif args.id != '':
+        subject_id=args.id
         subject_ids=np.array([args.id])
     else:
-        print('No ids were provided')
-        subject_ids=None
+        print('ERROR: No ids were provided')
+        print("ERROR: Please specify both subject(s) and site_code ...")
+        sys.exit(-1) 
        
     #check that combat parameters exist for this site or compute it
     combat_params_file = which_combat_file(site_code)
     if combat_params_file=='None':
         print(f'INFO: Compute combat parameters for {site_code} with subjects {subject_ids}')
-        if args.demographic_file==None:
-            try:
-                demographic_file = os.path.join(MELD_DATA_PATH, 'input', 'demographics_file.csv') 
-                os.path.isfile(demographic_file)
-                print(f'INFO: Use default demographic file {demographic_file}')
-            except:
-                print('ERROR: Could not find demographic file. Please provide a demographic file using the flag -demos')
-                os.sys.exit(-1)
+        if args.demographic_file == None:
+            print('ERROR: Please provide a demographic file using the flag "-demos" to harmonise your data')
         else:
-            demographic_file = args.demographic_file
-        #check that demographic file is adequate
-        demographic_file = check_demographic_file(demographic_file) 
+            #check that demographic file exist and is adequate
+            demographic_file = os.path.join(MELD_DATA_PATH, args.demographic_file) 
+            if os.path.isfile(demographic_file):
+                print(f'INFO: Use demographic file {demographic_file}')
+                demographic_file = check_demographic_file(demographic_file, subject_ids) 
+            else:
+                print(f'ERROR: Could not find demographic file provided {demographic_file}')
+                os.sys.exit(-1)
         #compute the combat parameters for a new site
-        new_site_harmonisation(subject_ids, demographic_file=demographic_file, output_dir=output_dir, withoutflair=args.withoutflair)
+        new_site_harmonisation(subject_ids, demographic_file=demographic_file, output_dir=output_dir, withoutflair=withoutflair)
 
     if not harmonisation_only:
-        run_data_processing_new_subjects(subject_ids, output_dir=output_dir, withoutflair=args.withoutflair)
+        run_data_processing_new_subjects(subject_ids, output_dir=output_dir, withoutflair=withoutflair)

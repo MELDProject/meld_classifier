@@ -226,7 +226,7 @@ def load_cmap():
     return cmap, dict_c
 
 def generate_prediction_report(
-    subject_ids, data_dir, hdf_predictions, exp, output_dir, 
+    subject_ids, data_dir, hdf_predictions, output_dir, 
     experiment_path=EXPERIMENT_PATH, experiment_name=MODEL_NAME, hdf5_file_root=DEFAULT_HDF5_FILE_ROOT, dataset=None):
     ''' Create images and report of predictions on inflated brain, on native T1 accompanied with saliencies explaining the predictions
     inputs: 
@@ -270,14 +270,13 @@ def generate_prediction_report(
     for subject_id in subject_ids:
         # find subject directory containing T1
         subject = MeldSubject(subject_id, cohort=c)
-        data_dir = os.path.join(data_dir, subject.subject_id)
         # create output directory
         output_dir_sub = os.path.join(output_dir, subject_id, "reports")
         os.makedirs(os.path.join(output_dir_sub), exist_ok=True)
         # load predictions subject
         result_hemis = load_prediction(subject.subject_id, hdf_predictions)
         # Open their MRI data if available
-        t1_file = glob.glob(os.path.join(data_dir, "T1", "*T1*.nii*"))[0]
+        t1_file = glob.glob(os.path.join(data_dir, subject_id, "T1", "*T1*.nii*"))[0]
         prediction_file_lh = glob.glob(os.path.join(output_dir, subject_id, "predictions", "lh.prediction*"))[0]
         prediction_file_rh = glob.glob(os.path.join(output_dir, subject_id, "predictions", "rh.prediction*"))[0]
         # load image

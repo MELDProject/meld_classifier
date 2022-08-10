@@ -340,41 +340,34 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
 if __name__ == "__main__":
     # parse commandline arguments
     parser = argparse.ArgumentParser(description="perform cortical parcellation using recon-all from freesurfer")
-    parser.add_argument(
-        "-id",
-        "--id",
-        help="Subject ID.",
-        default="",
-        required=False,
-    )
-    parser.add_argument(
-        "-ids",
-        "--list_ids",
-        default="",
-        help="Relative path to subject List containing id and site_code.",
-        required=False,
-    )
-    parser.add_argument(
-        "-site",
-        "--site_code",
-        help="Site code",
-        default="",
-        required=True,
-    )
-    parser.add_argument(
-        "--fastsurfer", 
-        help="use fastsurfer instead of freesurfer", 
-        required=False, 
-        default=False,
-        action="store_true",
-    )
-    parser.add_argument(
-        "--parallelise", 
-        help="parallelise segmentation", 
-        required=False,
-        default=False,
-        action="store_true",
-        )
+    parser.add_argument("-id","--id",
+                        help="Subject ID.",
+                        default="",
+                        required=False,
+                        )
+    parser.add_argument("-ids","--list_ids",
+                        default="",
+                        help="File containing list of ids. Can be txt or csv with 'ID' column",
+                        required=False,
+                        )
+    parser.add_argument("-site",
+                        "--site_code",
+                        help="Site code",
+                        default="",
+                        required=True,
+                        )
+    parser.add_argument("--fastsurfer", 
+                        help="use fastsurfer instead of freesurfer", 
+                        required=False, 
+                        default=False,
+                        action="store_true",
+                        )
+    parser.add_argument("--parallelise", 
+                        help="parallelise segmentation", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
     args = parser.parse_args()
     site_code = str(args.site_code)
     use_fastsurfer = args.fastsurfer
@@ -383,16 +376,17 @@ if __name__ == "__main__":
     subject_ids=None
     print(args)
 
-    if args.list_ids:
+    if args.list_ids != '':
+        list_ids=opj(MELD_DATA_PATH, args.list_ids)
         try:
-            sub_list_df=pd.read_csv(args.list_ids)
+            sub_list_df=pd.read_csv(list_ids)
             subject_ids=np.array(sub_list_df.ID.values)
         except:
-            subject_ids=np.array(np.loadtxt(args.list_ids, dtype='str', ndmin=1)) 
+            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
         else:
                 print(f"ERROR: Could not open {subject_ids}")
                 sys.exit(-1)                
-    elif args.id:
+    elif args.id != '':
         subject_id=args.id
         subject_ids=np.array([args.id])
     else:
@@ -413,34 +407,6 @@ if __name__ == "__main__":
             print('Run subjects one after another')
             for subj in subject_ids:
                 run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer)
-
-    # if list_ids!="":
-    #     if id != "":
-    #         print("Ignoring  subject id because list provided...")
-    #     try:
-    #         sub_list_df = pd.read_csv(list_ids)
-    #         subject_ids=np.array(sub_list_df.ID.values)
-    #     except:
-    #         subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1))
-    #     else:
-    #         print("Could not open, subject_list")
-    #         sys.exit(-1)     
-    #     if use_parallel:
-    #         #launch segmentation and feature extraction in parallel
-    #         print('Run subjects in parallel') 
-    #         run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer)
-    #     else:
-    #         #launch segmentation and feature extraction for each subject one after another
-    #         print('Run subjects one after another')
-    #         for subject_id in subject_ids:
-    #             run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
-    # else:
-    #     if id == "":
-    #         print("Please specify both subject and site_code...")
-    #     else:
-    #         #launch segmentation and feature extraction for 1 subject
-    #         subject_id=id
-    #         run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
 
 
 
