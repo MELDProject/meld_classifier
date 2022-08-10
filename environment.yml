@@ -5,7 +5,7 @@ channels:
   - conda-forge
 dependencies:
   - python=3.8
-  - tensorflow=2.6
+  - tensorflow=2.5.3
   - pytest=6.2
   - nibabel=3.2
   - pillow=8.4
@@ -27,4 +27,4 @@ dependencies:
     - torch==1.12
     - torchvision==0.13
     - SimpleITK==2.1.1
-    - git+https://github.com/Deep-MI/LaPy.git
+#    - git+https://github.com/Deep-MI/LaPy.git
