@@ -18,7 +18,7 @@ import multiprocessing
 from functools import partial
 import tempfile
 import glob
-from meld_classifier.paths import BASE_PATH, SCRIPTS_DIR, MELD_DATA_PATH, FS_SUBJECTS_PATH, CLIPPING_PARAMS_FILE
+from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, FS_SUBJECTS_PATH, CLIPPING_PARAMS_FILE
 import pandas as pd
 from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
 from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5

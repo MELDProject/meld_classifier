@@ -16,7 +16,7 @@ import tempfile
 from os.path import join as opj
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.data_preprocessing import Preprocess, Feature
-from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, NORM_CONTROLS_PARAMS_FILE, COMBAT_PARAMS_FILE, MELD_SITE_CODES
+from meld_classifier.paths import BASE_PATH, MELD_PARAMS_PATH, MELD_DATA_PATH, NORM_CONTROLS_PARAMS_FILE, COMBAT_PARAMS_FILE, MELD_SITE_CODES
 
 def create_dataset_file(subjects_ids, save_file):
     df=pd.DataFrame()
@@ -30,7 +30,7 @@ def which_combat_file(site_code):
     file_site=os.path.join(BASE_PATH, f'MELD_{site_code}', f'{site_code}_combat_parameters.hdf5')
     if site_code in MELD_SITE_CODES:
         print('INFO: Use combat parameters from MELD cohort')
-        return os.path.join(BASE_PATH,COMBAT_PARAMS_FILE)
+        return os.path.join(MELD_PARAMS_PATH,COMBAT_PARAMS_FILE)
     elif os.path.isfile(file_site):
         print(f'INFO: Use combat parameters from site {site_code} : {file_site}')
         return file_site
@@ -116,7 +116,7 @@ def run_data_processing_new_subjects(subject_ids, combat_params_file=None, outpu
     #create cohort to normalise
     c_combat = MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_combat.hdf5', dataset=tmp.name)
     # provide mean and std parameter for normalisation by controls
-    param_norms_file = os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE)
+    param_norms_file = os.path.join(MELD_PARAMS_PATH, NORM_CONTROLS_PARAMS_FILE)
     # create object normalisation
     norm = Preprocess(c_combat,
                         write_hdf5_file_root='{site_code}_{group}_featurematrix_combat.hdf5',

@@ -3,7 +3,7 @@ from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from meld_classifier.dataset import load_combined_hemisphere_data, Dataset, normalise_data
 from meld_classifier.meld_plotting import trim,rotate90
 from meld_classifier.paths import (
-    BASE_PATH,
+    MELD_PARAMS_PATH,
     MELD_DATA_PATH,
     DK_ATLAS_FILE,
     EXPERIMENT_PATH, 
@@ -30,7 +30,6 @@ import matplotlib as mpl
 import matplotlib.cm as cm
 from PIL import Image
 import meld_classifier.mesh_tools as mt
-import meld_classifier.paths as paths
 from datetime import date
 from fpdf import FPDF
 
@@ -162,7 +161,7 @@ def get_key(dic, val):
     return "No key for value {}".format(val)
 
 def define_atlas():
-    atlas = nb.freesurfer.io.read_annot(os.path.join(BASE_PATH, DK_ATLAS_FILE))
+    atlas = nb.freesurfer.io.read_annot(os.path.join(MELD_PARAMS_PATH, DK_ATLAS_FILE))
     vertex_i = np.array(atlas[0]) - 1000  # subtract 1000 to line up vertex
     rois_prop = [
         np.count_nonzero(vertex_i == x) for x in set(vertex_i)
@@ -258,7 +257,7 @@ def generate_prediction_report(
     ]
 
     c = MeldCohort(hdf5_file_root=hdf5_file_root, dataset=dataset)
-    surf = mt.load_mesh_geometry(os.path.join(paths.BASE_PATH, SURFACE_PARTIAL))
+    surf = mt.load_mesh_geometry(os.path.join(MELD_PARAMS_PATH, SURFACE_PARTIAL))
 
     # load cmap and colors
     cmap, colors = load_cmap()
@@ -332,7 +331,8 @@ def generate_prediction_report(
             features_hemis[hemi], labels_hemis[hemi] = subject.load_feature_lesion_data(
                 features, hemi=hemi, features_to_ignore=[]
             )
-            features_hemis[hemi] = normalise_data(features_hemis[hemi], features, FINAL_SCALING_PARAMS)
+            scaling_parameter_file=FINAL_SCALING_PARAMS
+            features_hemis[hemi] = normalise_data(features_hemis[hemi], features, scaling_parameter_file)
             # get prediction
             predictions[hemi] = np.zeros(len(c.cortex_mask))
             predictions[hemi][c.cortex_mask] = result_hemis[hemi]

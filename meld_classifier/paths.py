@@ -35,6 +35,12 @@ try:
 except (NoOptionError, NoSectionError) as e:
     print(f"No fs_subjects_path defined in {config_fname}!")
     FS_SUBJECTS_PATH = ""
+try:
+    MELD_PARAMS_PATH = config.get('develop', 'meld_params_path')
+    print(f'Setting BASE_PATH to {MELD_PARAMS_PATH}')
+except (NoOptionError, NoSectionError) as e:
+    print(f"No meld_params_path defined in {config_fname}!")
+    MELD_PARAMS_PATH = ""
 
 # paths to important data files - relative to BASE_PATH
 COMBAT_PARAMS_FILE = 'Combat_parameters.hdf5'

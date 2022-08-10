@@ -10,14 +10,14 @@ import json
 import io
 import logging
 import tensorflow as tf
-from meld_classifier.paths import BASE_PATH
+from meld_classifier.paths import MELD_PARAMS_PATH
 
 
-def normalise_data(data, features, file_name):
+def normalise_data(data, features, file_name, dir=MELD_PARAMS_PATH):
     """normalise all input features by mean and std"""
     import matplotlib.pyplot as plt
 
-    file = os.path.join(BASE_PATH, file_name)
+    file = os.path.join(dir, file_name)
     with open(file, "r") as f:
         params_norm = json.loads(f.read())
     for i, feature in enumerate(features):

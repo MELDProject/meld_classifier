@@ -1,7 +1,7 @@
 ### script to calculate reference combat parameters from MELD cohort to use in distributed harmonisation for new site
 
 
-from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH
+from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, MELD_PARAMS_PATH
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 import os
 import numpy as np
@@ -18,7 +18,7 @@ import neuroCombat as nc
 from meld_classifier.data_preprocessing import Preprocess, Feature
 
 new_site_code = 'H99'
-site_combat_path = os.path.join(BASE_PATH,'distributed_combat')
+site_combat_path = os.path.join(MELD_PARAMS_PATH,'distributed_combat')
 if not os.path.isdir(site_combat_path):
     os.makedirs(site_combat_path)
 

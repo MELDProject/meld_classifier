@@ -2,6 +2,7 @@ from meld_classifier.paths import (
     DEMOGRAPHIC_FEATURES_FILE,
     BASE_PATH,
     DK_ATLAS_FILE,
+    MELD_PARAMS_PATH,
 )
 import pandas as pd
 import numpy as np
@@ -21,11 +22,12 @@ import meld_classifier.distributedCombat as dc
 
 
 class Preprocess:
-    def __init__(self, cohort, site_codes=None, write_hdf5_file_root=None, data_dir=BASE_PATH):
+    def __init__(self, cohort, site_codes=None, write_hdf5_file_root=None, data_dir=BASE_PATH, meld_dir=MELD_PARAMS_PATH):
         self.cohort = cohort
         self._covars = None
         self.write_hdf5_file_root = write_hdf5_file_root
         self.data_dir = data_dir
+        self.meld_dir = meld_dir
         self.site_codes = site_codes
         # filter subject ids based on site codes
         if self.site_codes is None:
@@ -95,6 +97,8 @@ class Preprocess:
                     print("skipping ", ids)
 
     def load_covars(self, subject_ids=None, demographic_file=DEMOGRAPHIC_FEATURES_FILE):
+        if not os.path.isfile(demographic_file):
+            demographic_file = os.path.join(self.data_dir,demographic_file)
         if subject_ids is None:
             subject_ids = self.subject_ids
         covars = pd.DataFrame()
@@ -194,7 +198,7 @@ class Preprocess:
         """
         # read morphological outliers from cohort.
         if outliers_file is not None:
-            outliers = list(pd.read_csv(os.path.join(BASE_PATH, outliers_file), header=0)["ID"])
+            outliers = list(pd.read_csv(os.path.join(self.data_dir, outliers_file), header=0)["ID"])
         else:
             outliers = []
         # load in features using cohort + subject class
@@ -265,7 +269,7 @@ class Preprocess:
         site_combat_path = os.path.join(self.data_dir,'distributed_combat')
         if not os.path.isdir(site_combat_path):
             os.makedirs(site_combat_path)
-        
+        meld_combat_path = os.path.join(self.meld_dir,'distributed_combat')
         listids = self.subject_ids    
         site_codes = np.zeros(len(listids))
         precombat_features=[]
@@ -307,11 +311,11 @@ class Preprocess:
                               ref_batch = 'H0')
         print('step2')
         dc_out = dc.distributedCombat_central(
-            [os.path.join(site_combat_path,f'MELD_{feature}.pickle'),
+            [os.path.join(meld_combat_path,f'MELD_{feature}.pickle'),
              os.path.join(site_combat_path,f"{site_code}_{feature}_summary.pickle")], ref_batch = 'H0'
         )
         # third, use variance estimates from full MELD cohort
-        dc_out['var_pooled'] = pd.read_pickle(os.path.join(site_combat_path,f'MELD_{feature}_var.pickle')).ravel()
+        dc_out['var_pooled'] = pd.read_pickle(os.path.join(meld_combat_path,f'MELD_{feature}_var.pickle')).ravel()
         for c in ['ages','sex','group']:
             new_site_covars[c]=new_site_covars[c].astype(np.float64)      
         print('step3')
@@ -466,7 +470,7 @@ class Preprocess:
                 # clip data to remove outliers vertices
                 if clipping_params!=None:
                     print(f'Clip data to remove very extreme values using {clipping_params}')
-                    with open(os.path.join(self.data_dir,clipping_params), "r") as f:
+                    with open(os.path.join(self.meld_dir,clipping_params), "r") as f:
                         params = json.loads(f.read())
                         vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
                         vals_rh, num_rh = self.clip_data(vals_rh, params[feature]);
@@ -508,7 +512,7 @@ class Preprocess:
             return smooth_vals_hemis
 
     def define_atlas(self, atlas=DK_ATLAS_FILE):
-        atlas = nb.freesurfer.io.read_annot(os.path.join(self.data_dir, atlas))
+        atlas = nb.freesurfer.io.read_annot(os.path.join(self.meld_dir, atlas))
         self.vertex_i = np.array(atlas[0]) - 1000  # subtract 1000 to line up vertex
         self.rois_prop = [
             np.count_nonzero(self.vertex_i == x) for x in set(self.vertex_i)

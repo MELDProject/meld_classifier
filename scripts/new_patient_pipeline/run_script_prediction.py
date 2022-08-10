@@ -16,7 +16,7 @@ import pandas as pd
 import argparse
 import tempfile
 from os.path import join as opj
-from meld_classifier.paths import BASE_PATH, FS_SUBJECTS_PATH, MELD_DATA_PATH, SCRIPTS_DIR, DEFAULT_HDF5_FILE_ROOT, EXPERIMENT_PATH, MELD_DATA_PATH, MODEL_PATH, MODEL_NAME
+from meld_classifier.paths import FS_SUBJECTS_PATH, MELD_DATA_PATH, DEFAULT_HDF5_FILE_ROOT, EXPERIMENT_PATH, MELD_DATA_PATH, MODEL_PATH, MODEL_NAME
 from meld_classifier.evaluation import Evaluator
 from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort
@@ -120,7 +120,6 @@ if __name__ == '__main__':
         sys.exit(-1) 
     
     # initialise variables
-    scripts_dir = os.path.join(SCRIPTS_DIR,'scripts')
     experiment_name = MODEL_NAME
     experiment_path = os.path.join(EXPERIMENT_PATH, MODEL_PATH)
     fold = 'all'
