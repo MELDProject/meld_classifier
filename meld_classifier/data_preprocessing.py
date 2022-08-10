@@ -1,24 +1,13 @@
 from meld_classifier.paths import (
     DEMOGRAPHIC_FEATURES_FILE,
-    CORTEX_LABEL_FILE,
-    SURFACE_FILE,
-    DEFAULT_HDF5_FILE_ROOT,
-    BOUNDARY_ZONE_FILE,
-    NVERT,
     BASE_PATH,
     DK_ATLAS_FILE,
-    SMOOTH_CALIB_FILE,
-    COMBAT_PARAMS_FILE,
-    FINAL_SCALING_PARAMS, 
-    NORM_CONTROLS_PARAMS_FILE
 )
 import pandas as pd
 import numpy as np
 import nibabel as nb
 import os
 import h5py
-import glob
-import logging
 import random
 import json
 import sys
@@ -105,11 +94,9 @@ class Preprocess:
                 else:
                     print("skipping ", ids)
 
-    def load_covars(self, subject_ids=None, demographic_file=None):
+    def load_covars(self, subject_ids=None, demographic_file=DEMOGRAPHIC_FEATURES_FILE):
         if subject_ids is None:
             subject_ids = self.subject_ids
-        if demographic_file is None:
-            demographic_file = DEMOGRAPHIC_FEATURES_FILE
         covars = pd.DataFrame()
         ages = []
         sex = []
@@ -275,7 +262,7 @@ class Preprocess:
 
         """
         site_code=self.site_codes[0]
-        site_combat_path = os.path.join(BASE_PATH,'distributed_combat')
+        site_combat_path = os.path.join(self.data_dir,'distributed_combat')
         if not os.path.isdir(site_combat_path):
             os.makedirs(site_combat_path)
         
@@ -362,7 +349,7 @@ class Preprocess:
         #shrink estimates
         shrink_estimates = self.shrink_combat_estimates(estimates)
         #save estimates and delete pickle file
-        combat_params_file=os.path.join(BASE_PATH, self.write_hdf5_file_root.format(site_code=site_code))
+        combat_params_file=os.path.join(self.data_dir, self.write_hdf5_file_root.format(site_code=site_code))
         self.save_norm_combat_parameters(feature, shrink_estimates, combat_params_file)
         os.remove(pickle_file)
         return estimates, shrink_estimates
@@ -479,7 +466,7 @@ class Preprocess:
                 # clip data to remove outliers vertices
                 if clipping_params!=None:
                     print(f'Clip data to remove very extreme values using {clipping_params}')
-                    with open(os.path.join(BASE_PATH,clipping_params), "r") as f:
+                    with open(os.path.join(self.data_dir,clipping_params), "r") as f:
                         params = json.loads(f.read())
                         vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
                         vals_rh, num_rh = self.clip_data(vals_rh, params[feature]);
@@ -520,8 +507,8 @@ class Preprocess:
             self.save_cohort_features(feature_smooth, smooth_vals_hemis, np.array(subject_include))
             return smooth_vals_hemis
 
-    def define_atlas(self):
-        atlas = nb.freesurfer.io.read_annot(os.path.join(BASE_PATH, DK_ATLAS_FILE))
+    def define_atlas(self, atlas=DK_ATLAS_FILE):
+        atlas = nb.freesurfer.io.read_annot(os.path.join(self.data_dir, atlas))
         self.vertex_i = np.array(atlas[0]) - 1000  # subtract 1000 to line up vertex
         self.rois_prop = [
             np.count_nonzero(self.vertex_i == x) for x in set(self.vertex_i)
@@ -581,7 +568,7 @@ class Preprocess:
             matrix = matrix.append(pd.DataFrame([row]), ignore_index=True)
         # save matrix
         if save_matrix == True:
-            file = os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi))
+            file = os.path.join(self.data_dir, "matrix_QC_{}_wholecohort.csv".format(hemi))
             matrix.to_csv(file)
             print("Matrix with average features/ROIs for all subject can be found at {}".format(file))
 
@@ -590,7 +577,7 @@ class Preprocess:
     def get_outlier_feature(self, feature, hemi):
         """return array of 1 (feature is outlier) and 0 (feature is not outlier) for list of subjects"""
         df = self.create_features_rois_matrix(feature, hemi, save_matrix=True)
-#         df = pd.read_csv(os.path.join(BASE_PATH, "matrix_QC_{}_wholecohort.csv".format(hemi)), header=0)
+#         df = pd.read_csv(os.path.join(self.data_dir, "matrix_QC_{}_wholecohort.csv".format(hemi)), header=0)
         # define if feature is outlier or not
         ids = df.groupby(["site", "scanner"])
         outliers = []
@@ -641,7 +628,7 @@ class Preprocess:
         outliers = outliers.append(df[(df["FLAIR"] == False) & (df["tot_out_feat"] >= 2)]["ID"])
         # save outliers
         if output_file is not None:
-            file_path = os.path.join(BASE_PATH, output_file)
+            file_path = os.path.join(self.data_dir, output_file)
             print("list of outliers saved at {}".format(file_path))
             outliers.to_csv(file_path, index=False)
 
@@ -740,9 +727,10 @@ class Preprocess:
             if cohort_for_norm is not None:
                 print("Use other cohort for normalisation")
                 mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, 
-                                                               params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
+                                                               params_norm=params_norm)
             else:
                 if params_norm is not None:
+                    print(f'Use normalisation parameter from {params_norm}')
                     params = self.read_norm_combat_parameters(feature, params_norm)
                     mean_c = params['mean']
                     std_c = params['std']
@@ -802,9 +790,10 @@ class Preprocess:
             if cohort_for_norm is not None:
                 print("Use other cohort for normalisation")
                 mean_c, std_c = self.compute_mean_std_controls(feature, cohort=cohort_for_norm, asym=True, 
-                                                               params_norm=os.path.join(BASE_PATH, NORM_CONTROLS_PARAMS_FILE))
+                                                               params_norm=params_norm)
             else:
                 if params_norm is not None:
+                    print(f'Use normalisation parameter from {params_norm}')
                     params = self.read_norm_combat_parameters(feature, params_norm)
                     mean_c = params['mean.asym']
                     std_c = params['std.asym']
