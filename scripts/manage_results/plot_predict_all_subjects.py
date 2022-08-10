@@ -5,7 +5,7 @@ import meld_classifier.matplotlib_surface_plotting as msp
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.meld_plotting import trim,rotate90
 import os
-import meld_classifier.paths as paths
+from meld_classifier.paths import EXPERIMENT_PATH
 import nibabel as nb
 import argparse
 import matplotlib.pyplot as plt
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     vertices = c.surf_partial["coords"]
     faces = c.surf_partial["faces"]
 
-    experiment_path = os.path.join(paths.EXPERIMENT_PATH, experiment_folder, f"fold_{fold}")
+    experiment_path = os.path.join(EXPERIMENT_PATH, experiment_folder, f"fold_{fold}")
     result_file = os.path.join(experiment_path, "results", "test_results.csv")
     prediction_file = os.path.join(experiment_path, "results", f"predictions_{experiment_name}.hdf5")
 

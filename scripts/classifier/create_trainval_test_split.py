@@ -1,4 +1,4 @@
-import meld_classifier.paths as paths
+from meld_classifier.paths import BASE_PATH
 import os
 from meld_classifier.meld_cohort import MeldCohort
 import argparse
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         "hdf5_file_root": "{}_{}_featurematrix_combat_6.hdf5",
     }
     # check if outname already exists
-    if os.path.exists(os.path.join(paths.BASE_PATH, args.outname)):
+    if os.path.exists(os.path.join(BASE_PATH, args.outname)):
         if args.force:
             print("WARNING: overwriting existing output file {}".format(args.outname))
         else:
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # remove eventual outliers
     if args.outliers != False:
         # get outliers
-        csv = pd.read_csv(os.path.join(paths.BASE_PATH, args.outliers), header=0, encoding="unicode_escape")
+        csv = pd.read_csv(os.path.join(BASE_PATH, args.outliers), header=0, encoding="unicode_escape")
         list_outliers = csv["ID"].values
         # remove outliers from different list
         listids = np.setdiff1d(listids, list_outliers)
@@ -106,4 +106,4 @@ if __name__ == "__main__":
     subject_ids = pd.DataFrame(
         {"subject_id": listids, "split": ["test" if subj_id in testids else "trainval" for subj_id in listids]}
     )
-    subject_ids.to_csv(os.path.join(paths.BASE_PATH, args.outname))
+    subject_ids.to_csv(os.path.join(BASE_PATH, args.outname))

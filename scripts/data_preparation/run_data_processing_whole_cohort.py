@@ -1,3 +1,4 @@
+### Not up-to-date
 """ This script run the data preprocessing on a whole cohort using Preprocess class 
 Whole script has 3 steps
 1. smooth data - write to new hdf5 file

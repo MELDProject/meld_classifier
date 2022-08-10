@@ -1,5 +1,4 @@
 from meld_classifier.experiment import Experiment
-import meld_classifier.paths as paths
 import os
 import sys
 import logging

@@ -1,5 +1,5 @@
 from meld_classifier.experiment import Experiment, save_config, load_config, submit_experiments_array
-import meld_classifier.paths as paths
+from meld_classifier.paths import EXPERIMENT_PATH
 import numpy as np
 import os
 import sys
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     )
     parser.set_defaults(make_images=False, optimise_threshold=True)
     parser.add_argument("--config-file", help="path to experiment_config.py file", default="experiment_config.py")
-    parser.add_argument("--base-experiment-path", help="path to the experiments folder", default=paths.EXPERIMENT_PATH)
+    parser.add_argument("--base-experiment-path", help="path to the experiments folder", default=EXPERIMENT_PATH)
     parser.add_argument(
         "--run-on-slurm",
         dest="run_on_slurm",

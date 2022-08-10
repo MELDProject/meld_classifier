@@ -2,7 +2,7 @@ import os
 import numpy as np
 import h5py
 from meld_classifier.meld_cohort import MeldCohort
-import meld_classifier.paths as paths
+from meld_classifier.paths import MELD_DATA_PATH
 import nibabel as nb
 import argparse
 
@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    experiment_path = os.path.join(paths.MELD_DATA_PATH, args.experiment_folder)
+    experiment_path = os.path.join(MELD_DATA_PATH, args.experiment_folder)
     subjects_dir = args.subjects_dir
 
     if args.fold == None: 

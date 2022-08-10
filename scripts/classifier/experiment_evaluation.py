@@ -1,5 +1,5 @@
 from meld_classifier.experiment_comparison import ExperimentComparison
-import meld_classifier.paths as paths
+from meld_classifier.paths import EXPERIMENT_PATH
 import argparse
 import numpy as np
 import os
@@ -39,7 +39,7 @@ if __name__ == "__main__":
             exp_name = os.path.basename(exp_folder)[:-9]  # remove the date from foldername
             files = glob(
                 os.path.join(
-                    paths.EXPERIMENT_PATH,
+                    EXPERIMENT_PATH,
                     exp_folder,
                     "fold_{}".format(args.folds[0]),
                     "data_parameters_{}_*.json".format(exp_name),
