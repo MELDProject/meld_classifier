@@ -72,7 +72,7 @@ def fastsurfer_subject(subject, fs_folder):
     command = format(
         "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu".format(fs_folder, subject_id, subject_t1_path)
     )
-    print(command)
+    # print(command)
 
     # call fastsurfer
     print(f"INFO : Start cortical parcellation for {subject_id} (up to 2h). Please wait")
@@ -338,50 +338,14 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     ### SMOOTH FEATURES ###
-    smooth_features_new_subjects(subject, output_dir=output_dir)
+    smooth_features_new_subjects(subject, output_dir=output_dir )
 
-
-if __name__ == "__main__":
-    # parse commandline arguments
-    parser = argparse.ArgumentParser(description="perform cortical parcellation using recon-all from freesurfer")
-    parser.add_argument("-id","--id",
-                        help="Subject ID.",
-                        default="",
-                        required=False,
-                        )
-    parser.add_argument("-ids","--list_ids",
-                        default="",
-                        help="File containing list of ids. Can be txt or csv with 'ID' column",
-                        required=False,
-                        )
-    parser.add_argument("-site",
-                        "--site_code",
-                        help="Site code",
-                        default="",
-                        required=True,
-                        )
-    parser.add_argument("--fastsurfer", 
-                        help="use fastsurfer instead of freesurfer", 
-                        required=False, 
-                        default=False,
-                        action="store_true",
-                        )
-    parser.add_argument("--parallelise", 
-                        help="parallelise segmentation", 
-                        required=False,
-                        default=False,
-                        action="store_true",
-                        )
-    args = parser.parse_args()
-    site_code = str(args.site_code)
-    use_fastsurfer = args.fastsurfer
-    use_parallel = args.parallelise
+def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=False, use_fastsurfer=False ):
+    site_code = str(site_code)
     subject_id=None
     subject_ids=None
-    print(args)
-
-    if args.list_ids != '':
-        list_ids=opj(MELD_DATA_PATH, args.list_ids)
+    if list_ids != None:
+        list_ids=opj(MELD_DATA_PATH, list_ids)
         try:
             sub_list_df=pd.read_csv(list_ids)
             subject_ids=np.array(sub_list_df.ID.values)
@@ -390,9 +354,9 @@ if __name__ == "__main__":
         else:
                 print(f"ERROR: Could not open {subject_ids}")
                 sys.exit(-1)                
-    elif args.id != '':
-        subject_id=args.id
-        subject_ids=np.array([args.id])
+    elif sub_id != None:
+        subject_id=sub_id
+        subject_ids=np.array([sub_id])
     else:
         print('ERROR: No ids were provided')
         print("ERROR: Please specify both subject(s) and site_code ...")
@@ -412,9 +376,47 @@ if __name__ == "__main__":
             for subj in subject_ids:
                 run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer)
 
+if __name__ == "__main__":
+    # parse commandline arguments
+    parser = argparse.ArgumentParser(description="perform cortical parcellation using recon-all from freesurfer")
+    parser.add_argument("-id","--id",
+                        help="Subject ID.",
+                        default=None,
+                        required=False,
+                        )
+    parser.add_argument("-ids","--list_ids",
+                        default=None,
+                        help="File containing list of ids. Can be txt or csv with 'ID' column",
+                        required=False,
+                        )
+    parser.add_argument("-site",
+                        "--site_code",
+                        help="Site code",
+                        required=True,
+                        )
+    parser.add_argument("--fastsurfer", 
+                        help="use fastsurfer instead of freesurfer", 
+                        required=False, 
+                        default=False,
+                        action="store_true",
+                        )
+    parser.add_argument("--parallelise", 
+                        help="parallelise segmentation", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
+    args = parser.parse_args()
+    print(args)
 
-
-
+    run_script_segmentation(
+                        site_code = args.site_code,
+                        list_ids=args.list_ids,
+                        sub_id=args.id, 
+                        use_parallel=args.parallelise, 
+                        use_fastsurfer=args.fastsurfer,
+                        )
+    
 
 
 

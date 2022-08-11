@@ -54,7 +54,7 @@ def check_demographic_file(demographic_file, subject_ids):
         os.sys.exit(-1)
 
 
-def run_data_processing_new_subjects(subject_ids, combat_params_file=None, output_dir=BASE_PATH, withoutflair=False):
+def run_data_processing_new_subjects(subject_ids, site_code, combat_params_file=None, output_dir=BASE_PATH, withoutflair=False):
  
     # Set features and smoothed values
     if withoutflair:
@@ -130,7 +130,7 @@ def run_data_processing_new_subjects(subject_ids, combat_params_file=None, outpu
     tmp.close()
 
 
-def new_site_harmonisation(subject_ids, demographic_file, output_dir=BASE_PATH, withoutflair=False):
+def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=BASE_PATH, withoutflair=False):
 
     # Set features and smoothed values
     if withoutflair:
@@ -184,6 +184,50 @@ def new_site_harmonisation(subject_ids, demographic_file, output_dir=BASE_PATH, 
 
     tmp.close()
 
+def run_script_preprocessing(site_code, list_ids=None, sub_id=None, output_dir=BASE_PATH, demographic_file=None, harmonisation_only=False, withoutflair=False):
+    print(site_code)
+    site_code = str(site_code)
+    subject_id=None
+    subject_ids=None
+    if list_ids != None:
+        list_ids=opj(MELD_DATA_PATH, list_ids)
+        try:
+            sub_list_df=pd.read_csv(list_ids)
+            subject_ids=np.array(sub_list_df.ID.values)
+        except:
+            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
+        else:
+                print(f"ERROR: Could not open {subject_ids}")
+                sys.exit(-1)                
+    elif sub_id != None:
+        subject_id=sub_id
+        subject_ids=np.array([sub_id])
+    else:
+        print('ERROR: No ids were provided')
+        print("ERROR: Please specify both subject(s) and site_code ...")
+        sys.exit(-1) 
+       
+    #check that combat parameters exist for this site or compute it
+    combat_params_file = which_combat_file(site_code)
+    if combat_params_file=='None':
+        print(f'INFO: Compute combat parameters for {site_code} with subjects {subject_ids}')
+        if demographic_file == None:
+            print('ERROR: Please provide a demographic file using the flag "-demos" to harmonise your data')
+            os.sys.exit(-1)
+        else:
+            #check that demographic file exist and is adequate
+            demographic_file = os.path.join(MELD_DATA_PATH, demographic_file) 
+            if os.path.isfile(demographic_file):
+                print(f'INFO: Use demographic file {demographic_file}')
+                demographic_file = check_demographic_file(demographic_file, subject_ids) 
+            else:
+                print(f'ERROR: Could not find demographic file provided {demographic_file}')
+                os.sys.exit(-1)
+        #compute the combat parameters for a new site
+        new_site_harmonisation(subject_ids, site_code=site_code, demographic_file=demographic_file, output_dir=output_dir, withoutflair=withoutflair)
+
+    if not harmonisation_only:
+        run_data_processing_new_subjects(subject_ids, site_code=site_code, output_dir=output_dir, withoutflair=withoutflair)
 
 if __name__ == '__main__':
 
@@ -192,26 +236,19 @@ if __name__ == '__main__':
     #TODO think about how to best pass a list
     parser.add_argument("-id","--id",
                         help="Subject ID.",
-                        default="",
+                        default=None,
                         required=False,
                         )
     parser.add_argument("-ids","--list_ids",
-                        default="",
+                        default=None,
                         help="File containing list of ids. Can be txt or csv with 'ID' column",
                         required=False,
                         )
     parser.add_argument("-site",
                         "--site_code",
                         help="Site code",
-                        default="",
                         required=True,
                         )
-    parser.add_argument('-d', '--output_dir', 
-                        type=str, 
-                        help='path to store hdf5 files',
-                        required=False,
-                        default=BASE_PATH,
-                        ) 
     parser.add_argument('-demos', '--demographic_file', 
                         type=str, 
                         help='provide the demographic files for the harmonisation',
@@ -229,49 +266,14 @@ if __name__ == '__main__':
                         default=False,
                         help="do not use flair information",
                         )
-
-    
     args = parser.parse_args()
-    site_code=str(args.site_code)
-    output_dir = args.output_dir
-    harmonisation_only = args.harmo_only
-    withoutflair=args.withoutflair
+    print(args)
 
-    if args.list_ids != '':
-        list_ids=opj(MELD_DATA_PATH, args.list_ids)
-        try:
-            sub_list_df=pd.read_csv(list_ids)
-            subject_ids=np.array(sub_list_df.ID.values)
-        except:
-            subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
-        else:
-                print(f"ERROR: Could not open {subject_ids}")
-                sys.exit(-1)                
-    elif args.id != '':
-        subject_id=args.id
-        subject_ids=np.array([args.id])
-    else:
-        print('ERROR: No ids were provided')
-        print("ERROR: Please specify both subject(s) and site_code ...")
-        sys.exit(-1) 
-       
-    #check that combat parameters exist for this site or compute it
-    combat_params_file = which_combat_file(site_code)
-    if combat_params_file=='None':
-        print(f'INFO: Compute combat parameters for {site_code} with subjects {subject_ids}')
-        if args.demographic_file == None:
-            print('ERROR: Please provide a demographic file using the flag "-demos" to harmonise your data')
-        else:
-            #check that demographic file exist and is adequate
-            demographic_file = os.path.join(MELD_DATA_PATH, args.demographic_file) 
-            if os.path.isfile(demographic_file):
-                print(f'INFO: Use demographic file {demographic_file}')
-                demographic_file = check_demographic_file(demographic_file, subject_ids) 
-            else:
-                print(f'ERROR: Could not find demographic file provided {demographic_file}')
-                os.sys.exit(-1)
-        #compute the combat parameters for a new site
-        new_site_harmonisation(subject_ids, demographic_file=demographic_file, output_dir=output_dir, withoutflair=withoutflair)
-
-    if not harmonisation_only:
-        run_data_processing_new_subjects(subject_ids, output_dir=output_dir, withoutflair=withoutflair)
+    run_script_preprocessing(
+                    site_code=args.site_code,
+                    list_ids=args.list_ids,
+                    sub_id=args.id,
+                    demographic_file=args.demographic_file,
+                    harmonisation_only = args.harmo_only,
+                    withoutflair=args.withoutflair,
+                    )

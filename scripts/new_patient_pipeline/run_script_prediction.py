@@ -59,50 +59,14 @@ experiment_path=EXPERIMENT_PATH, experiment_name=MODEL_NAME, hdf5_file_root= DEF
         eva.load_predict_single_subject(
                 subject, fold="", plot=plot_images, saliency=saliency, suffix=""
         )
-         
-if __name__ == '__main__':
 
-    #parse commandline arguments 
-    parser = argparse.ArgumentParser(description='')
-    #TODO think about how to best pass a list
-    parser.add_argument("-id","--id",
-                        help="Subject ID.",
-                        default="",
-                        required=False,
-                        )
-    parser.add_argument("-ids","--list_ids",
-                        default="",
-                        help="File containing list of ids. Can be txt or csv with 'ID' column",
-                        required=False,
-                        )
-    parser.add_argument("-site",
-                        "--site_code",
-                        help="Site code",
-                        default="",
-                        required=True,
-                        )
-    parser.add_argument('--no_prediction_nifti',
-                        action="store_true",
-                        help='Only predict. Does not produce prediction on native T1, nor report',
-                        )
-    parser.add_argument('--no_report',
-                        action="store_true",
-                        help='Predict and map back into native T1. Does not produce report',)
-    parser.add_argument('--split',
-                        action="store_true",
-                        help='Split subjects list in chunk to avoid data overload',
-                        )
-
-    args = parser.parse_args()
-    no_prediction_nifti = args.no_prediction_nifti
-    no_report = args.no_report 
-    split = args.split
+def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_nifti=False, no_report=False, split=False):
+    
+    site_code = str(site_code)
     subject_id=None
     subject_ids=None
-    site_code=str(args.site_code)
-
-    if args.list_ids != '':
-        list_ids=opj(MELD_DATA_PATH, args.list_ids)
+    if list_ids != None:
+        list_ids=opj(MELD_DATA_PATH, list_ids)
         try:
             sub_list_df=pd.read_csv(list_ids)
             subject_ids=np.array(sub_list_df.ID.values)
@@ -111,9 +75,9 @@ if __name__ == '__main__':
         else:
                 print(f"ERROR: Could not open {subject_ids}")
                 sys.exit(-1)                
-    elif args.id != '':
-        subject_id=args.id
-        subject_ids=np.array([args.id])
+    elif sub_id != None:
+        subject_id=sub_id
+        subject_ids=np.array([sub_id])
     else:
         print('ERROR: No ids were provided')
         print("ERROR: Please specify both subject(s) and site_code ...")
@@ -126,7 +90,8 @@ if __name__ == '__main__':
     subjects_dir = FS_SUBJECTS_PATH
     classifier_output_dir = opj(MELD_DATA_PATH,'output','classifier_outputs')
     prediction_file = opj(classifier_output_dir, "results", f"predictions_{experiment_name}.hdf5")
-    predictions_output_dir = opj(MELD_DATA_PATH,'input')
+    data_dir = opj(MELD_DATA_PATH,'input')
+    predictions_output_dir = opj(MELD_DATA_PATH,'output','predictions_reports')
     
     #split the subject in group of 5 if big number of subjects
     chunked_subject_list = list()
@@ -169,11 +134,54 @@ if __name__ == '__main__':
             print('STEP3: Create pdf report')
             generate_prediction_report(
                 subject_ids = subject_ids_chunk,
-                data_dir = predictions_output_dir,
+                data_dir = data_dir,
                 hdf_predictions=prediction_file,
                 experiment_path=experiment_path, 
                 experiment_name=experiment_name, 
                 output_dir = predictions_output_dir,
                 hdf5_file_root = DEFAULT_HDF5_FILE_ROOT
             )
+
+if __name__ == '__main__':
+
+    #parse commandline arguments 
+    parser = argparse.ArgumentParser(description='')
+    #TODO think about how to best pass a list
+    parser.add_argument("-id","--id",
+                        help="Subject ID.",
+                        default=None,
+                        required=False,
+                        )
+    parser.add_argument("-ids","--list_ids",
+                        default=None,
+                        help="File containing list of ids. Can be txt or csv with 'ID' column",
+                        required=False,
+                        )
+    parser.add_argument("-site",
+                        "--site_code",
+                        help="Site code",
+                        required=True,
+                        )
+    parser.add_argument('--no_prediction_nifti',
+                        action="store_true",
+                        help='Only predict. Does not produce prediction on native T1, nor report',
+                        )
+    parser.add_argument('--no_report',
+                        action="store_true",
+                        help='Predict and map back into native T1. Does not produce report',)
+    parser.add_argument('--split',
+                        action="store_true",
+                        help='Split subjects list in chunk to avoid data overload',
+                        )
+    args = parser.parse_args()
+    print(args)    
+
+    run_script_prediction(
+                        site_code = args.site_code,
+                        list_ids=args.list_ids,
+                        sub_id=args.id,
+                        no_prediction_nifti = args.no_prediction_nifti,
+                        no_report = args.no_report,
+                        split = args.split
+                        )
                 
