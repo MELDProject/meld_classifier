@@ -12,7 +12,7 @@ import numpy as np
 from sqlite3 import paramstyle
 import sys
 import argparse
-import subprocess as sub
+from subprocess import Popen, DEVNULL, STDOUT, check_call
 import threading
 import multiprocessing
 from functools import partial
@@ -72,12 +72,13 @@ def fastsurfer_subject(subject, fs_folder):
     command = format(
         "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu".format(fs_folder, subject_id, subject_t1_path)
     )
+    print(command)
 
     # call fastsurfer
     print(f"INFO : Start cortical parcellation for {subject_id} (up to 2h). Please wait")
     print(f"INFO : Results will be stored in {fs_folder}")
     starting.acquire()  # no other process can get it until it is released
-    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
+    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     print(f"INFO : Finished cortical parcellation for {subject_id} !")
@@ -119,7 +120,7 @@ def fastsurfer_flair(subject, fs_folder):
     command = format(
         "recon-all -sd {} -subject {} -FLAIR {} -FLAIRpial -autorecon3".format(fs_folder, subject_id, subject_flair_path)
     )
-    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
+    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     proc.wait()
     print("finished FLAIRpial for subject", subject_id)
 
@@ -192,7 +193,7 @@ def freesurfer_subject(subject, fs_folder):
     print(f"INFO : Start cortical parcellation for {subject_id} (up to 36h). Please wait")
     print(f"INFO : Results will be stored in {fs_folder}")
     starting.acquire()  # no other process can get it until it is released
-    proc = sub.Popen(command, shell=True, stdout=sub.DEVNULL)  
+    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     print(f"INFO : Finished cortical parcellation for {subject_id} !")
@@ -262,12 +263,12 @@ def smooth_features_new_subjects(subject_ids, output_dir):
 
     tmp.close()
     
-def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20, site_code="", use_fastsurfer=False):
+def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=20, site_code="", use_fastsurfer=False):
     # parallel version of the pipeline, finish each stage for all subjects first
 
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
-    sub.check_call(ini_freesurfer, shell=True, stdout=sub.DEVNULL)
+    check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
 
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
@@ -276,33 +277,36 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_list, num_procs=20,
     if use_fastsurfer:
         ## first processing stage with fastsurfer: segmentation
         pool = multiprocessing.Pool(processes=num_procs, initializer=init, initargs=[multiprocessing.Lock()])
-        for _ in pool.imap_unordered(partial(fastsurfer_subject, fs_folder=fs_folder), subject_list):
+        for _ in pool.imap_unordered(partial(fastsurfer_subject, fs_folder=fs_folder), subject_ids):
             pass
 
         ## flair pial correction
         pool = multiprocessing.Pool(processes=num_procs)
-        for _ in pool.imap_unordered(partial(fastsurfer_flair, fs_folder=fs_folder), subject_list):
+        for _ in pool.imap_unordered(partial(fastsurfer_flair, fs_folder=fs_folder), subject_ids):
             pass
     else:
         ## processing with freesurfer: segmentation
         pool = multiprocessing.Pool(processes=num_procs, initializer=init, initargs=[multiprocessing.Lock()])
-        for _ in pool.imap_unordered(partial(freesurfer_subject, fs_folder=fs_folder), subject_list):
+        for _ in pool.imap_unordered(partial(freesurfer_subject, fs_folder=fs_folder), subject_ids):
             pass
 
 
     ### EXTRACT SURFACE-BASED FEATURES ###
+    print("STEP 2: Extract surface-based features")
     output_dir = opj(BASE_PATH, f"MELD_{site_code}")
 
     # parallelize create xhemi because it takes a while!
-    run_parallel_xhemi(subject_list, fs_folder, num_procs=num_procs)
+    print(f"INFO: run create xhemi in parallel for {subject_ids}")
+    run_parallel_xhemi(subject_ids, fs_folder, num_procs=num_procs)
 
     # Launch script to extract features
-    for subject in subject_list:
+    for subject in subject_ids:
+        print(f"INFO: Extract features for {subject}")
         extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     #### SMOOTH FEATURES #####
     #TODO: parallelise here
-    for subject in subject_list:
+    for subject in subject_ids:
         smooth_features_new_subjects(subject, output_dir=output_dir)
 
 def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False):
@@ -310,7 +314,7 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
-    sub.check_call(ini_freesurfer, shell=True, stdout=sub.DEVNULL)
+    check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
 
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH

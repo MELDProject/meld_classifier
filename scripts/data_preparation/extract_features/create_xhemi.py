@@ -17,7 +17,7 @@ def create_xhemi(subject_id, subjects_dir,template = 'fsaverage_sym'):
 
     #copy template
     if not os.path.isdir(opj(subjects_dir,template)):
-        shutil.copy(opj(os.environ['FREESURFER_HOME'],'subjects',template), opj(subjects_dir, os.path.basename(template)))
+        shutil.copytree(opj(os.environ['FREESURFER_HOME'],'subjects',template), opj(subjects_dir, os.path.basename(template)))
 
     if not os.path.isfile(opj(subjects_dir,subject_id,'surf','lh.fsaverage_sym.sphere.reg')):
         command = f'SUBJECTS_DIR={subjects_dir} surfreg --s {subject_id} --t {template} --lh'    
@@ -30,8 +30,11 @@ def create_xhemi(subject_id, subjects_dir,template = 'fsaverage_sym'):
         proc.wait()
 
 
-def run_parallel_xhemi(subject_ids, subjects_dir, num_procs = 10,template = 'fsaverage_sym' ):
+def run_parallel_xhemi(subject_ids, subjects_dir, num_procs = 10,template = 'fsaverage_sym' ):    
     pass
+    #copy template
+    if not os.path.isdir(opj(subjects_dir,template)):
+        shutil.copytree(opj(os.environ['FREESURFER_HOME'],'subjects',template), opj(subjects_dir, os.path.basename(template)))
     with multiprocessing.Pool(num_procs) as p:
         for _ in p.imap_unordered(partial(create_xhemi, subjects_dir=subjects_dir, template=template), subject_ids):
             pass
