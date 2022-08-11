@@ -13,13 +13,15 @@ import random
 import json
 import sys
 import pickle
+import shutil
 from itertools import chain
 import potpourri3d as pp3d
 import meld_classifier.mesh_tools as mt
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 from neuroCombat import neuroCombat, neuroCombatFromTraining
 import meld_classifier.distributedCombat as dc
-
+import warnings
+warnings.filterwarnings("ignore")
 
 class Preprocess:
     def __init__(self, cohort, site_codes=None, write_hdf5_file_root=None, data_dir=BASE_PATH, meld_dir=MELD_PARAMS_PATH):
@@ -266,7 +268,7 @@ class Preprocess:
 
         """
         site_code=self.site_codes[0]
-        site_combat_path = os.path.join(self.data_dir,'distributed_combat')
+        site_combat_path = os.path.join(self.data_dir,f'MELD_{site_code}','distributed_combat')
         if not os.path.isdir(site_combat_path):
             os.makedirs(site_combat_path)
         meld_combat_path = os.path.join(self.meld_dir,'distributed_combat')
@@ -355,6 +357,8 @@ class Preprocess:
         #save estimates and delete pickle file
         combat_params_file=os.path.join(self.data_dir, self.write_hdf5_file_root.format(site_code=site_code))
         self.save_norm_combat_parameters(feature, shrink_estimates, combat_params_file)
+        os.remove(pickle_file)
+        pickle_file = os.path.join(site_combat_path,f"{site_code}_{feature}_summary.pickle")
         os.remove(pickle_file)
         return estimates, shrink_estimates
        
