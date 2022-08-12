@@ -1,19 +1,23 @@
 import os
 import argparse
 import sys
-from datetime import date
+import time
 from scripts.new_patient_pipeline.run_script_segmentation import run_script_segmentation
 from scripts.new_patient_pipeline.run_script_preprocessing import run_script_preprocessing
 from scripts.new_patient_pipeline.run_script_prediction import run_script_prediction
 
 class Logger(object):
-        def __init__(self, file_path):
-            self.terminal = sys.stdout
-            self.log = open(file_path, "w")
+    def __init__(self, filename="Default"):
+        self.terminal = sys.stdout
+        self.filename = filename + time.strftime('%Y-%m-%d-%H-%M-%S') + '.log'
+        self.log = open(self.filename, "a")
 
-        def write(self, message):
-            self.terminal.write(message)
-            self.log.write(message) 
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+    
+    def flush(self):
+        pass
 
 if __name__ == "__main__":
     # parse commandline arguments
@@ -65,7 +69,7 @@ if __name__ == "__main__":
 
      
     #write terminal output in a log
-    file_path=os.path.join(os.path.abspath(os.getcwd()), 'MELD_pipeline.log')
+    file_path=os.path.join(os.path.abspath(os.getcwd()), 'MELD_pipeline_')
     sys.stdout = Logger(file_path)
 
     args = parser.parse_args()

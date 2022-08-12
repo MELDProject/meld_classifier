@@ -28,6 +28,8 @@ def create_dataset_file(subjects_ids, save_file):
 
 def which_combat_file(site_code):
     file_site=os.path.join(BASE_PATH, f'MELD_{site_code}', f'{site_code}_combat_parameters.hdf5')
+    if site_code=='TEST':
+        site_code = 'H4'
     if site_code in MELD_SITE_CODES:
         print('INFO: Use combat parameters from MELD cohort')
         return os.path.join(MELD_PARAMS_PATH,COMBAT_PARAMS_FILE)

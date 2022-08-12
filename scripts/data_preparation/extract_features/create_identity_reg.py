@@ -1,9 +1,11 @@
 #import relevant packages
 import numpy as np
 import argparse
+import os
 
 
 def create_identity(subject_id):
+    os.makedirs(subject_id + '/mri/transforms', exist_ok=True)
     with open(subject_id + '/mri/transforms/Identity.dat', 'w') as f:
         f.writelines(subject_id+'\n')
         f.writelines('1.000000'+'\n')

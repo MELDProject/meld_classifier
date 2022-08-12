@@ -95,7 +95,7 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
     
     #split the subject in group of 5 if big number of subjects
     chunked_subject_list = list()
-    if split: 
+    if (split) and (len(subject_ids))>5 : 
         chunk_size = min(len(subject_ids), 5)
         for i in range(0, len(subject_ids), chunk_size):
             chunked_subject_list.append(subject_ids[i : i + chunk_size])
