@@ -81,12 +81,12 @@ if __name__ == '__main__':
 
     # need to do this import here, because above we are setting up the meld_config.ini
     # which is read when using meld_classifier.paths
-    from meld_classifier.download_data import get_test_data, get_model, get_test_input
+    from meld_classifier.download_data import get_test_data, get_model, get_meld_params
     if not args.skip_download_data:
-        print("Downloading test input")
-        get_test_input(args.force_download)
         print("Downloading test data")
         get_test_data(args.force_download)
+    print("Downloading meld parameters input")
+    get_meld_params(args.force_download)
     print("Downloading model")
     get_model(args.force_download)
     print("Done.")
