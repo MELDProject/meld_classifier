@@ -49,7 +49,7 @@ FINAL_SCALING_PARAMS = 'scaling_params_with0.json'
 CLIPPING_PARAMS_FILE='clip_params_MELD.json'
 
 # qc-ed demographic features
-DEMOGRAPHIC_FEATURES_FILE = "demographics_qc_allgroups_with_H29.csv"
+DEMOGRAPHIC_FEATURES_FILE = "demographics_qc_allgroups.csv"
 # raw demographic features (participants.csv for each site)
 DEMOGRAPHIC_FEATURES_RAW_FILE = os.path.join("MELD_{site_code}", "MELD_{site_code}_participants.csv")
 

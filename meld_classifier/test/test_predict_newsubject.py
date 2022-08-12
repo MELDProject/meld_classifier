@@ -1,9 +1,10 @@
 #### tests for scripts/new_patient_pipeline.py ####
-# this test used the patient MELD_TEST_3T_FCD_000X
+# this test used the patient MELD_TEST_3T_FCD_0011
 # it test  : 
 # - the prediction on new subject using meld_classifier.predict_newsubject
 # - the prediction registration using scripts.manage_results.move_predictions_to_mgh.py
 # - the prediction registration back to native MRI using scripts.manage_results.register_back_to_xhemi.sh
+# - the creation of the MELD pdf reports
 # It checks outputs exists and compare the prediction with the expected one.
 
 import subprocess
@@ -23,8 +24,8 @@ def get_data_parameters():
         "experiment_folder":"output/classifier_outputs", 
         "expected_prediction_hdf5_file" : os.path.join("results", "predictions_ensemble_iteration_expected.hdf5"),
         "prediction_hdf5_file" : os.path.join("results", "predictions_ensemble_iteration.hdf5"),
-        "expected_prediction_nii_file" : "predictions/{}.prediction.nii",
-        "prediction_nii_file" : "predictions/{}.prediction.nii"
+        "expected_prediction_nii_file" : "{}.prediction_expected.nii",
+        "prediction_nii_file" : "{}.prediction.nii"
     }
     return data_parameters
 
@@ -55,7 +56,7 @@ def test_predict_newsubject():
     # call new_pt_pipeline_script3.py script
     print("calling")
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    script_path = os.path.abspath(os.path.join(dir_path, "../../scripts/new_patient_pipeline/new_pt_pipeline_script3.py"))
+    script_path = os.path.abspath(os.path.join(dir_path, "../../scripts/new_patient_pipeline/run_script_prediction.py"))
     print(script_path)
     subprocess.run(
                 [
@@ -69,7 +70,7 @@ def test_predict_newsubject():
             )
 
     # check if the expected folder structure was created_ex
-    path_prediction_subject = os.path.join(MELD_DATA_PATH, 'input', subject, 'predictions')
+    path_prediction_subject = os.path.join(MELD_DATA_PATH, 'output', 'predictions_reports', subject, 'predictions')
     assert os.path.isdir(path_prediction_subject)
 
     # delete txt file 
@@ -86,10 +87,10 @@ def test_predict_newsubject():
         assert diff_sum <= 10
 
     # compare prediction on mri native
-    mri_path = os.path.join(MELD_DATA_PATH,'input',subject)
     for hemi in ['lh','rh']:
-        prediction_nii = nb.load(os.path.join(mri_path,data_parameters['prediction_nii_file'].format(hemi))).get_fdata()
-        expected_prediction_nii = nb.load(os.path.join(mri_path,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
+        prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['prediction_nii_file'].format(hemi))).get_fdata()
+        expected_prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
         diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
         print(f'Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
         assert diff_sum <= 10
+ 
