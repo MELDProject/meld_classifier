@@ -14,7 +14,7 @@ import h5py
 import numpy as np
 import nibabel as nb
 from meld_classifier.paths import MELD_DATA_PATH
-from meld_classifier.download_data import get_test_input
+from meld_classifier.download_data import get_test_data
 
 def get_data_parameters():
     data_parameters = {
@@ -40,7 +40,7 @@ def load_prediction(subject,hdf5):
 @pytest.mark.slow
 def test_predict_newsubject():
     # ensure test input data is present
-    get_test_input()
+    get_test_data()
     
     # initiate parameter
     data_parameters = get_data_parameters()
