@@ -161,6 +161,11 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
     features_smooth = [feat.smooth_feat(feature, features[feature]) for feature in features]
     
     ### INITIALISE ###
+    #check enough subjects for harmonisation
+    if len(np.unique(subject_ids))<30:
+        print("ERROR: There are not enough subjects to proceed to an acurate harmonisation of the data... Rerun with at least 30 subjects.")
+        sys.exit(-1)
+
     #create dataset
     tmp = tempfile.NamedTemporaryFile(mode="w")
     create_dataset_file(subject_ids, tmp.name)
