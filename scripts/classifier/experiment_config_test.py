@@ -104,7 +104,7 @@ data_parameters = {
     "batch_size": 1024,
     # `normalise`: normalise feature values with pre-computed parameters
     # pass the json file containing the parameters. Or pass False
-    "normalise": "normalise_params_6_with0.json",
+    "normalise": "scaling_params_with0.json",
     ##### selection of lesion/normal vertices for training #####
     # `contra`: where to sample normal vertices from.
     # If True, only sample normal vertices from contralateral hemisphere

@@ -103,7 +103,7 @@ data_parameters = {
     # `batch_size`: number of samples per batch
     "batch_size": 1024,
     # `normalise`: normalise feature values between 0 and 1
-    'normalise': 'normalise_params_6.json',
+    'normalise': 'scaling_params_with0.json',
     ##### selection of lesion/normal vertices for training #####
     # `contra`: where to sample normal vertices from.
     # If True, only sample normal vertices from contralateral hemisphere

@@ -12,9 +12,9 @@ scripts/run.py
 ``` 
 This is the main entry point for training and evaluating models. 
 - Network and dataset configuration parameters are passed to the script using a config file. 
-    - `scripts/experiment_config_template.py` is an exemplary config file with all possible parameters. 
-    - The experiment configurations used to create the released models can be found in `scripts/experiment_config_train.py` and `scripts/experiment_config_test.py` (for training on the reverse cohort).
-- For training + evaluation (with thresold optimization), call `python classifier/run.py all --config experiment_config.py`
+    - `scripts/classifier/experiment_config_template.py` is an exemplary config file with all possible parameters. 
+    - The experiment configurations used to create the released models can be found in `scripts/classifier/experiment_config_train.py` and `scripts/classifier/experiment_config_test.py` (for training on the reverse cohort).
+- For training + evaluation (with thresold optimization), call `python scripts/classifier/run.py all --config scripts/classifier/experiment_config.py`
 
 ### Training models
 ```
