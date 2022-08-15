@@ -33,7 +33,8 @@ if __name__ == '__main__':
     subject=str(args.id_subj)
     
     # get subject folder and fs folder 
-    subject_dir = os.path.join(MELD_DATA_PATH,'input',subject)
+    subject_dir = os.path.join(MELD_DATA_PATH,'input', subject)
+    pred_dir = os.path.join(MELD_DATA_PATH,'output', 'predictions_reports', subject)
     subject_fs_folder = os.path.join(FS_SUBJECTS_PATH, subject)
     
     #initialise freesurfer variable environment
@@ -47,8 +48,8 @@ if __name__ == '__main__':
         T1_file = return_file(os.path.join(subject_dir, 'T1', '*T1*.nii*'), 'T1')
         FLAIR_file = return_file(os.path.join(subject_dir, 'FLAIR', '*FLAIR*.nii*'), 'FLAIR')
         #select predictions files
-        pred_lh_file = return_file(os.path.join(subject_dir, 'predictions', 'lh.prediction.nii*'), 'lh_prediction')
-        pred_rh_file = return_file(os.path.join(subject_dir, 'predictions', 'rh.prediction.nii*'), 'rh_prediction')
+        pred_lh_file = return_file(os.path.join(pred_dir, 'predictions', 'lh.prediction.nii*'), 'lh_prediction')
+        pred_rh_file = return_file(os.path.join(pred_dir, 'predictions', 'rh.prediction.nii*'), 'rh_prediction')
         
         #setup cortical segmentation command
         file_text = os.path.join(MELD_DATA_PATH, 'temp1.txt')
