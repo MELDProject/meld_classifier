@@ -2,7 +2,7 @@
 
 With the MELD classifier pipeline 
 
-<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
+<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results. (NEED UPDATE)
 
 Note: No demographic information are required for this process.
 
@@ -75,7 +75,7 @@ You can tune this command using additional variables and flags as detailed bello
 
   or
 
-```-ids <subjects_list>```: if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the meld_data_folder. 
+```-ids <subjects_list>```: if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. 
 
 
 **optional variables**:
@@ -86,17 +86,13 @@ You can tune this command using additional variables and flags as detailed bello
 
 ```--skip_segmentation```: use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to ran the preprocessing and the predictions (e.g: after harmonisation)
 
-```--harmo_only```: use this flag to do all the process up to the harmonisation. Usefull if you want to harmonise on some subjects but do not wish to predict on them. Please refer to [Harmonisation_new_site.md](Harmonisation_new_site.md) for detailed guidelines. 
-
-```-demos <demographic_file>```: if you want to harmonise your data, you will need to pass a demographic file containging demographics information. Please refer to [Harmonisation_new_site.md](Harmonisation_new_site.md) for detailed guidelines. 
-
 
 NOTES: 
 - you need to have set up your paths & organised your data before running this pipeline (see section **First step - Organising your data!**)
 - We recommend using the same FreeSurfer/FastSurfer version that you used to process your patient's data that was used to train the classifier (existing site) / to get the harmonisation parameters (new site).
 - Outputs of the pipeline (prediction back into the native nifti MRI and MELD reports) are stored in the folder ```output/predictions_reports/<sub_id>```. 
 
-USEFULL EXAMPLES: 
+**Examples of use case**: 
 
 To run the whole prediction pipeline on 1 subject using fastsurfer:
 ```bash
@@ -109,11 +105,7 @@ python scripts/new_patient_pipeline/new_pt_pipeline.py -site H4 -ids list_subjec
 ```
 
 
-### OPTIONAL : HARMONISE YOUR DATA 
-This section provide additional instructions to harmonise your data 
-
-
-### Additional information about the different scripts and steps
+### Additional information about the 3 different scripts / steps
 
 #### Script 1 - FreeSurfer reconstruction and smoothing
 
@@ -141,7 +133,7 @@ python scripts/new_patient_pipeline/run_script_segmentation.py -h
 
   Notes: 
   - Features need to have been extracted and smoothed using script 1. 
-  - (optional): this script can also be called to harmonise your data for new site but will need to pass a file containing  demographics information. Refers to [Harmonisation_new_site.md](Harmonisation_new_site.md) for detailed guidelines.
+  - (optional): this script can also be called to harmonise your data for new site but will need to pass a file containing demographics information.
 
 To know more about the script and how to use it on its own:
 ```bash
@@ -157,6 +149,11 @@ python scripts/new_patient_pipeline/run_script_preprocessing.py -h
 
 Notes: 
 - Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
+
+To know more about the script and how to use it on its own:
+```bash
+python scripts/new_patient_pipeline/run_script_prediction.py -h
+```
 
 ## Interpretation of results
 
@@ -186,7 +183,6 @@ E.g.
 
 These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<sub_id>_<hemi>_c1.png for cluster 1 and  mri_<sub_id>_<hemi>_c2.png for cluster 2.
 
-Please note: images are NOT shown in radiological convention (we are working on code to do this)
   
 ### Saliency
   
@@ -252,3 +248,4 @@ Note: the classifier is only able to predict areas within the pial and white sur
 ## How to cite the classifier
   
 Spitzer, H., Ripart, M., Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. (2021). Interpretable surface-based detection of focal cortical dysplasias: a MELD study. medRxiv, 2021.12.13.21267721.
+Spitzer, H., Ripart, M, Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. 2022. “Interpretable Surface-Based Detection of Focal Cortical Dysplasias: A Multi-Centre Epilepsy Lesion Detection Study.” Brain: A Journal of Neurology, August. https://doi.org/10.1093/brain/awac224.
