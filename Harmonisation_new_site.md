@@ -13,7 +13,10 @@ In the following, we describe the steps needed to compute the harmonisation para
 The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA), European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. There is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient's own risk.
 
 ## Information about the pipeline
-Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation).
+Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation) and activate the meld_classifier environment : 
+```bash
+conda activate meld_classifier
+```
 Also you need to make sure that Freesurfer is activated in your terminal (you should have some printed FREESURFER paths when opening the terminal). Otherwise you will need to manually activate Freesurfer on each new terminal by running : 
 ```bash
 export FREESURFER_HOME=<freesurfer_installation_directory>/freesurfer

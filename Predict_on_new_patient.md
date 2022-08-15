@@ -247,5 +247,4 @@ Note: the classifier is only able to predict areas within the pial and white sur
 
 ## How to cite the classifier
   
-Spitzer, H., Ripart, M., Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. (2021). Interpretable surface-based detection of focal cortical dysplasias: a MELD study. medRxiv, 2021.12.13.21267721.
 Spitzer, H., Ripart, M, Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. 2022. “Interpretable Surface-Based Detection of Focal Cortical Dysplasias: A Multi-Centre Epilepsy Lesion Detection Study.” Brain: A Journal of Neurology, August. https://doi.org/10.1093/brain/awac224.
