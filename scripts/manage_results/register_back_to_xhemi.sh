@@ -36,8 +36,8 @@ for sub in $subjects
     --streg $SUBJECTS_DIR/fsaverage_sym/surf/rh.sphere.reg $SUBJECTS_DIR/"$sub"/surf/rh.sphere.reg
     
     #correct from interpolation error
-    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/rh."$m".mgh -output "$sub"/surf/rh."$m"_corr.mgh
-    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/lh."$m".mgh -output "$sub"/surf/lh."$m"_corr.mgh
+    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/rh."$m".mgh -output "$sub"/surf/rh."$m"_corr.mgh -hemi rh
+    python $script_dir/correct_interpolation_error.py -dir $SUBJECTS_DIR/"$sub" -input "$sub"/surf/lh."$m".mgh -output "$sub"/surf/lh."$m"_corr.mgh -hemi lh
     
 ##  11. Convert from .mgh to .nii
 

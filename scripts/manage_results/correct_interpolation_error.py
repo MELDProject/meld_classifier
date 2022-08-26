@@ -66,11 +66,15 @@ if __name__ == '__main__':
     parser.add_argument('-output','--output',
                         help='input mgh file corrected',
                         required=True,)
+    parser.add_argument('-hemi','--hemi',
+                        help='hemisphere',
+                        required=True,)
     args = parser.parse_args()
     
     subdir = args.dir 
     input_mgh=args.input
     output_mgh=args.output
+    hemi=args.hemi
 
-    input_surf=os.path.join(subdir,'surf','rh.white')
+    input_surf=os.path.join(subdir,'surf',f'{hemi}.white')
     correct_interpolation_error(input_mgh,input_surf,output_mgh)

@@ -6,7 +6,7 @@ from configparser import ConfigParser, NoOptionError, NoSectionError
 # get scripts dir (parent dir of dir that this file is in)
 SCRIPTS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # read config file from scripts_dir
-config_fname = os.path.join(SCRIPTS_DIR, 'meld_config.ini')
+config_fname = os.path.join(SCRIPTS_DIR, 'meld_config_dev.ini')
 config = ConfigParser()
 config.read(config_fname)
 
