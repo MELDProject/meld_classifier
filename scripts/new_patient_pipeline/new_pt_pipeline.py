@@ -65,6 +65,20 @@ if __name__ == "__main__":
                         action="store_true",
                         help='Skip the segmentation and extraction of the MELD features',
                         )
+    parser.add_argument('--no_prediction_nifti',
+                        action="store_true",
+                        default=False,
+                        help='Only predict. Does not produce prediction on native T1, nor report',
+                        )
+    parser.add_argument('--no_report',
+                        action="store_true",
+                        default=False,
+                        help='Predict and map back into native T1. Does not produce report',)
+    parser.add_argument('--split',
+                        action="store_true",
+                        default=False,
+                        help='Split subjects list in chunk to avoid data overload',
+                        )
     
 
      
@@ -74,14 +88,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     print(args)
-    
-    #---------------------------------------------------------------------------------
-    ### INITIALISE
-    # fix some variables for friendly-use
-    args.withoutflair = False  #To preprocess the data without FLAIR 
-    args.split = True          #To split the subjects ids in chunk of 5 subjects (for large list of subjects)
-    args.no_report = False  #To not create meld reports
-   
     
     #---------------------------------------------------------------------------------
     ### CHECKS
@@ -109,7 +115,6 @@ if __name__ == "__main__":
                     sub_id=args.id,
                     demographic_file=args.demographic_file,
                     harmonisation_only = args.harmo_only,
-                    withoutflair=args.withoutflair,
                     )
 
     #---------------------------------------------------------------------------------
@@ -120,8 +125,9 @@ if __name__ == "__main__":
                             site_code = args.site_code,
                             list_ids=args.list_ids,
                             sub_id=args.id,
+                            no_prediction_nifti = args.no_prediction_nifti,
                             no_report = args.no_report,
-                            split = args.split
+                            split = args.split,
                             )
                 
     print(f'You can find a log of the pipeline at {file_path}')

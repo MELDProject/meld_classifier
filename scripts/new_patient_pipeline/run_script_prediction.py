@@ -6,7 +6,7 @@
 ## These contain images of the clusters on the surface and on the volumetric MRI as well as saliency reports
 ## The saliency reports include the z-scored feature values and how "salient" they were to the classifier
 
-## To run : python new_pt_pirpine_script3.py -ids <text_file_with_ids> -site <site_code>
+## To run : python run_script_prediction.py -ids <text_file_with_ids> -site <site_code>
 
 
 import os
@@ -16,7 +16,7 @@ import pandas as pd
 import argparse
 import tempfile
 from os.path import join as opj
-from meld_classifier.paths import FS_SUBJECTS_PATH, MELD_DATA_PATH, DEFAULT_HDF5_FILE_ROOT, EXPERIMENT_PATH, MELD_DATA_PATH, MODEL_PATH, MODEL_NAME
+from meld_classifier.paths import FS_SUBJECTS_PATH, MELD_DATA_PATH, DEFAULT_HDF5_FILE_ROOT, EXPERIMENT_PATH, MODEL_PATH, MODEL_NAME
 from meld_classifier.evaluation import Evaluator
 from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort
@@ -109,14 +109,14 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         
         #predict on new subjects 
         predict_subjects(subject_ids=subject_ids_chunk, 
-                        output_dir=classifier_output_dir,  
-                        plot_images=True, 
-                        saliency=True,
-                        experiment_path=experiment_path, 
-                        experiment_name=experiment_name, 
-                        hdf5_file_root= DEFAULT_HDF5_FILE_ROOT)
+                       output_dir=classifier_output_dir,  
+                       plot_images=False, 
+                       saliency=False,
+                       experiment_path=experiment_path, 
+                       experiment_name=experiment_name, 
+                       hdf5_file_root= DEFAULT_HDF5_FILE_ROOT)
         
-        if (not no_prediction_nifti) & (not no_report):        
+        if not no_prediction_nifti:        
             #Register predictions to native space
             print('STEP1: move predictions into volume')
             move_predictions_to_mgh(subject_ids=subject_ids_chunk, 

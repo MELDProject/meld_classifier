@@ -4,7 +4,7 @@
 ## that contains the T1 in nifti format ".nii" and where available a FLAIR 
 ## folder that contains the FLAIR in nifti format ".nii"
 
-## To run : python new_pt_pipeline_script1.py -id <sub_id> -site <site_code>
+## To run : python run_script_segmentation.py -id <sub_id> -site <site_code>
 
 
 import os

@@ -28,19 +28,19 @@ def move_to_xhemi_flip(subject_id, subjects_dir):
             f"{subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh",
         )
 
-        command = f"SUBJECTS_DIR='' mris_calc --output {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh set 0"
+        command = f"SUBJECTS_DIR={subjects_dir} mris_calc --output {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh set 0"
         proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc.wait()
 
     print(f'INFO: move feature to xhemi flip for {subject_id}')
     for measure in measures:
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure}"):
-            command = f"SUBJECTS_DIR='' mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/lh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
+            command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/lh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
             proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc.wait()
 
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure}"):
-            command = f"SUBJECTS_DIR='' mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/rh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
+            command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/rh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
             proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc.wait()
 
