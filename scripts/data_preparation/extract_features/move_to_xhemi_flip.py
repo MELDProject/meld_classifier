@@ -1,11 +1,11 @@
 import os
 import argparse
-from subprocess import Popen,  STDOUT, DEVNULL
+# from subprocess import Popen,  STDOUT, DEVNULL
 import shutil
-from meld_classifier.tools_commands_prints import get_m
+from meld_classifier.tools_commands_prints import get_m, run_command
 
 
-def move_to_xhemi_flip(subject_id, subjects_dir):
+def move_to_xhemi_flip(subject_id, subjects_dir, verbose=False):
     measures = [
         "thickness.mgh",
         "w-g.pct.mgh",
@@ -30,19 +30,22 @@ def move_to_xhemi_flip(subject_id, subjects_dir):
         )
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_calc --output {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh set 0"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
     print(get_m(f'Move feature to xhemi flip', subject_id, 'INFO'))
     for measure in measures:
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure}"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/lh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
 
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure}"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/rh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
 
 

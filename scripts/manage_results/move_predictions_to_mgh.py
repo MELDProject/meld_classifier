@@ -21,7 +21,7 @@ def save_mgh(filename, array, demo):
     output = nb.MGHImage(mmap, demo.affine, demo.header)
     nb.save(output, filename)
 
-def move_predictions_to_mgh(subject_ids, subjects_dir, prediction_file):
+def move_predictions_to_mgh(subject_ids, subjects_dir, prediction_file, verbose=False):
     ''' move meld predictions from hdf to mgh freesurfer volume. Outputs are saved into freesurfer subject directory 
     inputs:
         subject_ids : subjects ID in an array

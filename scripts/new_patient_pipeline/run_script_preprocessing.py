@@ -187,7 +187,7 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
 
     tmp.close()
 
-def run_script_preprocessing(site_code, list_ids=None, sub_id=None, output_dir=BASE_PATH, demographic_file=None, harmonisation_only=False, withoutflair=False):
+def run_script_preprocessing(site_code, list_ids=None, sub_id=None, output_dir=BASE_PATH, demographic_file=None, harmonisation_only=False, withoutflair=False, verbose=False):
     site_code = str(site_code)
     subject_id=None
     subject_ids=None
@@ -265,6 +265,14 @@ if __name__ == '__main__':
                         default=False,
                         help="do not use flair information",
                         )
+    parser.add_argument("--debug_mode", 
+                        help="mode to debug error", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
+
+    
     args = parser.parse_args()
     print(args)
 
@@ -275,4 +283,5 @@ if __name__ == '__main__':
                     demographic_file=args.demographic_file,
                     harmonisation_only = args.harmo_only,
                     withoutflair=args.withoutflair,
+                    verbose = args.debug_mode,
                     )

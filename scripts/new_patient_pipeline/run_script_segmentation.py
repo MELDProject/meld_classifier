@@ -8,19 +8,19 @@
 
 
 import os
+from tabnanny import verbose
 import numpy as np
 from sqlite3 import paramstyle
 import sys
 import argparse
 import subprocess
-from subprocess import Popen, DEVNULL, STDOUT, check_call
+# from subprocess import Popen, DEVNULL, STDOUT, check_call
 import threading
 import multiprocessing
 from functools import partial
 import tempfile
 import glob
 from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, FS_SUBJECTS_PATH, CLIPPING_PARAMS_FILE
-from meld_classifier.tools_commands_prints import get_m
 import pandas as pd
 from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
 from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5
@@ -30,7 +30,7 @@ from scripts.data_preparation.extract_features.move_to_xhemi_flip import move_to
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.data_preprocessing import Preprocess
 from os.path import join as opj
-import logging as log
+from meld_classifier.tools_commands_prints import get_m, run_command
 
 
 def init(lock):
@@ -39,7 +39,7 @@ def init(lock):
 
 
 
-def fastsurfer_subject(subject, fs_folder):
+def fastsurfer_subject(subject, fs_folder, verbose=False):
     # run fastsurfer segmentation on 1 subject
 
     #TODO: enable BIDS format
@@ -77,18 +77,17 @@ def fastsurfer_subject(subject, fs_folder):
     command = format(
         "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu".format(fs_folder, subject_id, subject_t1_path)
     )
-    # print(command)
 
     # call fastsurfer
-    print(get_m('Start cortical parcellation (up to 2h). Please wait', subjetc_id, 'INFO'))
+    print(get_m('Start cortical parcellation (up to 2h). Please wait', subject_id, 'INFO'))
     print(get_m(f'Results will be stored in {fs_folder}', subject_id, 'INFO'))
     starting.acquire()  # no other process can get it until it is released
-    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
+    proc = run_command(command, verbose=verbose) 
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     print(get_m(f'Finished cortical parcellation', subject_id, 'INFO'))
 
-def fastsurfer_flair(subject, fs_folder):
+def fastsurfer_flair(subject, fs_folder, verbose=False):
     #improve fastsurfer segmentation with FLAIR on 1 subject
 
     #TODO: enable BIDS format
@@ -125,11 +124,12 @@ def fastsurfer_flair(subject, fs_folder):
     command = format(
         "recon-all -sd {} -subject {} -FLAIR {} -FLAIRpial -autorecon3".format(fs_folder, subject_id, subject_flair_path)
     )
-    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
+    # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT) 
+    proc = run_command(command, verbose=verbose)
     proc.wait()
     print(get_m("Finished FLAIRpial", subject_id, "INFO"))
 
-def freesurfer_subject(subject, fs_folder):
+def freesurfer_subject(subject, fs_folder, verbose=False):
     #run freesurfer recon-all segmentation on 1 subject
 
     #TODO: enable BIDS format
@@ -196,12 +196,17 @@ def freesurfer_subject(subject, fs_folder):
     print(get_m('Start cortical parcellation (up to 36h). Please wait', subject_id, 'INFO'))
     print(get_m(f'Results will be stored in {fs_folder}', subject_id, 'INFO'))
     starting.acquire()  # no other process can get it until it is released
-    proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
+    # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+    proc = run_command(command, verbose=verbose)
+    if proc.returncode == 0 :
+        print(get_m('Finished cortical parcellation', subject_id, 'INFO'))
+    else:
+        print(get_m('Something went wrong during segmentation. Check the recon-all log', subject_id, 'WARNING'))
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
-    print(get_m('Finished cortical parcellation', subject_id, 'INFO'))
+    
 
-def extract_features(subject_id, fs_folder, output_dir):
+def extract_features(subject_id, fs_folder, output_dir, verbose=False):
     # Launch script to extract surface-based features from freesurfer outputs
     print(get_m('Extract surface-based features', subject_id, 'INFO'))
     
@@ -211,22 +216,22 @@ def extract_features(subject_id, fs_folder, output_dir):
     
     #register to symmetric fsaverage xhemi
     print(get_m(f'Creating registration to template surface', subject_id, 'INFO'))
-    create_xhemi(subject_id, fs_folder)
+    create_xhemi(subject_id, fs_folder, verbose=verbose)
 
     #create basic features
     print(get_m(f'Sampling features in native space', subject_id, 'INFO'))
-    sample_flair_smooth_features(subject_id, fs_folder)
+    sample_flair_smooth_features(subject_id, fs_folder, verbose=verbose)
        
     #move features and lesions to template
     print(get_m(f'Moving features to template surface', subject_id, 'INFO'))
-    move_to_xhemi_flip(subject_id, fs_folder)
+    move_to_xhemi_flip(subject_id, fs_folder, verbose = verbose )
     
     print(get_m(f'Moving lesion masks to template surface', subject_id, 'INFO'))
-    lesion_labels(subject_id, fs_folder)
+    lesion_labels(subject_id, fs_folder, verbose=verbose)
 
     #create training_data matrix for all patients and controls.
     print(get_m(f'Creating final training data matrix', subject_id, 'INFO'))
-    create_training_data_hdf5(subject_id, fs_folder, output_dir )
+    create_training_data_hdf5(subject_id, fs_folder, output_dir  )
      
 def create_dataset_file(subjects, output_path):
     df=pd.DataFrame()
@@ -276,7 +281,7 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
 
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
-    check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
+    proc = run_command(ini_freesurfer)
 
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
@@ -285,17 +290,17 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
     if use_fastsurfer:
         ## first processing stage with fastsurfer: segmentation
         pool = multiprocessing.Pool(processes=num_procs, initializer=init, initargs=[multiprocessing.Lock()])
-        for _ in pool.imap_unordered(partial(fastsurfer_subject, fs_folder=fs_folder), subject_ids):
+        for _ in pool.imap_unordered(partial(fastsurfer_subject, fs_folder=fs_folder, verbose=verbose), subject_ids):
             pass
 
         ## flair pial correction
         pool = multiprocessing.Pool(processes=num_procs)
-        for _ in pool.imap_unordered(partial(fastsurfer_flair, fs_folder=fs_folder), subject_ids):
+        for _ in pool.imap_unordered(partial(fastsurfer_flair, fs_folder=fs_folder, verbose=verbose), subject_ids):
             pass
     else:
         ## processing with freesurfer: segmentation
         pool = multiprocessing.Pool(processes=num_procs, initializer=init, initargs=[multiprocessing.Lock()])
-        for _ in pool.imap_unordered(partial(freesurfer_subject, fs_folder=fs_folder), subject_ids):
+        for _ in pool.imap_unordered(partial(freesurfer_subject, fs_folder=fs_folder, verbose=verbose), subject_ids):
             pass
 
 
@@ -305,12 +310,12 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
 
     # parallelize create xhemi because it takes a while!
     print(get_m(f'Run create xhemi in parallel', subject_ids, 'INFO'))
-    run_parallel_xhemi(subject_ids, fs_folder, num_procs=num_procs)
+    run_parallel_xhemi(subject_ids, fs_folder, num_procs=num_procs, verbose=verbose)
 
     # Launch script to extract features
     for subject in subject_ids:
         print(get_m(f'Extract features in hdf5', subject, 'INFO'))
-        extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
+        extract_features(subject, fs_folder=fs_folder, output_dir=output_dir, verbose=verbose)
 
     #### SMOOTH FEATURES #####
     #TODO: parallelise here
@@ -318,13 +323,14 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
         print(get_m(f'Start smoothing features', subject, 'STEP 3'))
         smooth_features_new_subjects(subject, output_dir=output_dir)
 
-def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False):
+def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False, verbose=False):
     # pipeline to segment the brain, exract surface-based features and smooth features for 1 subject
     
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
-    check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
-
+    # check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
+    proc = run_command(ini_freesurfer)
+    
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
     os.makedirs(fs_folder, exist_ok=True)
@@ -332,24 +338,24 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     if use_fastsurfer:
         ## first processing stage with fastsurfer: segmentation
         init(multiprocessing.Lock())
-        fastsurfer_subject(subject,fs_folder)
+        fastsurfer_subject(subject,fs_folder, verbose=verbose)
 
         ## flair pial correction
         init(multiprocessing.Lock())
-        fastsurfer_flair(subject,fs_folder)
+        fastsurfer_flair(subject,fs_folder, verbose=verbose)
     else:
         ## processing with freesurfer: segmentation
         init(multiprocessing.Lock())
-        freesurfer_subject(subject,fs_folder)
+        freesurfer_subject(subject,fs_folder, verbose=verbose)
     
     ### EXTRACT SURFACE-BASED FEATURES ###
     output_dir = opj(BASE_PATH, f"MELD_{site_code}")
-    extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
+    extract_features(subject, fs_folder=fs_folder, output_dir=output_dir, verbose=verbose)
 
     ### SMOOTH FEATURES ###
     smooth_features_new_subjects(subject, output_dir=output_dir)
 
-def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=False, use_fastsurfer=False ):
+def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=False, use_fastsurfer=False, verbose=False ):
     site_code = str(site_code)
     subject_id=None
     subject_ids=None
@@ -372,17 +378,17 @@ def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=F
     
     if subject_id != None:
         #launch segmentation and feature extraction for 1 subject
-        run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+        run_subject_segmentation_and_smoothing(subject_id,  site_code = site_code, use_fastsurfer = use_fastsurfer, verbose=verbose)
     else:
         if use_parallel:
             #launch segmentation and feature extraction in parallel
             print(get_m(f'Run subjects in parallel', None, 'INFO'))
-            run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer)
+            run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer, verbose=verbose)
         else:
             #launch segmentation and feature extraction for each subject one after another
             print(get_m(f'Run subjects one after another', None, 'INFO'))
             for subj in subject_ids:
-                run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer)
+                run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer, verbose=verbose)
 
 if __name__ == "__main__":
     # parse commandline arguments
@@ -414,6 +420,12 @@ if __name__ == "__main__":
                         default=False,
                         action="store_true",
                         )
+    parser.add_argument("--debug_mode", 
+                        help="mode to debug error", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
     args = parser.parse_args()
     print(args)
 
@@ -423,6 +435,7 @@ if __name__ == "__main__":
                         sub_id=args.id, 
                         use_parallel=args.parallelise, 
                         use_fastsurfer=args.fastsurfer,
+                        verbose = args.debug_mode
                         )
     
 

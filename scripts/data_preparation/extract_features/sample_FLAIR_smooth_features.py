@@ -7,9 +7,9 @@ import numpy as np
 import nibabel as nb
 from scripts.data_preparation.extract_features import io_meld
 from scripts.data_preparation.extract_features.create_identity_reg import create_identity
-from meld_classifier.tools_commands_prints import get_m
+from meld_classifier.tools_commands_prints import get_m, run_command
 
-def sample_flair_smooth_features(subject_id, subjects_dir):
+def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
     #TODO: rename function
 
     os.makedirs(opj(subjects_dir, subject_id, "surf_meld"), exist_ok=True)
@@ -35,7 +35,8 @@ def sample_flair_smooth_features(subject_id, subjects_dir):
             hemi = dsf[0]
             d = dsf[1]
             command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.gm_FLAIR_{d}.mgh --hemi {hemi} --projfrac {d} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
 
         print(get_m(f'Sample FLAIR features : {dswm_features_to_generate}', subject_id, 'INFO'))
@@ -44,7 +45,8 @@ def sample_flair_smooth_features(subject_id, subjects_dir):
             hemi = dswmf[0]
             dwm = dswmf[1]
             command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.wm_FLAIR_{dwm}.mgh --hemi {hemi} --projdist -{dwm} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
     else:
         print(get_m(f'No FLAIR.mgh found. Skip sampling FLAIR feature', subject_id, 'INFO'))
@@ -55,24 +57,29 @@ def sample_flair_smooth_features(subject_id, subjects_dir):
         print(get_m(f'Calculate curvatures', subject_id, 'INFO'))
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_curvature_stats -f white -g --writeCurvatureFiles {subject_id} {hemi} curv"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_curvature_stats -f pial -g --writeCurvatureFiles {subject_id} {hemi} curv"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         # Convert mean curvature and sulcal depth to .mgh file type
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.curv {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.curv.mgh"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.sulc {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.sulc.mgh"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.pial.K.crv {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K.mgh"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         # get gaussian curvature
@@ -85,13 +92,15 @@ def sample_flair_smooth_features(subject_id, subjects_dir):
         curvature = np.clip(curvature, 0, 20)
         io_meld.save_mgh(output, curvature, demo)
         command = f"SUBJECTS_DIR={subjects_dir} mris_fwhm --s {subject_id} --hemi {hemi} --cortex --smooth-only --fwhm 20 --i {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K_filtered.mgh --o {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K_filtered.sm20.mgh"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command, verbose=verbose)
         proc.wait()
 
         # get thickness
         print(get_m(f'Get thickness and white-grey matter contrast', subject_id, 'INFO'))
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.thickness {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.thickness.mgh"
-        proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+        proc = run_command(command)
         proc.wait()
 
 

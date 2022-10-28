@@ -1,20 +1,23 @@
 
 import os
 import argparse
-from subprocess import Popen,  STDOUT, DEVNULL
+# from subprocess import Popen,  STDOUT, DEVNULL
+from meld_classifier.tools_commands_prints import run_command
 
 
-def lesion_labels(subject_id, subjects_dir):
+def lesion_labels(subject_id, subjects_dir, verbose=False):
     if os.path.isfile(f"{subjects_dir}/{subject_id}/surf_meld/lh.lesion_linked.mgh"):
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.lesion.mgh"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subject_id}/surf_meld/lh.lesion_linked.mgh --trg {subject_id}/xhemi/surf_meld/lh.on_lh.lesion.mgh --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
 
     elif os.path.isfile(f"{subjects_dir}/{subject_id}/surf_meld/rh.lesion_linked.mgh"):
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.lesion.mgh"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subject_id}/surf_meld/rh.lesion_linked.mgh --trg {subject_id}/xhemi/surf_meld/rh.on_lh.lesion.mgh --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
+            proc = run_command(command, verbose=verbose)
             proc.wait()
 
 

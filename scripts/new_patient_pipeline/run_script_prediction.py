@@ -61,7 +61,7 @@ experiment_path=EXPERIMENT_PATH, experiment_name=MODEL_NAME, hdf5_file_root= DEF
                 subject, fold="", plot=plot_images, saliency=saliency, suffix=""
         )
 
-def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_nifti=False, no_report=False, split=False):
+def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_nifti=False, no_report=False, split=False, verbose=False):
     
     site_code = str(site_code)
     subject_id=None
@@ -121,13 +121,15 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
             print(get_m(f'Move predictions into volume', subject_ids_chunk, 'STEP 2'))
             move_predictions_to_mgh(subject_ids=subject_ids_chunk, 
                                     subjects_dir=subjects_dir, 
-                                    prediction_file=prediction_file)
+                                    prediction_file=prediction_file,
+                                    verbose=verbose)
 
             #Register prediction back to nifti volume
             print(get_m(f'Move prediction back to native space', subject_ids_chunk, 'STEP 3'))
             register_subject_to_xhemi(subject_ids=subject_ids_chunk, 
                                       subjects_dir=subjects_dir, 
-                                      output_dir=predictions_output_dir)
+                                      output_dir=predictions_output_dir, 
+                                      verbose=verbose)
         
         if not no_report:
             # Create individual reports of each identified cluster
@@ -173,6 +175,12 @@ if __name__ == '__main__':
                         action="store_true",
                         help='Split subjects list in chunk to avoid data overload',
                         )
+    parser.add_argument("--debug_mode", 
+                        help="mode to debug error", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
     args = parser.parse_args()
     print(args)    
 
@@ -182,6 +190,7 @@ if __name__ == '__main__':
                         sub_id=args.id,
                         no_prediction_nifti = args.no_prediction_nifti,
                         no_report = args.no_report,
-                        split = args.split
+                        split = args.split, 
+                        verbose = args.debug_mode
                         )
                 

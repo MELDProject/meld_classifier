@@ -80,6 +80,12 @@ if __name__ == "__main__":
                         default=False,
                         help='Split subjects list in chunk to avoid data overload',
                         )
+    parser.add_argument("--debug_mode", 
+                        help="mode to debug error", 
+                        required=False,
+                        default=False,
+                        action="store_true",
+                        )
     
 
      
@@ -107,6 +113,7 @@ if __name__ == "__main__":
                             sub_id=args.id, 
                             use_parallel=args.parallelise, 
                             use_fastsurfer=args.fastsurfer,
+                            verbose = args.debug_mode
                             )
     else:
         print(get_m(f'Skip script segmentation', None, 'SCRIPT 1'))
@@ -133,6 +140,7 @@ if __name__ == "__main__":
                             no_prediction_nifti = args.no_prediction_nifti,
                             no_report = args.no_report,
                             split = args.split,
+                            verbose = args.debug_mode
                             )
     else:
         print(get_m(f'Skip script predition', None, 'SCRIPT 3'))
