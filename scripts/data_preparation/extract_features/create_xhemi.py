@@ -7,12 +7,13 @@ import shutil
 from subprocess import Popen,  STDOUT, DEVNULL
 from argparse import ArgumentParser
 import multiprocessing
+from meld_classifier.tools_commands_prints import get_m
 
 def create_xhemi(subject_id, subjects_dir,template = 'fsaverage_sym'):
     
     #check FS folder subject exist
     if not os.path.isdir(opj(subjects_dir,subject_id)):
-        print(f'ERROR: FS folder does not exist for {subject_id}')
+        print(get_m(f'FS folder does not exist', subject_id, 'ERROR'))
         return
 
     #copy template

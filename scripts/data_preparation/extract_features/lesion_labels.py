@@ -6,22 +6,16 @@ from subprocess import Popen,  STDOUT, DEVNULL
 
 def lesion_labels(subject_id, subjects_dir):
     if os.path.isfile(f"{subjects_dir}/{subject_id}/surf_meld/lh.lesion_linked.mgh"):
-        print("isfile")
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.lesion.mgh"):
-            print("isnotfile")
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subject_id}/surf_meld/lh.lesion_linked.mgh --trg {subject_id}/xhemi/surf_meld/lh.on_lh.lesion.mgh --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
             proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc.wait()
-        print("isfile")
 
     elif os.path.isfile(f"{subjects_dir}/{subject_id}/surf_meld/rh.lesion_linked.mgh"):
-        print("isfile")
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.lesion.mgh"):
-            print("isnotfile")
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subject_id}/surf_meld/rh.lesion_linked.mgh --trg {subject_id}/xhemi/surf_meld/rh.on_lh.lesion.mgh --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
             proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc.wait()
-        print("isfile")
 
 
 if __name__ == "__main__":

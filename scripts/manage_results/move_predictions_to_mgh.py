@@ -42,7 +42,6 @@ def move_predictions_to_mgh(subject_ids, subjects_dir, prediction_file):
             demo = nb.load(os.path.join(subjects_dir, subject_id, "xhemi", "surf_meld", f"{hemi}.on_lh.thickness.mgh"))
             filename = os.path.join(subjects_dir, subject_id, "xhemi", "classifier", f"{hemi}.prediction.mgh")
             save_mgh(filename, overlay, demo)
-            print(f"prediction saved at {filename}")
     
 if __name__ == "__main__":
     # Set up experiment

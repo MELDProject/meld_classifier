@@ -23,6 +23,7 @@ from meld_classifier.meld_cohort import MeldCohort
 from scripts.manage_results.register_back_to_xhemi import register_subject_to_xhemi
 from scripts.manage_results.move_predictions_to_mgh import move_predictions_to_mgh
 from scripts.manage_results.plot_prediction_report import generate_prediction_report
+from meld_classifier.tools_commands_prints import get_m
 
 def create_dataset_file(subjects_ids, save_file):
     df=pd.DataFrame()
@@ -73,14 +74,13 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         except:
             subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
         else:
-                print(f"ERROR: Could not open {subject_ids}")
-                sys.exit(-1)                
+            sys.exit(get_m(f'Could not open {subject_ids}', None, 'ERROR'))       
     elif sub_id != None:
         subject_id=sub_id
         subject_ids=np.array([sub_id])
     else:
-        print('ERROR: No ids were provided')
-        print("ERROR: Please specify both subject(s) and site_code ...")
+        print(get_m(f'No ids were provided', None, 'ERROR'))
+        print(get_m(f'Please specify both subject(s) and site_code ...', None, 'ERROR'))
         sys.exit(-1) 
     
     # initialise variables
@@ -99,13 +99,13 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         chunk_size = min(len(subject_ids), 5)
         for i in range(0, len(subject_ids), chunk_size):
             chunked_subject_list.append(subject_ids[i : i + chunk_size])
-        print(f'INFO: {len(subject_ids)} subjects splitted in {len(chunked_subject_list)} chunks')
+        print(get_m(f'{len(subject_ids)} subjects splitted in {len(chunked_subject_list)}', None, 'INFO'))
     else:
         subject_ids_chunk = chunked_subject_list.append(subject_ids)
-    
+
     # for each chunk of subjects
     for subject_ids_chunk in chunked_subject_list:
-        print(f'INFO: run prediction on {subject_ids_chunk}')
+        print(get_m(f'Run predictions', subject_ids_chunk, 'STEP 1'))
         
         #predict on new subjects 
         predict_subjects(subject_ids=subject_ids_chunk, 
@@ -118,20 +118,20 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         
         if not no_prediction_nifti:        
             #Register predictions to native space
-            print('STEP1: move predictions into volume')
+            print(get_m(f'Move predictions into volume', subject_ids_chunk, 'STEP 2'))
             move_predictions_to_mgh(subject_ids=subject_ids_chunk, 
                                     subjects_dir=subjects_dir, 
                                     prediction_file=prediction_file)
 
             #Register prediction back to nifti volume
-            print('STEP2: move prediction back to native space')
+            print(get_m(f'Move prediction back to native space', subject_ids_chunk, 'STEP 3'))
             register_subject_to_xhemi(subject_ids=subject_ids_chunk, 
                                       subjects_dir=subjects_dir, 
                                       output_dir=predictions_output_dir)
         
         if not no_report:
             # Create individual reports of each identified cluster
-            print('STEP3: Create pdf report')
+            print(get_m(f'Create pdf report', subject_ids_chunk, 'STEP 4'))
             generate_prediction_report(
                 subject_ids = subject_ids_chunk,
                 data_dir = data_dir,

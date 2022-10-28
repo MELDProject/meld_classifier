@@ -17,6 +17,7 @@ from os.path import join as opj
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.data_preprocessing import Preprocess, Feature
 from meld_classifier.paths import BASE_PATH, MELD_PARAMS_PATH, MELD_DATA_PATH, NORM_CONTROLS_PARAMS_FILE, COMBAT_PARAMS_FILE, MELD_SITE_CODES
+from meld_classifier.tools_commands_prints import get_m
 
 def create_dataset_file(subjects_ids, save_file):
     df=pd.DataFrame()
@@ -31,13 +32,13 @@ def which_combat_file(site_code):
     if site_code=='TEST':
         site_code = 'H4'
     if site_code in MELD_SITE_CODES:
-        print('INFO: Use combat parameters from MELD cohort')
+        print(get_m(f'Use combat parameters from MELD cohort', None, 'INFO'))
         return os.path.join(MELD_PARAMS_PATH,COMBAT_PARAMS_FILE)
     elif os.path.isfile(file_site):
-        print(f'INFO: Use combat parameters from site {site_code} : {file_site}')
+        print(get_m(f'Use combat parameters from site', None, 'INFO'))
         return file_site
     else:
-        print(f'INFO: Could not find combat parameters for {site_code}')
+        print(get_m(f'Could not find combat parameters for {site_code}', None, 'WARNING'))
         return 'None'
 
 def check_demographic_file(demographic_file, subject_ids):
@@ -46,14 +47,12 @@ def check_demographic_file(demographic_file, subject_ids):
         df = pd.read_csv(demographic_file)
         df[['ID', 'Sex', 'Age at preoperative']]
     except Exception as e:
-        print(f"ERROR: Error with the demographic file provided for the harmonisation. \n {e}")
-        os.sys.exit(-1)
+        sys.exit(get_m(f'Error with the demographic file provided for the harmonisation\n{e}', None, 'ERROR'))
     #check demographic file has the right subjects
     if set(subject_ids).issubset(set(np.array(df['ID']))):
         return demographic_file
     else:
-        print('ERROR: Missing subject in the demographic file')
-        os.sys.exit(-1)
+        sys.exit(get_m(f'Missing subject in the demographic file', None, 'ERROR'))
 
 
 def run_data_processing_new_subjects(subject_ids, site_code, combat_params_file=None, output_dir=BASE_PATH, withoutflair=False):
@@ -93,12 +92,11 @@ def run_data_processing_new_subjects(subject_ids, site_code, combat_params_file=
     if combat_params_file==None:
         combat_params_file = which_combat_file(site_code)
     if combat_params_file=='need_harmonisation':
-        sys.exit('ERROR: You need to compute the combat harmonisation parameters for this site before to run combat')
+        sys.exit(get_m(f'You need to compute the combat harmonisation parameters for this site before to run combat', None, 'ERROR'))
 
     ### COMBAT DATA ###
     #-----------------------------------------------------------------------------------------------
-    print('STEP: Combat harmonise')
-    print(f'INFO: process subjects {subject_ids}')
+    print(get_m(f'Combat harmonise subjects', subject_ids, 'STEP'))
     #create cohort for the new subject
     c_smooth = MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_smoothed.hdf5', dataset=tmp.name)
     #create object combat
@@ -113,8 +111,7 @@ def run_data_processing_new_subjects(subject_ids, site_code, combat_params_file=
 
     ###  INTRA, INTER & ASYMETRY ###
     #-----------------------------------------------------------------------------------------------
-    print('STEP : Intra-inter normalisation & asymmetry')
-    print(f'INFO: process subjects {subject_ids}')
+    print(get_m(f'Intra-inter normalisation & asymmetry subjects', subject_ids, 'STEP'))
     #create cohort to normalise
     c_combat = MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_combat.hdf5', dataset=tmp.name)
     # provide mean and std parameter for normalisation by controls
@@ -163,8 +160,7 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
     ### INITIALISE ###
     #check enough subjects for harmonisation
     if len(np.unique(subject_ids))<30:
-        print("ERROR: There are not enough subjects to proceed to an acurate harmonisation of the data... Rerun with at least 30 subjects.")
-        sys.exit(-1)
+        sys.exit(get_m(f'here are not enough subjects to proceed to an acurate harmonisation of the data... Rerun with at least 30 subjects', None, 'ERROR'))
 
     #create dataset
     tmp = tempfile.NamedTemporaryFile(mode="w")
@@ -174,7 +170,7 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
    
     ### COMBAT DISTRIBUTED DATA ###
     #-----------------------------------------------------------------------------------------------
-    print('STEP: Compute combat harmonisation parameters for new site')
+    print(get_m(f'Compute combat harmonisation parameters for new site', None, 'STEP'))
         
     #create cohort for the new subject
     c_smooth= MeldCohort(hdf5_file_root='{site_code}_{group}_featurematrix_smoothed.hdf5', 
@@ -192,7 +188,6 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
     tmp.close()
 
 def run_script_preprocessing(site_code, list_ids=None, sub_id=None, output_dir=BASE_PATH, demographic_file=None, harmonisation_only=False, withoutflair=False):
-    print(site_code)
     site_code = str(site_code)
     subject_id=None
     subject_ids=None
@@ -204,32 +199,29 @@ def run_script_preprocessing(site_code, list_ids=None, sub_id=None, output_dir=B
         except:
             subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
         else:
-                print(f"ERROR: Could not open {subject_ids}")
-                sys.exit(-1)                
+                sys.exit(get_m(f'Could not open {subject_ids}', None, 'ERROR'))             
     elif sub_id != None:
         subject_id=sub_id
         subject_ids=np.array([sub_id])
     else:
-        print('ERROR: No ids were provided')
-        print("ERROR: Please specify both subject(s) and site_code ...")
+        print(get_m(f'No ids were provided', None, 'ERROR'))
+        print(get_m(f'Please specify both subject(s) and site_code ...', None, 'ERROR'))
         sys.exit(-1) 
        
     #check that combat parameters exist for this site or compute it
     combat_params_file = which_combat_file(site_code)
     if combat_params_file=='None':
-        print(f'INFO: Compute combat parameters for {site_code} with subjects {subject_ids}')
+        print(get_m(f'Compute combat parameters for {site_code} with subjects {subject_ids}', None, 'INFO'))
         if demographic_file == None:
-            print('ERROR: Please provide a demographic file using the flag "-demos" to harmonise your data')
-            os.sys.exit(-1)
+            sys.exit(get_m(f'Please provide a demographic file using the flag "-demos" to harmonise your data', None, 'ERROR'))    
         else:
             #check that demographic file exist and is adequate
             demographic_file = os.path.join(MELD_DATA_PATH, demographic_file) 
             if os.path.isfile(demographic_file):
-                print(f'INFO: Use demographic file {demographic_file}')
+                print(get_m(f'Use demographic file {demographic_file}', None, 'INFO'))
                 demographic_file = check_demographic_file(demographic_file, subject_ids) 
             else:
-                print(f'ERROR: Could not find demographic file provided {demographic_file}')
-                os.sys.exit(-1)
+                sys.exit(get_m(f'Could not find demographic file provided {demographic_file}', None, 'ERROR'))
         #compute the combat parameters for a new site
         new_site_harmonisation(subject_ids, site_code=site_code, demographic_file=demographic_file, output_dir=output_dir, withoutflair=withoutflair)
 

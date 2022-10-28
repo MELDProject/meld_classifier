@@ -12,6 +12,7 @@ import numpy as np
 from sqlite3 import paramstyle
 import sys
 import argparse
+import subprocess
 from subprocess import Popen, DEVNULL, STDOUT, check_call
 import threading
 import multiprocessing
@@ -19,6 +20,7 @@ from functools import partial
 import tempfile
 import glob
 from meld_classifier.paths import BASE_PATH, MELD_DATA_PATH, FS_SUBJECTS_PATH, CLIPPING_PARAMS_FILE
+from meld_classifier.tools_commands_prints import get_m
 import pandas as pd
 from scripts.data_preparation.extract_features.create_xhemi import run_parallel_xhemi, create_xhemi
 from scripts.data_preparation.extract_features.create_training_data_hdf5 import create_training_data_hdf5
@@ -28,10 +30,14 @@ from scripts.data_preparation.extract_features.move_to_xhemi_flip import move_to
 from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.data_preprocessing import Preprocess
 from os.path import join as opj
+import logging as log
+
 
 def init(lock):
     global starting
     starting = lock
+
+
 
 def fastsurfer_subject(subject, fs_folder):
     # run fastsurfer segmentation on 1 subject
@@ -48,7 +54,7 @@ def fastsurfer_subject(subject, fs_folder):
     # if freesurfer outputs already exist for this subject, continue running from where it stopped
     # else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(opj(fs_folder, subject_id)):
-        print(f"STEP 1: Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped")
+        print(get_m(f'Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped', subject_id, 'STEP 1'))
         return
 
     # select inputs files T1 and FLAIR
@@ -60,28 +66,27 @@ def fastsurfer_subject(subject, fs_folder):
         # check T1 and FLAIR exist
         if len(subject_t1_path) > 1:
             raise FileNotFoundError(
-                "Find too much volumes for T1. Check and remove the additional volumes with same key name"
-            )
+                get_m(f'Find too much volumes for T1. Check and remove the additional volumes with same key name', subject, 'ERROR'))
         elif not subject_t1_path:
-            raise FileNotFoundError(f"Could not find T1 volume. Check if name follow the right nomenclature")
+            raise FileNotFoundError(get_m(f'Could not find T1 volume. Check if name follow the right nomenclature', subject,'ERROR'))
         else:
             subject_t1_path = subject_t1_path[0]
 
     # setup cortical segmentation command
-    print(f"STEP 1: Segmentation using T1 only with FastSurfer for {subject_id}")
+    print(get_m(f'Segmentation using T1 only with FastSurfer', subject_id, 'INFO'))
     command = format(
         "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu".format(fs_folder, subject_id, subject_t1_path)
     )
     # print(command)
 
     # call fastsurfer
-    print(f"INFO : Start cortical parcellation for {subject_id} (up to 2h). Please wait")
-    print(f"INFO : Results will be stored in {fs_folder}")
+    print(get_m('Start cortical parcellation (up to 2h). Please wait', subjetc_id, 'INFO'))
+    print(get_m(f'Results will be stored in {fs_folder}', subject_id, 'INFO'))
     starting.acquire()  # no other process can get it until it is released
     proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
-    print(f"INFO : Finished cortical parcellation for {subject_id} !")
+    print(get_m(f'Finished cortical parcellation', subject_id, 'INFO'))
 
 def fastsurfer_flair(subject, fs_folder):
     #improve fastsurfer segmentation with FLAIR on 1 subject
@@ -95,7 +100,7 @@ def fastsurfer_flair(subject, fs_folder):
         subject_flair_path =''
 
     if os.path.isfile(opj(fs_folder, subject_id, "mri", "FLAIR.mgz")):
-        print(f"STEP 1.2: Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
+        print(get_m(f'Freesurfer outputs already exists. Freesurfer will be skipped', subject_id, 'STEP 1.1'))
         return
 
     if subject_flair_path == '':
@@ -106,23 +111,23 @@ def fastsurfer_flair(subject, fs_folder):
 
         if len(subject_flair_path) > 1:
             raise FileNotFoundError(
-                "Find too much volumes for FLAIR. Check and remove the additional volumes with same key name"
+                get_m("Find too much volumes for FLAIR. Check and remove the additional volumes with same key name", subject_id, 'ERROR')
             )
 
         if not subject_flair_path:
-            print("No FLAIR file has been found for subject", subject_id)
+            print(get_m('No FLAIR file has been found', subject_id, 'ERROR'))
             return 
 
         subject_flair_path = subject_flair_path[0]
 
 
-    print("Starting FLAIRpial for subject", subject_id)
+    print(get_m("Starting FLAIRpial", subject_id, 'INFO'))
     command = format(
         "recon-all -sd {} -subject {} -FLAIR {} -FLAIRpial -autorecon3".format(fs_folder, subject_id, subject_flair_path)
     )
     proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     proc.wait()
-    print("finished FLAIRpial for subject", subject_id)
+    print(get_m("Finished FLAIRpial", subject_id, "INFO"))
 
 def freesurfer_subject(subject, fs_folder):
     #run freesurfer recon-all segmentation on 1 subject
@@ -141,7 +146,7 @@ def freesurfer_subject(subject, fs_folder):
     # If freesurfer outputs already exist for this subject, continue running from where it stopped
     # Else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(opj(fs_folder, subject_id)):
-        print(f"STEP 1: Freesurfer outputs already exists for subject {subject_id}. \nFreesurfer will be skipped")
+        print(get_m('Freesurfer outputs already exists. Freesurfer will be skipped', subject_id, "STEP 1"))
         return
 
     # select inputs files T1 and FLAIR
@@ -152,24 +157,22 @@ def freesurfer_subject(subject, fs_folder):
         # check T1 exists
         if len(subject_t1_path) > 1:
             raise FileNotFoundError(
-                "Find too much volumes for T1. Check and remove the additional volumes with same key name"
-            )
+                get_m('Find too much volumes for T1. Check and remove the additional volumes with same key name', subject_id, 'ERROR'))
         elif not subject_t1_path:
-            raise FileNotFoundError(f"Could not find T1 volume. Check if name follow the right nomenclature")
+            raise FileNotFoundError(get_m('Could not find T1 volume. Check if name follow the right nomenclature', subject_id, 'ERROR'))
         else:
             subject_t1_path = subject_t1_path[0]
 
     if subject_flair_path == '':
         # assume meld data structure
-        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)   
+        subject_dir = opj(MELD_DATA_PATH, "input", subject_id)
         subject_flair_path = glob.glob(opj(subject_dir, "FLAIR", "*FLAIR*.nii*"))
         # check FLAIR exists
         if len(subject_flair_path) > 1:
             raise FileNotFoundError(
-                "Find too much volumes for FLAIR. Check and remove the additional volumes with same key name"
-            )
+                get_m('Find too much volumes for FLAIR. Check and remove the additional volumes with same key name', subject_id, 'ERROR'))
         elif not subject_flair_path:
-            print("No FLAIR file has been found for subject", subject_id)
+            print(get_m('No FLAIR file has been found for subject', subject_id, 'INFO'))
             isflair = False
         else:
             subject_flair_path = subject_flair_path[0]
@@ -177,52 +180,52 @@ def freesurfer_subject(subject, fs_folder):
 
     # setup cortical segmentation command
     if isflair == True:
-        print(f"STEP 1: Segmentation using T1 and FLAIR with Freesurfer for {subject_id}")
+        print(get_m('Segmentation using T1 and FLAIR with Freesurfer', subject_id, 'STEP 1'))
         command = format(
             "$FREESURFER_HOME/bin/recon-all -sd {} -s {} -i {} -FLAIR {} -FLAIRpial -all".format(
                 fs_folder, subject_id, subject_t1_path, subject_flair_path
             )
         )
     else:
-        print("STEP 1: Segmentation using T1 only with Freesurfer for {subject_id}")
+        print(get_m('Segmentation using T1 only with Freesurfer', subject_id, 'STEP 1'))
         command = format(
             "$FREESURFER_HOME/bin/recon-all -sd {} -s {} -i {} -all".format(fs_folder, subject_id, subject_t1_path)
         )
 
     # call Freesurfer
-    print(f"INFO : Start cortical parcellation for {subject_id} (up to 36h). Please wait")
-    print(f"INFO : Results will be stored in {fs_folder}")
+    print(get_m('Start cortical parcellation (up to 36h). Please wait', subject_id, 'INFO'))
+    print(get_m(f'Results will be stored in {fs_folder}', subject_id, 'INFO'))
     starting.acquire()  # no other process can get it until it is released
     proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)  
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
-    print(f"INFO : Finished cortical parcellation for {subject_id} !")
+    print(get_m('Finished cortical parcellation', subject_id, 'INFO'))
 
 def extract_features(subject_id, fs_folder, output_dir):
     # Launch script to extract surface-based features from freesurfer outputs
-    print("STEP 2: Extract surface-based features", subject_id)
+    print(get_m('Extract surface-based features', subject_id, 'INFO'))
     
     #### EXTRACT SURFACE-BASED FEATURES #####
     # Create the output directory to store the surface-based features processed
     os.makedirs(output_dir, exist_ok=True)
     
     #register to symmetric fsaverage xhemi
-    print("INFO: Creating registration to template surface")
+    print(get_m(f'Creating registration to template surface', subject_id, 'INFO'))
     create_xhemi(subject_id, fs_folder)
 
     #create basic features
-    print("INFO: Sampling features in native space")
+    print(get_m(f'Sampling features in native space', subject_id, 'INFO'))
     sample_flair_smooth_features(subject_id, fs_folder)
        
     #move features and lesions to template
-    print("INFO: Moving features to template surface")
+    print(get_m(f'Moving features to template surface', subject_id, 'INFO'))
     move_to_xhemi_flip(subject_id, fs_folder)
     
-    print("INFO: Moving lesion masks to template surface")
+    print(get_m(f'Moving lesion masks to template surface', subject_id, 'INFO'))
     lesion_labels(subject_id, fs_folder)
 
     #create training_data matrix for all patients and controls.
-    print("INFO: Creating final training data matrix")
+    print(get_m(f'Creating final training data matrix', subject_id, 'INFO'))
     create_training_data_hdf5(subject_id, fs_folder, output_dir )
      
 def create_dataset_file(subjects, output_path):
@@ -247,26 +250,28 @@ def smooth_features_new_subjects(subject_ids, output_dir):
         ".on_lh.wm_FLAIR_1.mgh": 10,
     }
 
+    print(get_m(f'Smooth features', subject_ids[0], 'STEP3'))
+
+
     if isinstance(subject_ids, str):
         subject_ids=[subject_ids]
 
     tmp = tempfile.NamedTemporaryFile(mode="w")
     create_dataset_file(subject_ids, tmp.name)
-    
+
     c_raw = MeldCohort(hdf5_file_root="{site_code}_{group}_featurematrix.hdf5", dataset=tmp.name, data_dir=BASE_PATH)
     smoothing = Preprocess(c_raw, write_hdf5_file_root="{site_code}_{group}_featurematrix_smoothed.hdf5", data_dir=output_dir)
     
     #file to store subject with outliers vertices
     outliers_file=opj(output_dir, 'list_subject_extreme_vertices.csv')
-
-    print('INFO: smoothing features')
+    
     for feature in np.sort(list(set(features))):
         print(feature)
         smoothing.smooth_data(feature, features[feature], clipping_params=CLIPPING_PARAMS_FILE, outliers_file=outliers_file)
 
     tmp.close()
     
-def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=20, site_code="", use_fastsurfer=False):
+def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, site_code="", use_fastsurfer=False):
     # parallel version of the pipeline, finish each stage for all subjects first
 
     ### SEGMENTATION ###
@@ -295,21 +300,22 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=20, 
 
 
     ### EXTRACT SURFACE-BASED FEATURES ###
-    print("STEP 2: Extract surface-based features")
+    print(get_m(f'Extract surface-based features', subject_ids, 'STEP 2'))
     output_dir = opj(BASE_PATH, f"MELD_{site_code}")
 
     # parallelize create xhemi because it takes a while!
-    print(f"INFO: run create xhemi in parallel for {subject_ids}")
+    print(get_m(f'Run create xhemi in parallel', subject_ids, 'INFO'))
     run_parallel_xhemi(subject_ids, fs_folder, num_procs=num_procs)
 
     # Launch script to extract features
     for subject in subject_ids:
-        print(f"INFO: Extract features for {subject}")
+        print(get_m(f'Extract features in hdf5', subject, 'INFO'))
         extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     #### SMOOTH FEATURES #####
     #TODO: parallelise here
     for subject in subject_ids:
+        print(get_m(f'Start smoothing features', subject, 'STEP 3'))
         smooth_features_new_subjects(subject, output_dir=output_dir)
 
 def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False):
@@ -355,14 +361,13 @@ def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=F
         except:
             subject_ids=np.array(np.loadtxt(list_ids, dtype='str', ndmin=1)) 
         else:
-                print(f"ERROR: Could not open {subject_ids}")
-                sys.exit(-1)                
+            sys.exit(get_m(f'Could not open {subject_ids}', None, 'ERROR'))             
     elif sub_id != None:
         subject_id=sub_id
         subject_ids=np.array([sub_id])
     else:
-        print('ERROR: No ids were provided')
-        print("ERROR: Please specify both subject(s) and site_code ...")
+        print(get_m(f'No ids were provided', None, 'ERROR'))
+        print(get_m(f'Please specify both subject(s) and site_code ...', None, 'ERROR'))
         sys.exit(-1) 
     
     if subject_id != None:
@@ -371,11 +376,11 @@ def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=F
     else:
         if use_parallel:
             #launch segmentation and feature extraction in parallel
-            print('Run subjects in parallel') 
+            print(get_m(f'Run subjects in parallel', None, 'INFO'))
             run_subjects_segmentation_and_smoothing_parallel(subject_ids, site_code = site_code, use_fastsurfer = use_fastsurfer)
         else:
             #launch segmentation and feature extraction for each subject one after another
-            print('Run subjects one after another')
+            print(get_m(f'Run subjects one after another', None, 'INFO'))
             for subj in subject_ids:
                 run_subject_segmentation_and_smoothing(subj,  site_code = site_code, use_fastsurfer = use_fastsurfer)
 

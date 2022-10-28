@@ -2,6 +2,7 @@ import os
 import argparse
 from subprocess import Popen,  STDOUT, DEVNULL
 import shutil
+from meld_classifier.tools_commands_prints import get_m
 
 
 def move_to_xhemi_flip(subject_id, subjects_dir):
@@ -32,7 +33,7 @@ def move_to_xhemi_flip(subject_id, subjects_dir):
         proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc.wait()
 
-    print(f'INFO: move feature to xhemi flip for {subject_id}')
+    print(get_m(f'Move feature to xhemi flip', subject_id, 'INFO'))
     for measure in measures:
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure}"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/lh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"

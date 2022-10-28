@@ -5,10 +5,11 @@ import time
 from scripts.new_patient_pipeline.run_script_segmentation import run_script_segmentation
 from scripts.new_patient_pipeline.run_script_preprocessing import run_script_preprocessing
 from scripts.new_patient_pipeline.run_script_prediction import run_script_prediction
+from meld_classifier.tools_commands_prints import get_m
 
 class Logger(object):
-    def __init__(self, filename="Default"):
-        self.terminal = sys.stdout
+    def __init__(self, sys_type=sys.stdout, filename="Default"):
+        self.terminal = sys_type
         self.filename = filename + time.strftime('%Y-%m-%d-%H-%M-%S') + '.log'
         self.log = open(self.filename, "a")
 
@@ -84,7 +85,8 @@ if __name__ == "__main__":
      
     #write terminal output in a log
     file_path=os.path.join(os.path.abspath(os.getcwd()), 'MELD_pipeline_')
-    sys.stdout = Logger(file_path)
+    sys.stdout = Logger(sys.stdout,file_path)
+    sys.stderr = Logger(sys.stderr, file_path)
 
     args = parser.parse_args()
     print(args)
@@ -96,8 +98,9 @@ if __name__ == "__main__":
         os.sys.exit(-1)
 
     #---------------------------------------------------------------------------------
-    ### SEGMENTATION ###  
+    ### SEGMENTATION ###
     if not args.skip_segmentation:
+        print(get_m(f'Call script segmentation', None, 'SCRIPT 1'))
         run_script_segmentation(
                             site_code = args.site_code,
                             list_ids=args.list_ids,
@@ -105,10 +108,12 @@ if __name__ == "__main__":
                             use_parallel=args.parallelise, 
                             use_fastsurfer=args.fastsurfer,
                             )
+    else:
+        print(get_m(f'Skip script segmentation', None, 'SCRIPT 1'))
 
     #---------------------------------------------------------------------------------
     ### PREPROCESSING ###
-
+    print(get_m(f'Call script preprocessing', None, 'SCRIPT 2'))
     run_script_preprocessing(
                     site_code=args.site_code,
                     list_ids=args.list_ids,
@@ -120,7 +125,7 @@ if __name__ == "__main__":
     #---------------------------------------------------------------------------------
     ### PREDICTION ###
     if not args.harmo_only:
-
+        print(get_m(f'Call script prediction', None, 'SCRIPT 3'))
         run_script_prediction(
                             site_code = args.site_code,
                             list_ids=args.list_ids,
@@ -129,5 +134,7 @@ if __name__ == "__main__":
                             no_report = args.no_report,
                             split = args.split,
                             )
+    else:
+        print(get_m(f'Skip script predition', None, 'SCRIPT 3'))
                 
     print(f'You can find a log of the pipeline at {file_path}')
