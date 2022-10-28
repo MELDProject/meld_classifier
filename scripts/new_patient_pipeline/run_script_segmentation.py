@@ -256,10 +256,13 @@ def smooth_features_new_subjects(subject_ids, output_dir):
     c_raw = MeldCohort(hdf5_file_root="{site_code}_{group}_featurematrix.hdf5", dataset=tmp.name, data_dir=BASE_PATH)
     smoothing = Preprocess(c_raw, write_hdf5_file_root="{site_code}_{group}_featurematrix_smoothed.hdf5", data_dir=output_dir)
     
+    #file to store subject with outliers vertices
+    outliers_file=opj(output_dir, 'list_subject_extreme_vertices.csv')
+
     print('INFO: smoothing features')
     for feature in np.sort(list(set(features))):
         print(feature)
-        smoothing.smooth_data(feature, features[feature], clipping_params=CLIPPING_PARAMS_FILE)
+        smoothing.smooth_data(feature, features[feature], clipping_params=CLIPPING_PARAMS_FILE, outliers_file=outliers_file)
 
     tmp.close()
     
@@ -338,7 +341,7 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     extract_features(subject, fs_folder=fs_folder, output_dir=output_dir)
 
     ### SMOOTH FEATURES ###
-    smooth_features_new_subjects(subject, output_dir=output_dir )
+    smooth_features_new_subjects(subject, output_dir=output_dir)
 
 def run_script_segmentation(site_code, list_ids=None,sub_id=None, use_parallel=False, use_fastsurfer=False ):
     site_code = str(site_code)

@@ -10,6 +10,7 @@ import nibabel as nb
 import os
 import h5py
 import random
+import csv
 import json
 import sys
 import pickle
@@ -450,7 +451,7 @@ class Preprocess:
         vals = np.clip(vals, min_p, max_p)
         return vals, num
     
-    def smooth_data(self, feature, fwhm, clipping_params):
+    def smooth_data(self, feature, fwhm, clipping_params, outliers_file=None):
         """smooth features with given fwhm for all subject and save in new hdf5 file"""
         # create smooth name
         feature_smooth = self.feat.smooth_feat(feature, fwhm)
@@ -477,7 +478,19 @@ class Preprocess:
                     with open(os.path.join(self.meld_dir,clipping_params), "r") as f:
                         params = json.loads(f.read())
                         vals_lh, num_lh = self.clip_data(vals_lh, params[feature])
-                        vals_rh, num_rh = self.clip_data(vals_rh, params[feature]);
+                        vals_rh, num_rh = self.clip_data(vals_rh, params[feature])
+                        if (num_lh>0) or (num_rh>0):
+                            print(f'WARNING: subject:{id_sub} - feature: {feature} - {num_lh + num_rh} extremes vertices')
+                            header_name = ['subject', 'feature', 'num vertices outliers left', 'num vertices outliers right']
+                            if outliers_file!=None:
+                                need_header=False
+                                if not os.path.isfile(outliers_file):
+                                    need_header=True
+                                with open(outliers_file, 'a') as f:
+                                    writer = csv.writer(f)
+                                    if need_header:
+                                        writer.writerow(header_name)
+                                    writer.writerow([id_sub, feature, num_lh, num_rh])
                 vals_matrix_lh.append(vals_lh)
                 vals_matrix_rh.append(vals_rh)
                 subject_include.append(id_sub)
