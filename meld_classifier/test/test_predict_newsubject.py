@@ -53,7 +53,7 @@ def test_predict_newsubject():
     f.close()
 
 
-    # call new_pt_pipeline_script3.py script
+    # call script run_script_prediction.py
     print("calling")
     dir_path = os.path.dirname(os.path.realpath(__file__))
     script_path = os.path.abspath(os.path.join(dir_path, "../../scripts/new_patient_pipeline/run_script_prediction.py"))

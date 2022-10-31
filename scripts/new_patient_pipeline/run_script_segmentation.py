@@ -255,7 +255,7 @@ def smooth_features_new_subjects(subject_ids, output_dir):
         ".on_lh.wm_FLAIR_1.mgh": 10,
     }
 
-    print(get_m(f'Smooth features', subject_ids[0], 'STEP3'))
+    print(get_m(f'Start smoothing features', subject_ids, 'STEP 3'))
 
 
     if isinstance(subject_ids, str):
@@ -320,7 +320,6 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
     #### SMOOTH FEATURES #####
     #TODO: parallelise here
     for subject in subject_ids:
-        print(get_m(f'Start smoothing features', subject, 'STEP 3'))
         smooth_features_new_subjects(subject, output_dir=output_dir)
 
 def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer=False, verbose=False):

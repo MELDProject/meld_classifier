@@ -66,7 +66,7 @@ if __name__ == "__main__":
                         action="store_true",
                         help='Skip the segmentation and extraction of the MELD features',
                         )
-    parser.add_argument('--no_prediction_nifti',
+    parser.add_argument('--no_nifti',
                         action="store_true",
                         default=False,
                         help='Only predict. Does not produce prediction on native T1, nor report',
@@ -137,7 +137,7 @@ if __name__ == "__main__":
                             site_code = args.site_code,
                             list_ids=args.list_ids,
                             sub_id=args.id,
-                            no_prediction_nifti = args.no_prediction_nifti,
+                            no_prediction_nifti = args.no_nifti,
                             no_report = args.no_report,
                             split = args.split,
                             verbose = args.debug_mode
