@@ -276,7 +276,7 @@ def smooth_features_new_subjects(subject_ids, output_dir):
 
     tmp.close()
     
-def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, site_code="", use_fastsurfer=False):
+def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, site_code="", use_fastsurfer=False, verbose=False):
     # parallel version of the pipeline, finish each stage for all subjects first
 
     ### SEGMENTATION ###
