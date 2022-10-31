@@ -65,26 +65,21 @@ python scripts/new_patient_pipeline/new_pt_pipeline.py -site <site_code> -id <su
 
 You can tune this command using additional variables and flags as detailed bellow:
 
-**Mandatory variables**:
-
-```-site <site_code>```: The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
-
-  either :
-
-   ```-id <subject_id>```: if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X
-
-  or
-
-```-ids <subjects_list>```: if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. 
-
-
-**optional variables**:
-
-```--parallelise```: use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. 
-
-```--fastsurfer```: use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. 
-
-```--skip_segmentation```: use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to ran the preprocessing and the predictions (e.g: after harmonisation)
+| **Mandatory variables**         |  Comment | 
+|-------|---|
+| ```-site <site_code>```  |  The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
+|```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
+|  ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
+| **Optional variables** |
+|```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
+|```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
+|```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to ran the preprocessing and the predictions (e.g: after harmonisation) |
+|```--harmo_only``` | Use this flag to do all the processes up to the harmonisation. Usefull if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
+|**More advance variables** | 
+| ```--split``` | use this flag to split your list of subjects in smaller chunks to avoid data overload during prediction step. Usefull if running more than 30 patients at a time. |
+|```--no_nifti```| Use this flag to to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
+|```--no_report``` | Use this flag to do all the processes up to creating the prediction as a nifti file. Does not produce the pdf reports. |
+|```--debug_mode``` | use this flag to print additional information to debug the code (e.g print the commands, print errors) |
 
 
 NOTES: 
@@ -104,12 +99,11 @@ To run the whole prediction pipeline on multiples subjects with parallelisation:
 python scripts/new_patient_pipeline/new_pt_pipeline.py -site H4 -ids list_subjects.txt --parallelise
 ```
 
+## Additional information about the 3 different scripts / steps
 
-### Additional information about the 3 different scripts / steps
+### Script 1 - FreeSurfer reconstruction and smoothing
 
-#### Script 1 - FreeSurfer reconstruction and smoothing
-
-- This script:
+This script:
  1. Runs a FreeSurfer reconstruction on a participant
  2. Extracts surface-based features needed for the classifier:
     * Samples the features
@@ -124,9 +118,9 @@ To know more about the script and how to use it on its own:
 python scripts/new_patient_pipeline/run_script_segmentation.py -h
 ```
 
-#### Script 2 - Feature Preprocessing
+### Script 2 - Feature Preprocessing
 
-- This script : 
+This script : 
   1. Combat harmonised features and write in hdf5
   2. Normalise the smoothed features (intra-subject & inter-subject (by controls)) and write in hdf5
   3. Normalise the raw combat features (intra-subject, asymmetry and then inter-subject (by controls)) and write in hdf5
@@ -142,7 +136,7 @@ python scripts/new_patient_pipeline/run_script_preprocessing.py -h
 
 ### Script 3 - Lesions prediction & MELD reports
 
-- This script : 
+This script : 
 1. Run the MELD classifier and predict lesion on new subject
 2. Register the prediction back into the native nifti MRI. Results are stored in output/predictions_reports/<sub_id>/predictions.
 3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in output/predictions_reports/<sub_id>/predictions/reports.

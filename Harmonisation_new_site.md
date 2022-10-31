@@ -83,23 +83,17 @@ Note: This command will segment the brain using Freesurfer, extract the features
 
 You can tune this command using additional variables and flags as detailed bellow:
 
-**Mandatory variables**:
-
-```-site <site_code>```: The site code should start with H, e.g. H1. If you don't have a site code contact the MELD team.
-
-```-ids <subjects_list>```: The name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. 
-
-```-demos <demographic_file>```: The name of the csv file containing the demographic information as detailled in the section above. An example 'demographics_file.csv' is provided in the <meld_data_folder>.
-
-**Optional variables**:
-
-```--parallelise```: use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. 
-
-```--fastsurfer```: use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. 
-
-```--skip_segmentation```: use this flag to skips the segmentation, features extraction and smoothing. Usefull if you already have these outputs and you just want to compute the harmonisation parameters.
-
-```--harmo_only```: Use this flag to do all the process up to the harmonisation. Usefull if you want to harmonise on some subjects but do not wish to predict on them.   
+| **Mandatory variables**         |  Comment | 
+|-------|---|
+| ```-site <site_code>```  |  The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
+|either ```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
+|or ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
+|```-demos <demographic_file>```| The name of the csv file containing the demographic information as detailled in the section above. An example 'demographics_file.csv' is provided in the <meld_data_folder>.|
+| **Optional variables** |
+|```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
+|```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
+|```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to ran the preprocessing and the predictions (e.g: after harmonisation) |
+|```--harmo_only``` | Use this flag to do all the processes up to the harmonisation. Usefull if you want to harmonise on some subjects but do not wish to predict on them |
 
 
 ## What's next ? 
