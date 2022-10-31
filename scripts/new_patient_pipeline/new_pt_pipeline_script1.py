@@ -89,7 +89,9 @@ if __name__ == '__main__':
     os.makedirs(output_dir, exist_ok=True)
     
     # Create temporary list of ids
-    subject_ids=os.path.join(BASE_PATH, 'subject_for_freesurfer.txt')
+    import tempfile 
+    subject_ids = tempfile.NamedTemporaryFile().name
+    print(subject_ids)
     with open(subject_ids, 'w') as f:
         f.write(subject)
     
@@ -106,4 +108,5 @@ if __name__ == '__main__':
     
     #delete temporary list ids
     os.remove(subject_ids)
+    # subject_ids.close()
     
