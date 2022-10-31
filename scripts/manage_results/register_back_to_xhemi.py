@@ -55,13 +55,18 @@ def correct_interpolation_error(input_mgh,input_surf,output_mgh):
     mt.save_mgh(output_mgh,reindexed_clustered,nb.load(input_mgh))
     return
 
-def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, verbose=False):
+def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, template = 'fsaverage_sym', verbose=False):
     ''' move the predictions from fsaverage to native space
     inputs:
         subject_ids :  subjects ID in an array
         subjects_dir :  freesurfer subjects directory 
         output_dir :  directory to save final prediction in native space
     '''
+    
+    #copy template
+    if not os.path.isdir(opj(subjects_dir,template)):
+        shutil.copytree(opj(os.environ['FREESURFER_HOME'],'subjects',template), opj(subjects_dir, os.path.basename(template)))
+
     for subject_id in subject_ids:
         # Moves left hemi from fsaverage to native space
         # --src is the source image i.e. the map you want to move back so change to the name of the cluster map in fsaverage_sym that you want to move back
