@@ -68,8 +68,8 @@ You can tune this command using additional variables and flags as detailed bello
 | **Mandatory variables**         |  Comment | 
 |-------|---|
 | ```-site <site_code>```  |  The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
-|```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
-|  ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
+|either ```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
+|or ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
 | **Optional variables** |
 |```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
 |```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
