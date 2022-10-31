@@ -110,8 +110,8 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         #predict on new subjects 
         predict_subjects(subject_ids=subject_ids_chunk, 
                        output_dir=classifier_output_dir,  
-                       plot_images=False, 
-                       saliency=False,
+                       plot_images=True, 
+                       saliency=True,
                        experiment_path=experiment_path, 
                        experiment_name=experiment_name, 
                        hdf5_file_root= DEFAULT_HDF5_FILE_ROOT)
