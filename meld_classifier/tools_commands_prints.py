@@ -16,6 +16,7 @@ def run_command(command, verbose=False):
         print(get_m(command, None, 'COMMAND'))
     # proc = subprocess.run(command, shell=True, capture_output=True)
     proc = Popen(command, shell=True, )
+    proc.wait()
     if proc.stderr:
         raise subprocess.CalledProcessError(
                 returncode = proc.returncode,
