@@ -37,7 +37,6 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
             command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.gm_FLAIR_{d}.mgh --hemi {hemi} --projfrac {d} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
             # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
-            proc.wait()
 
         print(get_m(f'Sample FLAIR features : {dswm_features_to_generate}', subject_id, 'INFO'))
         # Sample FLAIR 0.5mm and 1mm subcortically & smooth using 10mm Gaussian kernel
@@ -47,7 +46,7 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
             command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.wm_FLAIR_{dwm}.mgh --hemi {hemi} --projdist -{dwm} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
             # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
-            proc.wait()
+
     else:
         print(get_m(f'No FLAIR.mgh found. Skip sampling FLAIR feature', subject_id, 'INFO'))
 
@@ -59,28 +58,28 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
         command = f"SUBJECTS_DIR={subjects_dir} mris_curvature_stats -f white -g --writeCurvatureFiles {subject_id} {hemi} curv"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_curvature_stats -f pial -g --writeCurvatureFiles {subject_id} {hemi} curv"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         # Convert mean curvature and sulcal depth to .mgh file type
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.curv {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.curv.mgh"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.sulc {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.sulc.mgh"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.pial.K.crv {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K.mgh"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         # get gaussian curvature
         print(get_m(f'Compute gaussian curvature', subject_id, 'INFO'))
@@ -94,14 +93,14 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
         command = f"SUBJECTS_DIR={subjects_dir} mris_fwhm --s {subject_id} --hemi {hemi} --cortex --smooth-only --fwhm 20 --i {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K_filtered.mgh --o {subjects_dir}/{subject_id}/surf_meld/{hemi}.pial.K_filtered.sm20.mgh"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
-        proc.wait()
+
 
         # get thickness
         print(get_m(f'Get thickness and white-grey matter contrast', subject_id, 'INFO'))
         command = f"SUBJECTS_DIR={subjects_dir} mris_convert -c {subjects_dir}/{subject_id}/surf/{hemi}.thickness {subjects_dir}/{subject_id}/surf/{hemi}.white {subjects_dir}/{subject_id}/surf_meld/{hemi}.thickness.mgh"
         # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command)
-        proc.wait()
+
 
 
         shutil.copy(
