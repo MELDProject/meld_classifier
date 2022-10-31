@@ -66,6 +66,7 @@ def test_predict_newsubject():
                     list_txt_file_path,
                     "-site",
                     data_parameters['site'],
+                    "--debug_mode"
                 ]
             )
 
@@ -83,7 +84,7 @@ def test_predict_newsubject():
     expected_prediction = load_prediction(subject,os.path.join(exp_path, data_parameters['expected_prediction_hdf5_file']))
     for hemi in ['lh','rh']:
         diff_sum = (np.abs(prediction[hemi] - expected_prediction[hemi])).sum()
-        print(f'Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
+        print(f'Test HDF5 results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
         assert diff_sum <= 10
 
     # compare prediction on mri native
@@ -91,6 +92,6 @@ def test_predict_newsubject():
         prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['prediction_nii_file'].format(hemi))).get_fdata()
         expected_prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
         diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
-        print(f'Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
+        print(f'Test nifti results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
         assert diff_sum <= 10
  
