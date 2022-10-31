@@ -34,7 +34,7 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
             # sampling volume to surface
             hemi = dsf[0]
             d = dsf[1]
-            command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.gm_FLAIR_{d}.mgh --hemi {hemi} --projfrac {d} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
+            command = f"SUBJECTS_DIR='' mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.gm_FLAIR_{d}.mgh --hemi {hemi} --projfrac {d} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
             # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
 
@@ -43,10 +43,10 @@ def sample_flair_smooth_features(subject_id, subjects_dir, verbose=False):
         for dswmf in dswm_features_to_generate:
             hemi = dswmf[0]
             dwm = dswmf[1]
-            command = f"SUBJECTS_DIR={subjects_dir} mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.wm_FLAIR_{dwm}.mgh --hemi {hemi} --projdist -{dwm} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
+            command = f"SUBJECTS_DIR='' mri_vol2surf --src {subjects_dir}/{subject_id}/mri/FLAIR.mgz --out {subjects_dir}/{subject_id}/surf_meld/{hemi}.wm_FLAIR_{dwm}.mgh --hemi {hemi} --projdist -{dwm} --srcreg {subjects_dir}/{subject_id}/mri/transforms/Identity.dat --trgsubject {subjects_dir}/{subject_id} --surf white"
             # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
-
+		
     else:
         print(get_m(f'No FLAIR.mgh found. Skip sampling FLAIR feature', subject_id, 'INFO'))
 
