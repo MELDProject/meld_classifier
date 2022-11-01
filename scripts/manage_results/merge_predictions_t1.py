@@ -34,7 +34,6 @@ def merge_predictions_t1(subject_ids, subjects_dir, output_dir, verbose=False):
 
             #binarise predictions >0 to get mask of labels
             command = f'fslmaths {prediction_file} -bin {output_dir_subj}/labelmask.nii.gz'
-            print(command)
             proc = run_command(command, verbose=verbose)
 
             # multiply prediction by -1 and add 1, then get inverse of label mask

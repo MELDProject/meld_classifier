@@ -135,7 +135,7 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
             #Merged predictions and T1
             print(get_m(f'Merge prediction and T1', subject_ids_chunk, 'STEP 4'))
             merge_predictions_t1(subject_ids=subject_ids_chunk, 
-                                      subjects_dir=subjects_dir, 
+                                      subjects_dir=data_dir, 
                                       output_dir=predictions_output_dir, 
                                       verbose=verbose)
         
