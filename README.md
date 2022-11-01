@@ -25,7 +25,11 @@ We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage 
 Install MELD classifier and python dependencies:
 ```bash
 # checkout and install the github repo 
-git clone https://github.com/MELDProject/meld_classifier.git
+# TEMPORARY TO TEST THE NEW BRANCH : 
+git clone -b test_meld_v1.1.0 https://github.com/MELDProject/meld_classifier.git
+#TO CHANGE BEFORE RELEASE WITH: 
+#git clone https://github.com/MELDProject/meld_classifier.git 
+
 # enter the meld_classifier directory
 cd meld_classifier
 # create the meld classifier environment with all the dependencies 
