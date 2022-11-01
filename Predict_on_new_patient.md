@@ -158,9 +158,18 @@ After viewing these images, we recommend then viewing the predictions superimpos
 - Performing quality control
 - Viewing the .png images of predicted lesions
 
+### Main outputs
+
+The predictions are saved as NIFTI files in the folder: 
+/output/predictions_reports/<sub_id>/predictions
+- prediction.nii corresponds to the prediction mask for the whole brain
+- lh.prediction.nii and rh.prediction.nii correspond to the predictions masks for left and right hemispheres
+- prediction_merged_t1.nii.gz corresponds to the predictions masks merged with T1 in RGB format. Can be viewed on RGB viewer or used to transfert on PACS
+
+
 ### Viewing the predicted clusters
 The MELD pdf report and .png images of the predicted lesions are saved in the folder:
- /output/predictions_reports/<sub_id>/predictions/reports
+ /output/predictions_reports/<sub_id>/reports
  
 
 The first image is called inflatbrain_<sub_id>.png
