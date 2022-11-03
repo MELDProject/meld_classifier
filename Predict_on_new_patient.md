@@ -6,7 +6,7 @@ With the MELD classifier pipeline
 
 Note: No demographic information are required for this process.
 
-<ins>New site</ins>: If you would like to predict lesions on patients from **new epilepsy centres** or **new MRI scanners or updated T1 / FLAIR sequences** that were not used to train the classifier, you will need to first compute the harmonisation parameters for your site following the [Harmonisation_new_site.md](Harmonisation_new_site.md). This step needs to be done only once, then you can follow the same guidelines than existing site. 
+<ins>New site</ins>: If you would like to predict lesions on patients from **new epilepsy centres** or **new MRI scanners or updated T1 / FLAIR sequences** that were not used to train the classifier, you will need to first compute the harmonisation parameters for your site following the [Harmonisation_new_site.md](Harmonisation_new_site.md). This step needs to be done only once, then you can follow the same guidelines as an existing site. 
 
 Note: Demographic information (e.g age and sex) will be required for this process.
 
