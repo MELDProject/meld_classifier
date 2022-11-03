@@ -1,6 +1,6 @@
 # Compute the harmonisation parameters for a new site/scanner
 
-This guidelines will explain how to compute the harmonisation parameters needed to predict lesions on patients from new epilepsy centres, new MRI scanners or updated T1 / FLAIR sequences that were not used to train the MELD classifier. 
+This guideline explains how to compute the harmonisation parameters needed to predict lesions on patients from new epilepsy centres, new MRI scanners or updated T1 / FLAIR sequences that were not used to train the MELD classifier. 
 
 Note: 
 - Demographic information (e.g age and sex) will be required for this process.
