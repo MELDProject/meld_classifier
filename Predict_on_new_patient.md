@@ -2,7 +2,7 @@
 
 With the MELD classifier pipeline 
 
-<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results. (NEED UPDATE)
+<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
 
 Note: No demographic information are required for this process.
 
