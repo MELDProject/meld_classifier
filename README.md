@@ -64,7 +64,7 @@ pytest
 ```
 Note: If you run into errors at this stage and need help, you can re-run the command below to save the terminal outputs in a txt file, and send it to us. We can then work with you to solve any problems.
   ```bash
-  pytest | tee pytest_errors.log
+  pytest -s | tee pytest_errors.log
   ```
   You will find this pytest_errors.log file in <path_to_meld_classifier>. 
 
