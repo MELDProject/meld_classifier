@@ -18,7 +18,7 @@ def merge_predictions_t1(subject_ids, subjects_dir, output_dir, verbose=False):
     for subject_id in subject_ids:
         
         # initialise
-        t1_file=glob.glob(opj(subjects_dir, subject_id, 'T1', 'T1*.nii*'))[0]
+        t1_file=glob.glob(opj(subjects_dir, subject_id, 'T1', '*T1*.nii*'))[0]
         output_dir_subj = opj(output_dir, subject_id, 'predictions')
         prediction_file=opj(output_dir_subj, 'prediction.nii')
 

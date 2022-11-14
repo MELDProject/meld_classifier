@@ -6,7 +6,7 @@ Note:
 - Demographic information (e.g age and sex) will be required for this process.
 - If you are from an epilepsy centre who's data was used to train the classifier, you can directly refer to the guidelines from the [Predict_on_new_patient](Predict_on_new_patient.md)
 
-In the following, we describe the steps needed to compute the harmonisation parameters for a new site. Once you have done the process once, you can follow the general guidelines from[Predict_on_new_patient](Predict_on_new_patient.md) to predict on your new subject.
+In the following, we describe the steps needed to compute the harmonisation parameters for a new site, new MRI scanner or updated T1/FLAIR sequences. Once you have done the process once, you can follow the general guidelines from[Predict_on_new_patient](Predict_on_new_patient.md) to predict on your new subject.
 
 ## Disclaimer
 
@@ -28,16 +28,16 @@ with `<freesurfer_installation_directory>` being the path to where your Freesurf
 ## Compute the harmonisation paramaters 
 
 The harmonisation parameters are computed using [Distributed Combat](https://doi.org/10.1016/j.neuroimage.2021.118822).
-To get these parameters you will need a small cohort of subjects acquired from the same scanner and under the same protocol (sequence, parameters, ...).
+To get these parameters you will need a cohort of subjects acquired from the same scanner and under the same protocol (sequence, parameters, ...).
 Subjects can be controls and/or patients, but we advise to use ***at least 30 subjects*** to enable an accurate harmonisation. 
 Try to ensure the data are high quality (i.e no blurring, no artefacts, no cavities in the brain).
 
 ### Get your new site code !
-Prior everything you should contact the MELD team by mail (MELD.study@gmail.com) to get your new site_code. Don't forget to mention your institution and provide us with a mail for contact. This code will be needed to organise your data and run the code as detailled below. 
+Prior everything you should contact the MELD team by mail (MELD.study@gmail.com) to get your new site_code. Don't forget to mention your institution and provide us with a email address. This site code will be needed to organise your data and run the code as detailled below. Please note - if you are an existing site BUT have a new MRI scanner or updated MRI sequences, you need a new site code!
 
 ### First step - Organising your data!
 
-(Comming soon: enable BIDS format)
+(Comming soon: enabling the harmonisation to work on BIDS formatted data)
 
 You will need to organise the MRI data of the subjects
 
@@ -97,5 +97,5 @@ You can tune this command using additional variables and flags as detailed bello
 
 
 ## What's next ? 
-Once you have successfully computed the harmonisation parameters, they should be saved on your <meld_data_folder>.
+Once you have successfully computed the harmonisation parameters, they should be saved in your <meld_data_folder>. The file is called 'MELD_<site_code>_combat_parameters.hdf5' and is stored in 'output/preprocessed_surf_data/MELD_<site_code>/'.
 You can now refer to the guidelines [Predict_on_new_patient.md](Predict_on_new_patient.md) to predict lesion in patients from that same scanner/site.

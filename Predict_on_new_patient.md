@@ -2,7 +2,7 @@
 
 With the MELD classifier pipeline 
 
-<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results. (NEED UPDATE)
+<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
 
 Note: No demographic information are required for this process.
 
@@ -28,7 +28,7 @@ with `<freesurfer_installation_directory>` being the path to where your Freesurf
 
 ### First step - Organising your data!
 
-(Comming soon: enable BIDS format)
+(Comming soon: enabling the classifier to run on BIDS formatted data)
 
 You need to organise the MRI data for the patients you want to run the classifier on.
 
@@ -73,11 +73,11 @@ You can tune this command using additional variables and flags as detailed bello
 | **Optional variables** |
 |```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
 |```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
-|```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to ran the preprocessing and the predictions (e.g: after harmonisation) |
-|```--harmo_only``` | Use this flag to do all the processes up to the harmonisation. Usefull if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
-|**More advance variables** | 
-| ```--split``` | use this flag to split your list of subjects in smaller chunks to avoid data overload during prediction step. Usefull if running more than 30 patients at a time. |
-|```--no_nifti```| Use this flag to to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
+|```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to run the preprocessing and the predictions (e.g: after harmonisation) |
+|```--harmo_only``` | Use this flag to do all the processes up to the harmonisation. Useful if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
+|**More advanced variables** | 
+| ```--split``` | use this flag to split your list of subjects in smaller chunks to avoid data overload during prediction step. Useful if running more than 30 patients at a time. |
+|```--no_nifti```| Use this flag to run to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
 |```--no_report``` | Use this flag to do all the processes up to creating the prediction as a nifti file. Does not produce the pdf reports. |
 |```--debug_mode``` | use this flag to print additional information to debug the code (e.g print the commands, print errors) |
 
@@ -121,7 +121,7 @@ python scripts/new_patient_pipeline/run_script_segmentation.py -h
 ### Script 2 - Feature Preprocessing
 
 This script : 
-  1. Combat harmonised features and write in hdf5
+  1. Combat harmonise features and write into hdf5
   2. Normalise the smoothed features (intra-subject & inter-subject (by controls)) and write in hdf5
   3. Normalise the raw combat features (intra-subject, asymmetry and then inter-subject (by controls)) and write in hdf5
 
