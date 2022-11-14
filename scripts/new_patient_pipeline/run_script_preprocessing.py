@@ -159,8 +159,8 @@ def new_site_harmonisation(subject_ids, site_code, demographic_file, output_dir=
     
     ### INITIALISE ###
     #check enough subjects for harmonisation
-    if len(np.unique(subject_ids))<30:
-        sys.exit(get_m(f'here are not enough subjects to proceed to an acurate harmonisation of the data... Rerun with at least 30 subjects', None, 'ERROR'))
+    if len(np.unique(subject_ids))<20:
+        print(get_m(f'We recommend to use at least 20 subjects for an acurate harmonisation of the data. Here you are using only {len(np.unique(subject_ids))}', None, 'WARNING'))
 
     #create dataset
     tmp = tempfile.NamedTemporaryFile(mode="w")
