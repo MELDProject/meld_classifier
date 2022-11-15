@@ -3,6 +3,27 @@ import numpy as np
 import patsy
 import math
 
+def biweight_midvar(data, center=None, axis=None):
+    if center is None:
+        center = np.median(data, axis=axis, keepdims=True)
+        
+    mad = np.median(abs(data - center), axis=axis, keepdims=True)
+    
+    d = data - center
+    u = d/(9*mad)
+    
+    indic = np.abs(u) < 1
+    
+    num = d * d * (1. - u**2)**4
+    num[~indic] = 0.
+    num = np.sum(num, axis=axis)
+    
+    dem = (1. - u**2) * (1. - 5.*u**2)
+    dem[~indic] = 0.
+    dem = np.abs(np.sum(dem, axis=axis))**2
+    
+    n = np.sum(np.ones(data.shape), axis=axis)
+    return n * num/dem
 
 def betaNA(yy, designn):
     # designn <- designn[!is.na(yy),]
@@ -27,15 +48,15 @@ def bprior(delta_hat):
 
 
 def apriorMat(delta_hat):
-    m = delta_hat.mean(axis=0)
-    s2 = delta_hat.var(ddof=1, axis=0)
+    m = delta_hat.mean(axis=1)
+    s2 = delta_hat.var(ddof=1, axis=1)
     out = (m * s2 + m ** 3) / s2
     return out
 
 
 def bpriorMat(delta_hat):
-    m = delta_hat.mean(axis=0)
-    s2 = delta_hat.var(ddof=1, axis=0)
+    m = delta_hat.mean(axis=1)
+    s2 = delta_hat.var(ddof=1, axis=1)
     out = (m * s2 + m ** 3) / s2
     return out
 
@@ -48,7 +69,7 @@ def postvar(sum2, n, a, b):
     return (0.5 * sum2 + b) / (n / 2.0 + a - 1.0)
 
 
-def it_sol(sdat, g_hat, d_hat, g_bar, t2, a, b, conv=0.0001):
+def it_sol(sdat, g_hat, d_hat, g_bar, t2, a, b, conv=0.0001, robust=False):
     n = (1 - np.isnan(sdat)).sum(axis=1)
     g_old = g_hat.copy()
     d_old = d_hat.copy()
@@ -58,16 +79,23 @@ def it_sol(sdat, g_hat, d_hat, g_bar, t2, a, b, conv=0.0001):
     count = 0
     while change > conv:
         g_new = np.array(postmean(g_hat, g_bar, n, d_old, t2))
-        sum2 = ((sdat - np.dot(g_new.reshape((g_new.shape[0], 1)), ones)) ** 2).sum(
-            axis=1
-        )
+        
+        if robust:
+            sum2 = n*biweight_midvar(sdat,center=g_new.reshape((g_new.shape[0], 1)),axis=1)
+            # sum2 = n*(1.482602218505602*np.median(abs(sdat - np.dot(g_new.reshape((g_new.shape[0], 1)), ones)), axis = 1)) ** 2
+        else:
+            sum2 = ((sdat - np.dot(g_new.reshape((g_new.shape[0], 1)), ones)) ** 2).sum(
+                axis=1
+            )
+        
         d_new = postvar(sum2, n, a, b)
-
         # change = max(
         #     (abs(g_new - g_old.item()) / g_old.item()).max(),
         #     (abs(d_new - d_old) / d_old).max(),
         # )
         change = max(max(abs(g_new - g_old) / g_old), max(abs(d_new - d_old) / d_old))
+        # print(max(abs(g_new - g_old) / g_old), "," ,max(abs(d_new - d_old) / d_old))
+        
         g_old = g_new  # .copy()
         d_old = d_new  # .copy()
         count = count + 1
@@ -220,39 +248,45 @@ def getStandardizedDataDC(dat, data_dict, design, hasNAs, central_out):
     }
 
 
-def getNaiveEstimators(s_data, data_dict, hasNAs, mean_only):
+def getNaiveEstimators(s_data, data_dict, hasNAs, mean_only, robust):
     # todo double check this
     batch_design = data_dict["batch_design"]
     batches = data_dict["batches"]
-    if not hasNAs:
-        gamma_hat = np.matmul(
-            np.linalg.inv(np.matmul(batch_design.transpose(), batch_design)),
-            batch_design.transpose(),
-        )
-        gamma_hat = np.matmul(gamma_hat, s_data.transpose())
+    
+    if robust:
+        gamma_hat = []
+        for i in batches:
+            gamma_hat.append(np.median(s_data.iloc[:, i[0]], axis = 1))
+        gamma_hat = np.array(gamma_hat)
     else:
-        # todo check
-        gamma_hat = s_data.apply(betaNA, axis=0, args=(batch_design,))
-    delta_hat = None
+        if not hasNAs:
+            gamma_hat = np.matmul(np.linalg.inv(np.matmul(batch_design.transpose(), batch_design)), batch_design.transpose(),)
+            gamma_hat = np.matmul(gamma_hat, s_data.transpose())
+        else:
+            gamma_hat = s_data.apply(betaNA, axis=0, args=(batch_design,))
+    
+    delta_hat = []
     for i in batches:
         if mean_only:
-            delta_hat = pd.concat([delta_hat, np.ones(s_data.shape[1])])
+            delta.hat.append(np.ones(s_data.shape[1]))
+        elif robust:
+            delta_hat.append(biweight_midvar(s_data.iloc[:, i[0]],axis=1))
         else:
-            delta_hat = pd.concat(
-                 [delta_hat, pd.DataFrame(np.var(s_data.iloc[:, i[0]].astype(np.float64),axis=1,ddof=1))]
-             )
-    # todo not sure why I had to take diagonal
-    return {"gamma_hat": gamma_hat, "delta_hat": np.array(delta_hat).ravel()}
+            delta_hat.append(np.var(s_data.iloc[:, i[0]],axis=1,ddof=1))
+    delta_hat = np.array(delta_hat)
+    return {"gamma_hat": gamma_hat, "delta_hat": delta_hat}
 
 
 def getEbEstimators(
-    naiveEstimators, s_data, data_dict, parametric=True, mean_only=False
+    naiveEstimators, s_data, data_dict, parametric=True, mean_only=False, robust = False
 ):
-    gamma_hat = (
-        naiveEstimators["gamma_hat"]
-        .to_numpy()
-        .reshape(naiveEstimators["gamma_hat"].shape[1])
-    )
+#     gamma_hat = (
+#         naiveEstimators["gamma_hat"]
+#         .to_numpy()
+#         .reshape(naiveEstimators["gamma_hat"].shape[1])
+#     )
+    
+    gamma_hat = naiveEstimators["gamma_hat"]
     delta_hat = naiveEstimators["delta_hat"]
     # pd.DataFrame(naiveEstimators["delta_hat"].reshape(1, len(naiveEstimators["delta_hat"])))
     batches = data_dict["batches"]
@@ -264,17 +298,33 @@ def getEbEstimators(
         gamma_star = delta_star = []
         for i in range(nbatch):
             if mean_only:
-                gamma_star.append(postmean(gamma_hat[i], gamma_bar[i], 1, 1, t2))
+                gamma_star.append(postmean(gamma_hat[i,:], gamma_bar[i], 1, 1, t2[i]))
                 delta_star.append(np.ones(len(s_data)))
+            elif robust:
+                #gamma_star.append(postmean(gamma_hat, gamma_bar, 1, delta_hat, t2))
+                #delta_star.append(delta_hat)
+                
+                temp = it_sol(
+                    s_data.iloc[:, batches[i][0]],
+                    gamma_hat[i],
+                    delta_hat[i],
+                    gamma_bar[i],
+                    t2[i],
+                    a_prior[i],
+                    b_prior[i],
+                    robust=robust
+                )
+                gamma_star.append(temp[0])
+                delta_star.append(temp[1])
             else:
                 temp = it_sol(
                     s_data.iloc[:, batches[i][0]],
-                    gamma_hat,
-                    delta_hat,
-                    gamma_bar,
-                    t2,
-                    a_prior,
-                    b_prior,
+                    gamma_hat[i],
+                    delta_hat[i],
+                    gamma_bar[i],
+                    t2[i],
+                    a_prior[i],
+                    b_prior[i],
                 )
                 gamma_star.append(temp[0])
                 delta_star.append(temp[1])
@@ -290,12 +340,12 @@ def getEbEstimators(
                 gamma_star.append(temp[0])
                 delta_star.append(temp[1])
         return gamma_star, delta_star
-
-    gamma_bar = gamma_hat.mean().mean()
-    # t2 = gamma_hat.var(axis=0)
-    t2 = np.cov(gamma_hat)
+    
+    gamma_bar = gamma_hat.mean(axis=1)
+    t2 = gamma_hat.var(ddof=1, axis=1)
     a_prior = apriorMat(delta_hat)
     b_prior = bpriorMat(delta_hat)
+    
     tmp = getParametricEstimators() if parametric else getNonParametricEstimators()
     if ref_batch is not None:
         # set reference batch mean equal to 0
@@ -313,15 +363,21 @@ def getEbEstimators(
 
 
 def getNonEbEstimators(naiveEstimators, data_dict):
+    batches = data_dict["batches"]
+    nbatch = data_dict["n_batch"]
+    ref_batch = data_dict["ref_batch"]
+    ref = data_dict["ref"]
+    
+    gamma_hat = naiveEstimators["gamma_hat"]
+    delta_hat = naiveEstimators["delta_hat"]
+    
     out = {}
-    out["gamma_star"] = naiveEstimators["gamma_hat"]
-    out["delta_star"] = naiveEstimators["delta_hat"]
+    out["gamma_star"] = gamma_hat
+    out["delta_star"] = delta_hat
     out["gamma_bar"] = None
     out["t2"] = None
     out["a_prior"] = None
     out["b_prior"] = None
-    ref_batch = data_dict["ref_batch"]
-    ref = data_dict["ref"]
     if ref_batch is not None:
         # set reference batch mean equal to 0
         out["gamma_star"][batches[ref]] = 0

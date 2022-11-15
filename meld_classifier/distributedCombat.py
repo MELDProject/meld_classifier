@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import pickle
-from meld_classifier import distributedCombat_helpers as helpers
+import meld_classifier.distributedCombat_helpers as helpers
 
 #' Distributed ComBat step at each site
 #'
@@ -42,6 +42,7 @@ def distributedCombat_site(
     eb=True,
     parametric=True,
     mean_only=False,
+    robust=False,
     verbose=False,
     file=None,
 ):
@@ -139,6 +140,7 @@ def distributedCombat_site(
         data_dict=data_dict_site,
         hasNAs=hasNAs,
         mean_only=mean_only,
+        robust = robust
     )
     ####################################################################
     ########################### Getting final estimators ###############
@@ -156,10 +158,11 @@ def distributedCombat_site(
             data_dict=data_dict_site,
             parametric=parametric,
             mean_only=mean_only,
+            robust=robust
         )
     else:
         estimators = helpers.getNonEbEstimators(
-            naiveEstimators=naiveEstimators, data_dict=data_dict
+            naiveEstimators=naiveEstimators, data_dict=data_dict_site
         )
 
     ######################### Correct data #############################

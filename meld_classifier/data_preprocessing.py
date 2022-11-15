@@ -311,7 +311,8 @@ class Preprocess:
                                   bat, 
                                   new_site_covars[['ages','sex','group']], 
                                   file=os.path.join(site_combat_path,f"{site_code}_{feature}_summary.pickle"), 
-                              ref_batch = 'H0')
+                              ref_batch = 'H0', 
+                              robust=True,)
         print('step2')
         dc_out = dc.distributedCombat_central(
             [os.path.join(meld_combat_path,f'MELD_{feature}.pickle'),
@@ -327,7 +328,8 @@ class Preprocess:
             pd.DataFrame(new_site_data), bat, new_site_covars[['ages','sex','group']], 
             file=pickle_file,
              central_out=dc_out, 
-            ref_batch = 'H0'
+            ref_batch = 'H0', 
+            robust=True,
         )
         #open pickle, shrink estimates and save in hdf5 and delete pickle
         with open(pickle_file, 'rb') as f:
