@@ -2,13 +2,15 @@
 
 With the MELD classifier pipeline 
 
-<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site"](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
+<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. 
 
 Note: No demographic information are required for this process.
 
 <ins>New site</ins>: If you would like to predict lesions on patients from **new epilepsy centres** or **new MRI scanners or updated T1 / FLAIR sequences** that were not used to train the classifier, you will need to first compute the harmonisation parameters for your site following the [Harmonisation_new_site.md](Harmonisation_new_site.md). This step needs to be done only once, then you can follow the same guidelines as an existing site. 
 
 Note: Demographic information (e.g age and sex) will be required for this process.
+
+We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient"](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing). This explains how to harmonise your data and how to run the classifier in much more detail as well as how to interpret the results.
 
 ## Disclaimer
 
