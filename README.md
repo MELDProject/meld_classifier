@@ -34,8 +34,9 @@ git clone -b test_meld_v1.1.0 https://github.com/MELDProject/meld_classifier.git
 # enter the meld_classifier directory
 cd meld_classifier
 # create the meld classifier environment with all the dependencies \ 
-# ! Note : If you have a new MAC1 OS system, we recommend to install the environment using the file ***environment_MAC1.yml*** instead of ***environment.yml*** in the command below
-conda env create -f environment.yml
+# ! Note : If you have a new MAC1 OS system, you will need to install the special environments for new MAC1 users in the second command below.
+conda env create -f environment.yml    # For Linux and old MAC os users
+conda env create -f environment_MAC1.yml  # For new MAC1 users 
 # activate the environment
 conda activate meld_classifier
 # install meld_classifier with pip (with `-e`, the development mode, to allow changes in the code to be immediately visible in the installation)
