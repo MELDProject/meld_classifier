@@ -30,8 +30,6 @@ with `<freesurfer_installation_directory>` being the path to where your Freesurf
 
 ### First step - Organising your data!
 
-(Comming soon: enabling the classifier to run on BIDS formatted data)
-
 You need to organise the MRI data for the patients you want to run the classifier on.
 
 In the 'input' folder where your meld data has / is going to be stored, create a folder for each patient. 
@@ -69,25 +67,25 @@ You can tune this command using additional variables and flags as detailed bello
 
 | **Mandatory variables**         |  Comment | 
 |-------|---|
-| ```-site <site_code>```  |  The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
+| ```-site <site_code>```  |  the site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
 |either ```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
 |or ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
 | **Optional variables** |
 |```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
 |```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
 |```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to run the preprocessing and the predictions (e.g: after harmonisation) |
-|```--harmo_only``` | Use this flag to do all the processes up to the harmonisation. Useful if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
+|```--harmo_only``` | use this flag to do all the processes up to the harmonisation. Useful if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
 |**More advanced variables** | 
 | ```--split``` | use this flag to split your list of subjects in smaller chunks to avoid data overload during prediction step. Useful if running more than 30 patients at a time. |
-|```--no_nifti```| Use this flag to run to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
-|```--no_report``` | Use this flag to do all the processes up to creating the prediction as a nifti file. Does not produce the pdf reports. |
+|```--no_nifti```| use this flag to run to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
+|```--no_report``` | use this flag to do all the processes up to creating the prediction as a nifti file. Does not produce the pdf reports. |
 |```--debug_mode``` | use this flag to print additional information to debug the code (e.g print the commands, print errors) |
 
 
 NOTES: 
 - you need to have set up your paths & organised your data before running this pipeline (see section **First step - Organising your data!**)
 - We recommend using the same FreeSurfer/FastSurfer version that you used to process your patient's data that was used to train the classifier (existing site) / to get the harmonisation parameters (new site).
-- Outputs of the pipeline (prediction back into the native nifti MRI and MELD reports) are stored in the folder ```output/predictions_reports/<sub_id>```. 
+- Outputs of the pipeline (prediction back into the native nifti MRI and MELD reports) are stored in the folder ```output/predictions_reports/<subject_id>```. 
 
 **Examples of use case**: 
 
@@ -140,8 +138,8 @@ python scripts/new_patient_pipeline/run_script_preprocessing.py -h
 
 This script : 
 1. Run the MELD classifier and predict lesion on new subject
-2. Register the prediction back into the native nifti MRI. Results are stored in output/predictions_reports/<sub_id>/predictions.
-3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in output/predictions_reports/<sub_id>/predictions/reports.
+2. Register the prediction back into the native nifti MRI. Results are stored in output/predictions_reports/<subjec_id>/predictions.
+3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in output/predictions_reports/<subjec_id>/predictions/reports.
 
 Notes: 
 - Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
@@ -163,10 +161,9 @@ After viewing these images, we recommend then viewing the predictions superimpos
 ### Main outputs
 
 The predictions are saved as NIFTI files in the folder: 
-/output/predictions_reports/<sub_id>/predictions
+/output/predictions_reports/<subject_id>/predictions
 - prediction.nii corresponds to the prediction mask for the whole brain
 - lh.prediction.nii and rh.prediction.nii correspond to the predictions masks for left and right hemispheres
-- prediction_merged_t1.nii.gz corresponds to 
 
 ***NEW***: You can merge the MELD predictions onto the T1 nifti file using the command below. Note that you will need to have [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation) installed on your machine. 
 ```bash
@@ -178,27 +175,27 @@ The command will create the file predictions_merged_t1.nii.gz which corresponds 
 
 ### Viewing the predicted clusters
 The MELD pdf report and .png images of the predicted lesions are saved in the folder:
- /output/predictions_reports/<sub_id>/reports
+ /output/predictions_reports/<subject_id>/reports
  
 
-The first image is called inflatbrain_<sub_id>.png
+The first image is called inflatbrain_<subject_id>.png
 
 ![inflated](images/inflatbrain_sub_id.png)
 
 This image tells you the number of predicted clusters and shows on the inflated brain where the clusters are located.
 
-The next images are mri_<sub_id>_<hemi>_c*.png
+The next images are mri_<subject_id>_<hemi>_c*.png
 
 E.g. 
 
 ![mri](images/mri_sub_id_lh_c1.png)
 
-These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<sub_id>_<hemi>_c1.png for cluster 1 and  mri_<sub_id>_<hemi>_c2.png for cluster 2.
+These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<subject_id>_<hemi>_c1.png for cluster 1 and  mri_<subject_id>_<hemi>_c2.png for cluster 2.
 
   
 ### Saliency
   
-The next images are called saliency_<sub_id>_<hemi>_c*.png. Each cluster has a saliency image associated with it. E.g.
+The next images are called saliency_<subject_id>_<hemi>_c*.png. Each cluster has a saliency image associated with it. E.g.
   
 ![saliency](images/saliency_sub_id_lh_c1.png)
   
@@ -228,7 +225,7 @@ To do this run:
 ```bash
 cd <path_to_meld_classifier>
 conda activate meld_classifier
-python scripts/new_patient_pipeline/new_pt_qc_script.py -id <sub_id>
+python scripts/new_patient_pipeline/new_pt_qc_script.py -id <subject_id>
 ```
 ![qc_surface](images/qc_surface.png)
 
@@ -255,7 +252,7 @@ Note: the classifier is only able to predict areas within the pial and white sur
 * If there is a reconstruction error due to an FCD, the classifier will only be able to detect areas within the pial and white surfaces and may miss areas of the lesion that are not correctly segmented by FreeSurfer
 * There will be false positive clusters. You will need to look at the predicted clusters with an experienced radiologist to identify the significance of detected areas
 * The classifier has only been trained on FCD lesions and we do not have data on its ability to detect other pathologies e.g. DNET / ganglioglioma / polymicrogyria. As such, the research tool should only be applied to patients with FCD / suspected FCD
-* Performance of the classifier varies according to MRI field strength, data available (e.g. T1 or T1 and FLAIR) and histopathological subtype. For more details of how the classifier performs in different cohorts, see (https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1)
+* Performance of the classifier varies according to MRI field strength, data available (e.g. T1 or T1 and FLAIR) and histopathological subtype. For more details of how the classifier performs in different cohorts, see [our paper](https://academic.oup.com/brain/advance-article/doi/10.1093/brain/awac224/6659752).
 
 ## How to cite the classifier
   
