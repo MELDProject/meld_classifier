@@ -166,7 +166,14 @@ The predictions are saved as NIFTI files in the folder:
 /output/predictions_reports/<sub_id>/predictions
 - prediction.nii corresponds to the prediction mask for the whole brain
 - lh.prediction.nii and rh.prediction.nii correspond to the predictions masks for left and right hemispheres
-- prediction_merged_t1.nii.gz corresponds to the predictions masks merged with T1 in RGB format. Can be viewed on RGB viewer or used to transfert on PACS
+- prediction_merged_t1.nii.gz corresponds to 
+
+***NEW***: You can merge the MELD predictions onto the T1 nifti file using the command below. Note that you will need to have [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation) installed on your machine. 
+```bash
+python scripts/new_patient_pipeline/merge_predictions_t1.py -id <subject_id> -t1 <path_to_t1_nifti> -pred <path_to_meld_prediction_nifti> -output_dir <where_to_save_output>
+```
+The command will create the file predictions_merged_t1.nii.gz which corresponds to the predictions masks merged with T1 in RGB format. It can be viewed on RGB viewer or used to transfert on PACS system.
+
 
 
 ### Viewing the predicted clusters

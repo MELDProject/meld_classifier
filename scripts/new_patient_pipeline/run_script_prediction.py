@@ -22,7 +22,7 @@ from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort
 from scripts.manage_results.register_back_to_xhemi import register_subject_to_xhemi
 from scripts.manage_results.move_predictions_to_mgh import move_predictions_to_mgh
-from scripts.manage_results.merge_predictions_t1 import merge_predictions_t1
+from scripts.manage_results.merge_predictions_t1 import call_merge_predictions_t1
 from scripts.manage_results.plot_prediction_report import generate_prediction_report
 from meld_classifier.tools_commands_prints import get_m
 
@@ -133,11 +133,12 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
                                       verbose=verbose)
             
             #Merged predictions and T1
-            print(get_m(f'Merge prediction and T1', subject_ids_chunk, 'STEP 4'))
-            merge_predictions_t1(subject_ids=subject_ids_chunk, 
-                                      subjects_dir=data_dir, 
-                                      output_dir=predictions_output_dir, 
-                                      verbose=verbose)
+            #TODO: remove dependancie to FSL
+            #print(get_m(f'Merge prediction and T1', subject_ids_chunk, 'STEP 4'))
+            #call_merge_predictions_t1(subject_ids=subject_ids_chunk, 
+            #                          subjects_dir=data_dir, 
+            #                          output_dir=predictions_output_dir, 
+            #                          verbose=verbose)
         
         if not no_report:
             # Create individual reports of each identified cluster

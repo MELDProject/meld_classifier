@@ -157,7 +157,7 @@ class Preprocess:
 
     def read_norm_combat_parameters(self, feature, hdf5_file):
         """reconstruct estimates dictionnary from the combat parameters hdf5 file"""
-        hdf5_file_context = h5py.File(hdf5_file, "r+")
+        hdf5_file_context = h5py.File(hdf5_file, "r")
         estimates = {}
         with hdf5_file_context as f:
             feat_dir = f[feature]
