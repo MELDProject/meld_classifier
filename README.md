@@ -17,8 +17,7 @@ The MELD surface-based FCD detection algorithm is intended for research purposes
 
 ### Prerequisites
 For preprocessing, MELD classifier requires Freesurfer. It is trained on data from versions 6 & v5.3. Please follow instructions on [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall) to install FreeSurfer v6. \
-New update ! MELD pipeline is now also working with FastSurfer (quicker version of Fresurfer). If you wish to use FastSurfer instead please follow instructions for the [native install of Fastsurfer](https://github.com/Deep-MI/FastSurfer.git) \
-You will also need FSL, see installation guidelines [here](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation)
+New update ! MELD pipeline is now also working with FastSurfer (quicker version of Fresurfer). If you wish to use FastSurfer instead please follow instructions for the [native install of Fastsurfer](https://github.com/Deep-MI/FastSurfer.git). Note that Fastsurfer requires to install Freesurfer V7.2 to works\
 
 ### Conda installation
 We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage the environment and dependencies. Please follow instructions on [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to install Anaconda.
@@ -26,15 +25,14 @@ We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage 
 Install MELD classifier and python dependencies:
 ```bash
 # checkout and install the github repo 
-# TEMPORARY TO TEST THE NEW BRANCH : 
-git clone -b test_meld_v1.1.0 https://github.com/MELDProject/meld_classifier.git
-#TO CHANGE BEFORE RELEASE WITH: 
-#git clone https://github.com/MELDProject/meld_classifier.git 
+git clone https://github.com/MELDProject/meld_classifier.git 
 
 # enter the meld_classifier directory
 cd meld_classifier
 # create the meld classifier environment with all the dependencies 
-conda env create -f environment.yml
+# ! Note : If you have a new MAC1 OS system, you will need to install the special environments for new MAC1 users in the second command below.
+conda env create -f environment.yml    # For Linux and old MAC os users
+conda env create -f environment_MAC1.yml  # For new MAC1 users 
 # activate the environment
 conda activate meld_classifier
 # install meld_classifier with pip (with `-e`, the development mode, to allow changes in the code to be immediately visible in the installation)
@@ -84,4 +82,4 @@ Please check out our [manuscript](https://academic.oup.com/brain/advance-article
 
 An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md).
 
-A guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site is found [here](https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing)(NEED UPDATE).
+A guide to using the MELD surface-based FCD detection algorithm on a new patient is found [here](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing).
