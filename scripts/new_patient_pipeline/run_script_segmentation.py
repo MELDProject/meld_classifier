@@ -282,6 +282,7 @@ def run_subjects_segmentation_and_smoothing_parallel(subject_ids, num_procs=10, 
     ### SEGMENTATION ###
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
     proc = run_command(ini_freesurfer)
+    proc.wait()
 
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH
@@ -329,6 +330,7 @@ def run_subject_segmentation_and_smoothing(subject, site_code="", use_fastsurfer
     ini_freesurfer = format("$FREESURFER_HOME/SetUpFreeSurfer.sh")
     # check_call(ini_freesurfer, shell=True, stdout = DEVNULL, stderr=STDOUT)
     proc = run_command(ini_freesurfer)
+    proc.wait()
     
     ## Make a directory for the outputs
     fs_folder = FS_SUBJECTS_PATH

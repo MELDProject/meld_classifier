@@ -14,9 +14,7 @@ def get_m(message, subject=None, type_message='INFO'):
 def run_command(command, verbose=False):
     if verbose:
         print(get_m(command, None, 'COMMAND'))
-    # proc = subprocess.run(command, shell=True, capture_output=True)
     proc = Popen(command, shell=True, )
-    proc.wait()
     if proc.stderr:
         raise subprocess.CalledProcessError(
                 returncode = proc.returncode,

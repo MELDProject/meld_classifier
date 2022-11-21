@@ -29,26 +29,32 @@ def merge_predictions_t1(subject_id, t1_file, prediction_file, output_dir, verbo
         #binarise predictions >0 to get mask of labels
         command = f'fslmaths {prediction_file} -bin {output_dir}/labelmask.nii.gz'
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # multiply prediction by -1 and add 1, then get inverse of label mask
         command = f'fslmaths {output_dir}/labelmask.nii.gz -mul -1 -add 1 -bin {output_dir}/labelmask_inv.nii.gz '
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # Threshold T1 with the intensity and multiply by the labelmask inversed
         command = f'fslmaths {t1_file} -thr 0 -div {t1_threshold} -mul {output_dir}/labelmask_inv.nii.gz {output_dir}/t1_Rch.nii.gz'
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # Threshold image at percentile 0.999
         command = f'fslmaths {output_dir}/t1_Rch.nii.gz -uthr 0.999 {output_dir}/tmp1.nii.gz'
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # Threshold image at 1 and binarise
         command = f'fslmaths {output_dir}/t1_Rch.nii.gz -thr 1 -bin {output_dir}/tmp2.nii.gz'
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # Add images together and create copy for RGB images
         command = f'fslmaths  {output_dir}/tmp1.nii.gz -add  {output_dir}/tmp2.nii.gz  {output_dir}/t1_Rch.nii.gz'
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         shutil.copy(f'{output_dir}/t1_Rch.nii.gz', f'{output_dir}/t1_Gch.nii.gz')
         shutil.copy(f'{output_dir}/t1_Rch.nii.gz', f'{output_dir}/t1_Bch.nii.gz')
@@ -64,17 +70,21 @@ def merge_predictions_t1(subject_id, t1_file, prediction_file, output_dir, verbo
             
             command = f'fslmaths {prediction_file} -thr {label} -uthr {label} -bin -mul {labelsR[label-1]} -add {output_dir}/t1_Rch.nii.gz {output_dir}/t1_Rch.nii.gz'
             proc = run_command(command, verbose=verbose)
+            proc.wait()
 
             command = f'fslmaths {prediction_file} -thr {label} -uthr {label} -bin -mul {labelsG[label-1]} -add {output_dir}/t1_Gch.nii.gz {output_dir}/t1_Gch.nii.gz'
             proc = run_command(command, verbose=verbose)
+            proc.wait()
 
             command = f'fslmaths {prediction_file} -thr {label} -uthr {label} -bin -mul {labelsB[label-1]} -add {output_dir}/t1_Bch.nii.gz {output_dir}/t1_Bch.nii.gz'
             proc = run_command(command, verbose=verbose)
+            proc.wait()
 
         #merge RGB images in one 
         command = f'fslmerge -t {output_dir}/predictions_merged_t1.nii.gz {output_dir}/t1_Rch.nii.gz {output_dir}/t1_Gch.nii.gz {output_dir}/t1_Bch.nii.gz'
         proc = run_command(command, verbose=verbose) 
-
+        proc.wait()
+        
         #delete temporary files
         os.remove(f'{output_dir}/t1_Rch.nii.gz')
         os.remove(f'{output_dir}/t1_Gch.nii.gz')

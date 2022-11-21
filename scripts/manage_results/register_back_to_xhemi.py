@@ -73,8 +73,8 @@ def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, template = 
         # --trg is the target image i.e. the name of the map you want to create in the subject's native space
         # the rest is the registration files
         command = f'SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/xhemi/classifier/lh.prediction.mgh --trg {subjects_dir}/{subject_id}/surf/lh.prediction.mgh --streg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg {subjects_dir}/{subject_id}/surf/lh.sphere.reg'
-        # check_call(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         # Moves the right hemi back from fsaverage to native. There are 2 steps
         #Step1: move left hemi fsaverage to right hemi of fsaverage
@@ -85,12 +85,12 @@ def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, template = 
         # --trg is the target image i.e. the name of the map you want to create in the subject's native space
 
         command = f'SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/xhemi/classifier/rh.prediction.mgh --trg {subjects_dir}/{subject_id}/xhemi/classifier/rh.prediction_on_rh.mgh --streg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/rh.sphere.left_right'
-        # check_call(command,shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         command = f'SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/xhemi/classifier/rh.prediction_on_rh.mgh --trg {subjects_dir}/{subject_id}/surf/rh.prediction.mgh --streg {subjects_dir}/fsaverage_sym/surf/rh.sphere.reg {subjects_dir}/{subject_id}/surf/rh.sphere.reg'
-        # check_call(command,shell=True, stdout = DEVNULL, stderr=STDOUT)
         proc = run_command(command, verbose=verbose)
+        proc.wait()
 
         #correct from interpolation error
         for hemi in ['lh','rh']:
@@ -103,18 +103,19 @@ def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, template = 
 
             #map from surface back to vol
             command = f'SUBJECTS_DIR={subjects_dir} mri_surf2vol --identity {subject_id} --template {subjects_dir}/{subject_id}/mri/T1.mgz --o {subjects_dir}/{subject_id}/mri/{hemi}.prediction.mgz --hemi {hemi} --surfval {subjects_dir}/{subject_id}/surf/{hemi}.prediction_corr.mgh --fillribbon'
-            # check_call(command,shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
-        
+            proc.wait()
+
             #register back to original volume
             command = f'SUBJECTS_DIR={subjects_dir} mri_vol2vol --mov {subjects_dir}/{subject_id}/mri/{hemi}.prediction.mgz --targ {subjects_dir}/{subject_id}/mri/orig/001.mgz  --regheader --o {subjects_dir}/{subject_id}/mri/{hemi}.prediction.mgz --nearest'
-            # check_call(command,shell=True, stdout = DEVNULL, stderr=STDOUT)
             proc = run_command(command, verbose=verbose)
+            proc.wait()
 
             #convert to nifti
             command = f'SUBJECTS_DIR={subjects_dir} mri_convert {subjects_dir}/{subject_id}/mri/{hemi}.prediction.mgz {subjects_dir}/{subject_id}/mri/{hemi}.prediction.nii.gz -rt nearest'
             proc = run_command(command, verbose=verbose)
-            
+            proc.wait()
+
         #move files
         save_dir=opj(output_dir,subject_id,'predictions')
         os.makedirs(save_dir, exist_ok=True)
@@ -125,7 +126,8 @@ def register_subject_to_xhemi(subject_ids, subjects_dir, output_dir, template = 
         #combine vols from left and right hemis
         command=f'mri_concat --i {save_dir}/lh.prediction.nii.gz --i {save_dir}/rh.prediction.nii.gz --o {save_dir}/prediction.nii.gz --combine'
         proc = run_command(command, verbose=verbose)
-
+        proc.wait()
+        
 if __name__ == "__main__":
     pass
 
