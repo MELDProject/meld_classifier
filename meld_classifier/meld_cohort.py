@@ -6,9 +6,9 @@ from meld_classifier.paths import (
     CORTEX_LABEL_FILE,
     SURFACE_FILE,
     DEFAULT_HDF5_FILE_ROOT,
-    BOUNDARY_ZONE_FILE,
     NVERT,
     BASE_PATH,
+    MELD_PARAMS_PATH
 )
 import pandas as pd
 import numpy as np
@@ -23,8 +23,9 @@ import scipy
 
 class MeldCohort:
     """Class to define cohort-level parameters such as subject ids, mesh"""
-    def __init__(self, hdf5_file_root=DEFAULT_HDF5_FILE_ROOT, dataset=None, data_dir=BASE_PATH):
+    def __init__(self, hdf5_file_root=DEFAULT_HDF5_FILE_ROOT, dataset=None, data_dir=BASE_PATH, meld_dir=MELD_PARAMS_PATH):
         self.data_dir = data_dir
+        self.meld_dir = meld_dir
         self.hdf5_file_root = hdf5_file_root
         self.dataset = dataset
         self.log = logging.getLogger(__name__)
@@ -69,7 +70,7 @@ class MeldCohort:
     @property
     def cortex_label(self):
         if self._cortex_label is None:
-            p = os.path.join(self.data_dir, CORTEX_LABEL_FILE)
+            p = os.path.join(self.meld_dir, CORTEX_LABEL_FILE)
             self._cortex_label = np.sort(nb.freesurfer.io.read_label(p))
         return self._cortex_label
 
@@ -84,7 +85,7 @@ class MeldCohort:
     @property
     def surf_area(self):
         if self._surf_area is None:
-            p = os.path.join(self.data_dir, "fsaverage_sym/surf/lh.area")
+            p = os.path.join(self.meld_dir, "fsaverage_sym/surf/lh.area")
             self._surf_area = nb.freesurfer.read_morph_data(p)
         return self._surf_area
 
@@ -92,7 +93,7 @@ class MeldCohort:
     def surf(self):
         """inflated surface, dict with 'faces' and 'coords'"""
         if self._surf is None:
-            p = os.path.join(self.data_dir, "fsaverage_sym", "surf", "lh.inflated")
+            p = os.path.join(self.meld_dir, "fsaverage_sym", "surf", "lh.inflated")
             self._surf = mt.load_mesh_geometry(p)
         return self._surf
 
@@ -100,7 +101,7 @@ class MeldCohort:
     def surf_partial(self):
         """partially inflated surface, dict with 'faces' and 'coords'"""
         if self._surf_partial is None:
-            p = os.path.join(self.data_dir, "fsaverage_sym", "surf", "lh.partial_inflated")
+            p = os.path.join(self.meld_dir, "fsaverage_sym", "surf", "lh.partial_inflated")
             vertices, faces = nb.freesurfer.io.read_geometry(p)
             self._surf_partial = {"faces": faces, "coords": vertices}
         return self._surf_partial
@@ -126,14 +127,14 @@ class MeldCohort:
     @property
     def lobes(self):
         if self._lobes is None:
-            p = os.path.join(self.data_dir, "fsaverage_sym/label/lh.lobes.annot")
+            p = os.path.join(self.meld_dir, "fsaverage_sym/label/lh.lobes.annot")
             self._lobes = nb.freesurfer.read_annot(p)
         return self._lobes
 
     @property
     def coords(self):
         if self._coords is None:
-            surf = mt.load_mesh_geometry(os.path.join(self.data_dir, SURFACE_FILE))
+            surf = mt.load_mesh_geometry(os.path.join(self.meld_dir, SURFACE_FILE))
             # spherical 2D coordinates. ignore radius
         #    spherical_coords = mt.spherical_np(surf["coords"])[:, 1:]
             # surf_coords_norm = (surf['coords']-np.min(surf['coords'],axis=0))/(np.max(surf['coords'],axis=0)-np.min(surf['coords'],axis=0))
@@ -470,7 +471,7 @@ class MeldSubject:
         Returns:
             list of features, matching structure of feature_names
         """
-        csv_path = os.path.join(self.cohort.data_dir, csv_file)
+        csv_path = os.path.join(self.cohort.meld_dir, csv_file)
         return_single = False
         if isinstance(feature_names, str):
             return_single = True

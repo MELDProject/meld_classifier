@@ -3,28 +3,29 @@ channels:
   - defaults
   - pog87
   - conda-forge
+  - apple
 dependencies:
   - python=3.8
-  - tensorflow=2.5
+  - tensorflow-deps
   - pytest=6.2
   - nibabel=3.2
   - pillow=8.4
   - jupyterlab=3.2
-  - ptitprince=0.2
-  - scikit-image=0.18
+  - scipy=1.9.3
+  - scikit-image=0.18.3
   - h5py=3.1
   - fpdf=1.7
   - pip=21.2
   - pip:
+    - tensorflow-macos==2.10.0
+    - tensorflow-metal==0.6.0
     - matplotlib_surface_plotting
-    - potpourri3d==0.0.4
-#    - umap-learn
+    - potpourri3d==0.0.8
     - nilearn==0.8
     - neuroCombat==0.2.12
-    - alibi==0.6
+    - alibi==0.8.0
     - patsy==0.5.2
     - matplotlib==3.5.1
-    - torch==1.12
-    - torchvision==0.13
     - SimpleITK==2.1.1
-    - git+https://github.com/Deep-MI/LaPy.git
+    - ptitprince==0.2.6
+

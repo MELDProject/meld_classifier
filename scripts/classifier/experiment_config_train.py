@@ -64,7 +64,7 @@ data_parameters = {
     # also contains a trainval/test split of the subjects that is to be respected by all models using this dataset
     # - 'MELD_dataset_V3.csv' contains H27
     # MELD_dataset_V5.csv MELD_dataset_V5_reverse.csv
-    "dataset": "MELD_dataset_V6_reverse.csv",
+    "dataset": "MELD_dataset_V6.csv",
     # `group`: initial section of subjects for training, can select patients only ('patient')
     # or controls+patients ('both')
     "group": "both",
@@ -103,7 +103,7 @@ data_parameters = {
     # `batch_size`: number of samples per batch
     "batch_size": 1024,
     # `normalise`: normalise feature values between 0 and 1
-    'normalise': 'normalise_params_6.json',
+    'normalise': 'scaling_params_with0.json',
     ##### selection of lesion/normal vertices for training #####
     # `contra`: where to sample normal vertices from.
     # If True, only sample normal vertices from contralateral hemisphere

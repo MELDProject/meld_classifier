@@ -7,7 +7,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 import ptitprince as pt
 
 
-import meld_classifier.paths as paths
+from meld_classifier.paths import EXPERIMENT_PATH
 from meld_classifier.meld_cohort import MeldCohort
 import os
 import glob
@@ -23,7 +23,7 @@ class ExperimentComparison:
     def __init__(
         self,
         experiments_dictionary,
-        experiment_path=paths.EXPERIMENT_PATH,
+        experiment_path=EXPERIMENT_PATH,
         folds=range(10),
         threshold="optimal",
         params_for_experiment_name=None,

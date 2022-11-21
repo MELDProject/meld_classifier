@@ -1,8 +1,4 @@
-import os
 import numpy as np
-import meld_classifier.paths as paths
-import pandas as pd
-import nibabel as nb
 
 
 def get_sitecode(fs_id):

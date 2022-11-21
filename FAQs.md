@@ -37,7 +37,7 @@ conda env create -f environment.yml
 
 * **if the error is : *pip failed***
   
-    Open the environment.yml file and comment oout all the line below the 1st 'pip' 
+    Open the environment.yml file and comment out all the line below the 1st 'pip' 
     e.g:
     ```
     #- pip:

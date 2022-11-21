@@ -5,7 +5,8 @@ import numpy as np
 import subprocess
 import os
 import potpourri3d as pp3d
-import meld_classifier.paths as paths
+from meld_classifier.paths import BASE_PATH, MELD_PARAMS_PATH
+import matplotlib.pyplot as plt
 
 # import paths as paths
 def find_nearest_multi(array, value):
@@ -54,7 +55,7 @@ def calibrate_smoothing(coords, faces, start_v=125000, n_iter=70, cortex_mask=No
     line = np.linspace(0, n_iter, 100)
     try:
         plt.plot(line, model(line))
-        plt.savefig(os.path.join(paths.BASE_PATH, "Images", "calibration_curve_smoothing.png"))
+        plt.savefig(os.path.join(BASE_PATH, "calibration_curve_smoothing.png"))
     except:
         pass
     print("End of calibration")
@@ -105,9 +106,8 @@ def save_mgh(filename, array, demo):
     nb.save(output, filename)
 
 
-def smoothing_fs(overlay, fwhm, subject="fsaverage_sym", hemi="lh"):
-    subjects_dir = paths.BASE_PATH
-    os.environ["SUBJECTS_DIR"] = paths.BASE_PATH
+def smoothing_fs(overlay, fwhm, subject="fsaverage_sym", hemi="lh", subjects_dir=MELD_PARAMS_PATH):
+    os.environ["SUBJECTS_DIR"] = subjects_dir
 
     """smooth surface overlay on fsaverage_sym"""
     tmpdir = "/tmp/" + str(np.random.randint(1000000))

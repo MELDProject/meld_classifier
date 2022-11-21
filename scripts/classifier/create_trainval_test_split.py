@@ -1,4 +1,4 @@
-import meld_classifier.paths as paths
+from meld_classifier.paths import BASE_PATH
 import os
 from meld_classifier.meld_cohort import MeldCohort
 import argparse
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Create trainval and test splits. Should only be executed once per major dataset version. Resulting file is saved in BASE_PATH. Is run on a hardcoded list of sites and hdf5_file_root. If you would like to change this, edit this script."
     )
-    parser.add_argument("--outname", default="MELD_dataset_V6.csv")
+    parser.add_argument("--outname", default="MELD_dataset.csv")
     parser.add_argument("--test_frac", type=float, default=0.5)
     parser.add_argument("--outliers", default=False)
     parser.add_argument("-f", "--force", default=False, action="store_true")
@@ -38,6 +38,7 @@ if __name__ == "__main__":
             "H2",
             "H3",
             "H4",
+            #add more here
             "H5",
             "H6",
             "H7",
@@ -57,10 +58,10 @@ if __name__ == "__main__":
             "H26",
         ],
         "group": "both",
-        "hdf5_file_root": "{}_{}_featurematrix_combat_6.hdf5",
+        "hdf5_file_root": "{site_code}_{group}_featurematrix_combat.hdf5",
     }
     # check if outname already exists
-    if os.path.exists(os.path.join(paths.BASE_PATH, args.outname)):
+    if os.path.exists(os.path.join(BASE_PATH, args.outname)):
         if args.force:
             print("WARNING: overwriting existing output file {}".format(args.outname))
         else:
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     # remove eventual outliers
     if args.outliers != False:
         # get outliers
-        csv = pd.read_csv(os.path.join(paths.BASE_PATH, args.outliers), header=0, encoding="unicode_escape")
+        csv = pd.read_csv(os.path.join(BASE_PATH, args.outliers), header=0, encoding="unicode_escape")
         list_outliers = csv["ID"].values
         # remove outliers from different list
         listids = np.setdiff1d(listids, list_outliers)
@@ -106,4 +107,4 @@ if __name__ == "__main__":
     subject_ids = pd.DataFrame(
         {"subject_id": listids, "split": ["test" if subj_id in testids else "trainval" for subj_id in listids]}
     )
-    subject_ids.to_csv(os.path.join(paths.BASE_PATH, args.outname))
+    subject_ids.to_csv(os.path.join(BASE_PATH, args.outname))

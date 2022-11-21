@@ -9,14 +9,7 @@ except ImportError:
 
 setup(
     name="meld_classifier",
-    version=__version__,
-    author=__author__,
-    author_email=__email__,
-    maintainer=__author__,
-    maintainer_email=__email__,
-    description="Neural network lesion classifier for the MELD project.",
-    license="MIT",
+    version="1.0.0",
     packages=find_packages(),
-    install_requires=["nibabel", "h5py", "pillow", "tensorflow", "pandas", "matplotlib"],
     package_dir={"meld_classifier": "meld_classifier"},
 )

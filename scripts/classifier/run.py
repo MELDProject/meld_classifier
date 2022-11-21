@@ -1,11 +1,12 @@
 from meld_classifier.experiment import Experiment, save_config, load_config, submit_experiments_array
-import meld_classifier.paths as paths
+from meld_classifier.paths import EXPERIMENT_PATH
 import numpy as np
 import os
 import sys
 import logging
 import csv
 import argparse
+from meld_classifier.set_basic import exclude_set
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     )
     parser.set_defaults(make_images=False, optimise_threshold=True)
     parser.add_argument("--config-file", help="path to experiment_config.py file", default="experiment_config.py")
-    parser.add_argument("--base-experiment-path", help="path to the experiments folder", default=paths.EXPERIMENT_PATH)
+    parser.add_argument("--base-experiment-path", help="path to the experiments folder", default=EXPERIMENT_PATH)
     parser.add_argument(
         "--run-on-slurm",
         dest="run_on_slurm",
@@ -96,7 +97,10 @@ if __name__ == "__main__":
     network_parameters = config.network_parameters
     variable_data_parameters = config.variable_data_parameters
     data_parameters = config.data_parameters
-
+    
+    #if features_to_exclude is referring to a template set, replace
+    if data_parameters['features_to_exclude'] in np.array(exclude_set.keys()):
+        data_parameters['features_to_exclude'] = exclude_set[data_parameters['features_to_exclude']]
     # create list of experiments to run
     experiment_parameters = []
     # first, add experiments for variable_network_parameters

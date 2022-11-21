@@ -567,23 +567,13 @@ class Evaluator:
         prediction = np.concatenate(
             [thresholded[hemi][self.experiment.cohort.cortex_mask] for hemi in ["left", "right"]]
         )
+        # save data
+        self.save_prediction(subj_id, prediction, suffix=suffix)
+
         # saliency
         if saliency:
             # TODO might want to make method and target configureable parameters
-            data_dictionary = self.saliency(
-                data_dictionary=data_dictionary, method=["integrated_gradients"], target=["pred"]
-            )
-
-        # get stats
-        self.per_subject_stats(subj_id, prediction, labels, fold=fold, suffix=suffix)
-
-        # plot prediction
-        if plot:
-            self.plot_report_prediction(subj_id, subject_features, prediction, labels)
-
-        # save data
-        self.save_prediction(subj_id, prediction, suffix=suffix)
-        if saliency:
+            data_dictionary = self.saliency(data_dictionary=data_dictionary, method=["integrated_gradients"], target=["pred"])
             # save saliency
             dataset_str = "integrated_gradients_pred"
             self.save_prediction(
@@ -594,6 +584,13 @@ class Evaluator:
                 dtype=np.float32,
             )
 
+        # get stats
+        self.per_subject_stats(subj_id, prediction, labels, fold=fold, suffix=suffix)
+
+        # plot prediction
+        if plot:
+            self.plot_report_prediction(subj_id, subject_features, prediction, labels)
+        
         return
 
     def save_prediction(self, subject, prediction, dataset_str="prediction", suffix="", dtype=np.uint8):

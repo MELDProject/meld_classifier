@@ -5,10 +5,9 @@ import numpy as np
 from PIL import Image, ImageChops
 from PIL import ImageFont
 from PIL import ImageDraw
-from meld_classifier.dataset import load_combined_hemisphere_data
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
 import matplotlib_surface_plotting.matplotlib_surface_plotting as msp
-import meld_classifier.paths as paths
+from meld_classifier.paths import MELD_PARAMS_PATH
 import nibabel as nb
 
 def trim(im):
@@ -27,7 +26,7 @@ def rotate90(im):
 def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename="tmp.png"):
     """create a grid of flatmap plots for a single subject"""
     # load in meshes
-    flat = nb.load(os.path.join(paths.BASE_PATH, "fsaverage_sym", "surf", "lh.full.patch.flat.gii"))
+    flat = nb.load(os.path.join(MELD_PARAMS_PATH, "fsaverage_sym", "surf", "lh.full.patch.flat.gii"))
 
     vertices, faces = flat.darrays[0].data, flat.darrays[1].data
     cortex = MeldCohort().cortex_label

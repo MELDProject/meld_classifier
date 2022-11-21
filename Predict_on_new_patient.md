@@ -1,12 +1,16 @@
 # Predict lesion on a new patient 
 
-With the MELD classifier pipeline, if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed for predict the trained model on a new patient.
+With the MELD classifier pipeline 
+
+<ins>Existing site</ins>: if you are from an epilepsy centre who's data was used to train the classifier, predicting lesion locations on new patients is easy. In the following, we describe the steps needed to use the trained model to predict on a new patient. 
+
 Note: No demographic information are required for this process.
 
-We also have a "Guide to using the MELD surface-based FCD detection algorithm on a new patient from an existing MELD site" (https://docs.google.com/document/d/1TnUdH-p0mXII7aYa6OCxvcn-pnhMDGMOfXARxjK4S-M/edit?usp=sharing). This explains how to run the classifier in much more detail as well as how to interpret the results.
+<ins>New site</ins>: If you would like to predict lesions on patients from **new epilepsy centres** or **new MRI scanners or updated T1 / FLAIR sequences** that were not used to train the classifier, you will need to first compute the harmonisation parameters for your site following the [Harmonisation_new_site.md](Harmonisation_new_site.md). This step needs to be done only once, then you can follow the same guidelines as an existing site. 
 
-If you would like to predict lesions on patients from new epilepsy centres or new MRI scanners or updated T1 / FLAIR sequences that were not used to train the classifier, you will need to used the Predict_on_patients_from_new_sites pipeline which is under development.
 Note: Demographic information (e.g age and sex) will be required for this process.
+
+We also have a ["Guide to using the MELD surface-based FCD detection algorithm on a new patient"](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing). This explains how to harmonise your data and how to run the classifier in much more detail as well as how to interpret the results.
 
 ## Disclaimer
 
@@ -15,7 +19,7 @@ The MELD surface-based FCD detection algorithm is intended for research purposes
 ## Information about the pipeline
 Before running the below pipeline, ensure that you have [installed MELD classifier](README.md#installation) and activate the meld_classifier environment : 
 ```bash
-  conda activate meld_classifier
+conda activate meld_classifier
 ```
 Also you need to make sure that Freesurfer is activated in your terminal (you should have some printed FREESURFER paths when opening the terminal). Otherwise you will need to manually activate Freesurfer on each new terminal by running : 
 ```bash
@@ -25,6 +29,7 @@ source $FREESURFER_HOME/SetUpFreeSurfer.sh
 with `<freesurfer_installation_directory>` being the path to where your Freesurfer has been installed.
 
 ### First step - Organising your data!
+
 You need to organise the MRI data for the patients you want to run the classifier on.
 
 In the 'input' folder where your meld data has / is going to be stored, create a folder for each patient. 
@@ -46,82 +51,151 @@ Go into the meld_classifier folder
 ```bash
   cd <path_to_meld_classifier_folder>
 ```
-Each of the 3 following scripts needs to be run from the 'meld_classifier' folder
 
-### Overview new patient pipeline
-The pipeline is split into 3 main scripts as illustrated below and detailed after.
+### Overview new patient pipeline 
+
+The pipeline is split into 3 main scripts as illustrated below and detailed in the next section. 
 ![pipeline_fig](images/tutorial_pipeline_fig.png)
 
+The pipeline can be called using one unique command line. Example to run the whole pipeline on 1 subject:
 
-### Script 1 - FreeSurfer reconstruction
 ```bash
-python scripts/new_patient_pipeline/new_pt_pipeline_script1.py -id <sub_id>
+python scripts/new_patient_pipeline/new_pt_pipeline.py -site <site_code> -id <subject_id> 
 ```
-- This script runs a FreeSurfer reconstruction on a participant
-- REMINDER: you need to have set up your paths & organised your data before running Script 1 (see Installation)
-- We recommend using the same FreeSurfer version that you used to process your patient's data that was used to train the classifier
-- Within your  MELD folder should be an input folder that contains folders for each participant. 
-- Within each participant folder should be a T1 folder that contains the T1 in nifti format ".nii" and where available a FLAIR folder that contains the FLAIR in nifti format ".nii"
+
+You can tune this command using additional variables and flags as detailed bellow:
+
+| **Mandatory variables**         |  Comment | 
+|-------|---|
+| ```-site <site_code>```  |  the site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team. | 
+|either ```-id <subject_id>```  |  if you want to run the pipeline on 1 single subject. Needs to be in MELD format MELD\_<site\_code>\_<scanner\_field>\_FCD\_000X |  
+|or ```-ids <subjects_list>``` |  if you want to run the pipeline on more than 1 subject, you can pass the name of a text file containing the list of subjects. An example 'subjects_list.txt' is provided in the <meld_data_folder>. | 
+| **Optional variables** |
+|```--parallelise``` | use this flag to speed up the segmentation by running Freesurfer/FastSurfer on multiple subjects in parallel. |
+|```--fastsurfer``` | use this flag to use FastSurfer instead of Freesurfer. Requires FastSurfer installed. |
+|```--skip_segmentation``` | use this flag to skips the segmentation, features extraction and smoothing (processes from script1). Usefull if you already have these outputs and you just want to run the preprocessing and the predictions (e.g: after harmonisation) |
+|```--harmo_only``` | use this flag to do all the processes up to the harmonisation. Useful if you want to harmonise on some subjects but do not wish to predict on them (see [Harmonisation_new_site.md](Harmonisation_new_site.md) guidelines) |
+|**More advanced variables** | 
+| ```--split``` | use this flag to split your list of subjects in smaller chunks to avoid data overload during prediction step. Useful if running more than 30 patients at a time. |
+|```--no_nifti```| use this flag to run to all the processes up saving the predictions as surface vectors in the hdf5 file. Does not produce produce nifti and pdf outputs.|
+|```--no_report``` | use this flag to do all the processes up to creating the prediction as a nifti file. Does not produce the pdf reports. |
+|```--debug_mode``` | use this flag to print additional information to debug the code (e.g print the commands, print errors) |
+
+
+NOTES: 
+- you need to have set up your paths & organised your data before running this pipeline (see section **First step - Organising your data!**)
+- We recommend using the same FreeSurfer/FastSurfer version that you used to process your patient's data that was used to train the classifier (existing site) / to get the harmonisation parameters (new site).
+- Outputs of the pipeline (prediction back into the native nifti MRI and MELD reports) are stored in the folder ```output/predictions_reports/<subject_id>```. 
+
+**Examples of use case**: 
+
+To run the whole prediction pipeline on 1 subject using fastsurfer:
+```bash
+python scripts/new_patient_pipeline/new_pt_pipeline.py -site H4 -id MELD_H4_3T_FCD_0001 --fastsurfer
+```
+
+To run the whole prediction pipeline on multiples subjects with parallelisation:
+```bash
+python scripts/new_patient_pipeline/new_pt_pipeline.py -site H4 -ids list_subjects.txt --parallelise
+```
+
+## Additional information about the 3 different scripts / steps
+
+### Script 1 - FreeSurfer reconstruction and smoothing
+
+This script:
+ 1. Runs a FreeSurfer reconstruction on a participant
+ 2. Extracts surface-based features needed for the classifier:
+    * Samples the features
+    * Creates the registration to the template surface fsaverage_sym
+    * Moves the features to the template surface
+    * Write feature in hdf5
+ 3. Preprocess features: 
+    * Smooth features and write in hdf5
+
+To know more about the script and how to use it on its own:
+```bash
+python scripts/new_patient_pipeline/run_script_segmentation.py -h
+```
 
 ### Script 2 - Feature Preprocessing
+
+This script : 
+  1. Combat harmonise features and write into hdf5
+  2. Normalise the smoothed features (intra-subject & inter-subject (by controls)) and write in hdf5
+  3. Normalise the raw combat features (intra-subject, asymmetry and then inter-subject (by controls)) and write in hdf5
+
+  Notes: 
+  - Features need to have been extracted and smoothed using script 1. 
+  - (optional): this script can also be called to harmonise your data for new site but will need to pass a file containing demographics information.
+
+To know more about the script and how to use it on its own:
 ```bash
-python scripts/new_patient_pipeline/new_pt_pipeline_script2.py -ids <text_file_with_subjects_ids> -site <site_code>
+python scripts/new_patient_pipeline/run_script_preprocessing.py -h
 ```
-- The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
-- This script:
-1. Extracts surface-based features needed for the classifier :
-* Samples the features
-* Creates the registration to the template surface fsaverage_sym
-* Moves the features to the template surface
-* Write feature in hdf5
-2. Preprocess features : 
-* Smooth features and write in hdf5
-* Combat harmonised and write in hdf5
-* Normalise the smoothed features (intra-subject & inter-subject (by controls)) and write in hdf5
-* Normalise the raw combat features (intra-subject, asymmetry and then inter-subject (by controls)) and write in hdf5
 
 ### Script 3 - Lesions prediction & MELD reports
-```bash
-python scripts/new_patient_pipeline/new_pt_pipeline_script3.py -ids <text_file_with_subjects_ids> -site <site_code>
-```
-- The site code should start with H, e.g. H1. If you cannot remember your site code - contact the MELD team.
-- Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
-- This script : 
+
+This script : 
 1. Run the MELD classifier and predict lesion on new subject
-2. Register the prediction back into the native nifti MRI. Results are stored in inputs/<sub_id>/predictions.
-3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in Results are stored in inputs/<sub_id>/predictions/reports.
+2. Register the prediction back into the native nifti MRI. Results are stored in output/predictions_reports/<subjec_id>/predictions.
+3. Create MELD reports with predicted lesion location on inflated brain, on native MRI and associated saliencies. Reports are stored in output/predictions_reports/<subjec_id>/predictions/reports.
+
+Notes: 
+- Features need to have been processed using script 2 and Freesurfer outputs need to be available for each subject
+
+To know more about the script and how to use it on its own:
+```bash
+python scripts/new_patient_pipeline/run_script_prediction.py -h
+```
 
 ## Interpretation of results
-The precalculated .png images of predicted lesions and their associated saliencies can be used to look at the predicted clusters and why they were detected by the classifier. 
+
+The precalculated .png images of predicted lesions and their associated saliencies can be used to look at the predicted clusters and why they were detected by the classifier. The MELD pdf report provides a summary of all the prediction for a subject.
 
 After viewing these images, we recommend then viewing the predictions superimposed on the T1 volume. This will enable:
 - Re-review of the T1 /FLAIR at the predicted cluster locations to see if an FCD can now be seen
 - Performing quality control
 - Viewing the .png images of predicted lesions
 
-### Viewing the predicted clusters
-The .png images of the predicted lesions are saved in the folder:
- /input/<sub_id>/predictions/reports
+### Main outputs
 
-The first image is called inflatbrain_<sub_id>.png
+The predictions are saved as NIFTI files in the folder: 
+/output/predictions_reports/<subject_id>/predictions
+- prediction.nii corresponds to the prediction mask for the whole brain
+- lh.prediction.nii and rh.prediction.nii correspond to the predictions masks for left and right hemispheres
+
+***NEW***: You can merge the MELD predictions onto the T1 nifti file using the command below. Note that you will need to have [FSL](https://fsl.fmrib.ox.ac.uk/fsl/fslwiki/FslInstallation) installed on your machine. 
+```bash
+python scripts/new_patient_pipeline/merge_predictions_t1.py -id <subject_id> -t1 <path_to_t1_nifti> -pred <path_to_meld_prediction_nifti> -output_dir <where_to_save_output>
+```
+The command will create the file predictions_merged_t1.nii.gz which corresponds to the predictions masks merged with T1 in RGB format. It can be viewed on RGB viewer or used to transfert on PACS system.
+
+
+
+### Viewing the predicted clusters
+The MELD pdf report and .png images of the predicted lesions are saved in the folder:
+ /output/predictions_reports/<subject_id>/reports
+ 
+
+The first image is called inflatbrain_<subject_id>.png
 
 ![inflated](images/inflatbrain_sub_id.png)
 
 This image tells you the number of predicted clusters and shows on the inflated brain where the clusters are located.
 
-The next images are mri_<sub_id>_<hemi>_c*.png
+The next images are mri_<subject_id>_<hemi>_c*.png
 
 E.g. 
 
 ![mri](images/mri_sub_id_lh_c1.png)
 
-These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<sub_id>_<hemi>_c1.png for cluster 1 and  mri_<sub_id>_<hemi>_c2.png for cluster 2.
+These images show the cluster on the volumetric T1 image. Each cluster has its own image e.g.  mri_<subject_id>_<hemi>_c1.png for cluster 1 and  mri_<subject_id>_<hemi>_c2.png for cluster 2.
 
-Please note: images are NOT shown in radiological convention (we are working on code to do this)
   
 ### Saliency
   
-The next images are called saliency_<sub_id>_<hemi>_c*.png. Each cluster has a saliency image associated with it. E.g.
+The next images are called saliency_<subject_id>_<hemi>_c*.png. Each cluster has a saliency image associated with it. E.g.
   
 ![saliency](images/saliency_sub_id_lh_c1.png)
   
@@ -151,7 +225,7 @@ To do this run:
 ```bash
 cd <path_to_meld_classifier>
 conda activate meld_classifier
-python scripts/new_patient_pipeline/new_pt_qc_script.py -id <sub_id>
+python scripts/new_patient_pipeline/new_pt_qc_script.py -id <subject_id>
 ```
 ![qc_surface](images/qc_surface.png)
 
@@ -178,8 +252,8 @@ Note: the classifier is only able to predict areas within the pial and white sur
 * If there is a reconstruction error due to an FCD, the classifier will only be able to detect areas within the pial and white surfaces and may miss areas of the lesion that are not correctly segmented by FreeSurfer
 * There will be false positive clusters. You will need to look at the predicted clusters with an experienced radiologist to identify the significance of detected areas
 * The classifier has only been trained on FCD lesions and we do not have data on its ability to detect other pathologies e.g. DNET / ganglioglioma / polymicrogyria. As such, the research tool should only be applied to patients with FCD / suspected FCD
-* Performance of the classifier varies according to MRI field strength, data available (e.g. T1 or T1 and FLAIR) and histopathological subtype. For more details of how the classifier performs in different cohorts, see (https://www.medrxiv.org/content/10.1101/2021.12.13.21267721v1)
+* Performance of the classifier varies according to MRI field strength, data available (e.g. T1 or T1 and FLAIR) and histopathological subtype. For more details of how the classifier performs in different cohorts, see [our paper](https://academic.oup.com/brain/advance-article/doi/10.1093/brain/awac224/6659752).
 
 ## How to cite the classifier
   
-Spitzer, H., Ripart, M., Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. (2021). Interpretable surface-based detection of focal cortical dysplasias: a MELD study. medRxiv, 2021.12.13.21267721.
+Spitzer, H., Ripart, M, Whitaker, K., Napolitano, A., De Palma, L., De Benedictis, A., et al. 2022. “Interpretable Surface-Based Detection of Focal Cortical Dysplasias: A Multi-Centre Epilepsy Lesion Detection Study.” Brain: A Journal of Neurology, August. https://doi.org/10.1093/brain/awac224.

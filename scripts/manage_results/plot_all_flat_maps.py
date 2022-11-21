@@ -5,7 +5,7 @@ from meld_classifier.network_tools import build_model
 from meld_classifier.experiment import get_subject_ids
 from meld_classifier.meld_plotting import trim,rotate90
 import meld_classifier.hdf5_io as io
-import meld_classifier.paths as paths
+from meld_classifier.paths import MELD_PARAMS_PATH, EXPERIMENT_PATH
 import numpy as np
 import seaborn as sns
 import json
@@ -26,11 +26,11 @@ import argparse
 def plot_single_subject(data_to_plots, lesion, feature_names=None, out_filename="tmp.png"):
     """create a grid of flatmap plots"""
     # load in meshes
-    flat = nb.load(os.path.join(paths.BASE_PATH, "fsaverage_sym", "surf", "lh.full.patch.flat.gii"))
+    flat = nb.load(os.path.join(MELD_PARAMS_PATH, "fsaverage_sym", "surf", "lh.full.patch.flat.gii"))
 
     vertices, faces = flat.darrays[0].data, flat.darrays[1].data
     cortex = np.sort(
-        nb.freesurfer.io.read_label(os.path.join(paths.BASE_PATH, "fsaverage_sym", "label", "lh.cortex.label"))
+        nb.freesurfer.io.read_label(os.path.join(MELD_PARAMS_PATH, "fsaverage_sym", "label", "lh.cortex.label"))
     )
     cortex_bin = np.zeros(len(vertices)).astype(bool)
     cortex_bin[cortex] = 1
@@ -126,7 +126,7 @@ def plot_reports_for_experiment(experiments_folder, experiment, date, fold, para
     data_parameters = json.load(open(os.path.join(experiment_path, "data_parameters_{}.json".format(experiment_name))))
     listids, features = get_subject_ids(data_parameters, verbose=False)
     cortex = np.sort(
-        nb.freesurfer.io.read_label(os.path.join(paths.BASE_PATH, "fsaverage_sym", "label", "lh.cortex.label"))
+        nb.freesurfer.io.read_label(os.path.join(MELD_PARAMS_PATH, "fsaverage_sym", "label", "lh.cortex.label"))
     )
     _, _, features_to_ignore = dp.filter_features(
         data_parameters.get("features_to_replace_with_0", []),
@@ -192,7 +192,7 @@ def plot_reports_for_experiment(experiments_folder, experiment, date, fold, para
                 data_to_plots,
                 lesion=lesion_combi,
                 feature_names=feature_names,
-                out_filename=os.path.join(paths.EXPERIMENT_PATH, "qc_ims", "{}.jpeg".format(subject)),
+                out_filename=os.path.join(EXPERIMENT_PATH, "qc_ims", "{}.jpeg".format(subject)),
             )
 
     return
