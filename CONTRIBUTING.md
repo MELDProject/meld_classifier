@@ -34,7 +34,7 @@ The general workflow is as follows:
 5. squash & merge the PR into master. This replaces all the individual commits with 1 commit per PR which is helful for keeping a clean commit history on master and get rid of all the "bugfix" commit messages. Go to the PR on the github webpage and click on the down arrow on the merge button. Select `squash and merge` and click. 
 
 
-Creating a relase
+Creating a release
 -----------------
 
 We use `bump2version` (``pip install bump2version``) to keep track of version numbering. 
