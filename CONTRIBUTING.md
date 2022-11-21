@@ -51,4 +51,4 @@ Version numbers follow the convention of ``major.minor.patch``.
 
 3. Create and merge a PR for the bump2version commit.
 
-4. Edit and publish the relase on github (under the "tags" Tab) and add release notes.
+4. Edit and publish the release on github (under the "tags" Tab) and add release notes.
