@@ -83,3 +83,9 @@ Please check out our [manuscript](https://academic.oup.com/brain/advance-article
 An overview of the notebooks that we used to create the figures can be found [here](figure_notebooks.md).
 
 A guide to using the MELD surface-based FCD detection algorithm on a new patient is found [here](https://docs.google.com/document/d/1vF5U1i-B45OkE_8wdde8yHHypp6W9xNN_1DBoEGmn0E/edit?usp=sharing).
+
+
+## Acknowledgments
+
+We would like to thank the MELD consortium for providing the data to train this classifier and their expertise to build this pipeline.
+We would like to thank Lennart Walger (https://github.com/1-w) and Andrew Chen (https://github.com/andy1764), for their help testing and improving the MELD pipeline to v1.1.0
