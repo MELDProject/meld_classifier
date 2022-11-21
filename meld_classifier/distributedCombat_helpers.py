@@ -76,6 +76,7 @@ def it_sol(sdat, g_hat, d_hat, g_bar, t2, a, b, conv=0.0001, robust=False):
     ones = np.ones((1, sdat.shape[1]))
 
     change = 1
+    change_old = 1
     count = 0
     while change > conv:
         g_new = np.array(postmean(g_hat, g_bar, n, d_old, t2))
@@ -96,8 +97,14 @@ def it_sol(sdat, g_hat, d_hat, g_bar, t2, a, b, conv=0.0001, robust=False):
         change = max(max(abs(g_new - g_old) / g_old), max(abs(d_new - d_old) / d_old))
         # print(max(abs(g_new - g_old) / g_old), "," ,max(abs(d_new - d_old) / d_old))
         
+        if count > 30:
+            if change > change_old:
+                print('[neuroCombat WARNING] Empirical Bayes step failed to converge after 30 iterations, using estimate before change between iterations increases.')
+                break
+
         g_old = g_new  # .copy()
         d_old = d_new  # .copy()
+        change_old = change
         count = count + 1
     adjust = (g_new, d_new)
     return adjust
@@ -268,7 +275,7 @@ def getNaiveEstimators(s_data, data_dict, hasNAs, mean_only, robust):
     delta_hat = []
     for i in batches:
         if mean_only:
-            delta.hat.append(np.ones(s_data.shape[1]))
+            delta_hat.append(np.ones(s_data.shape[1]))
         elif robust:
             delta_hat.append(biweight_midvar(s_data.iloc[:, i[0]],axis=1))
         else:
