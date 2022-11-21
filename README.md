@@ -75,7 +75,7 @@ For more details, check out the guides linked below:
 - [Train and evaluate models](Training_and_evaluating_models.md)
 
 ## Contribute
-If you'd like to contribute to this code base, have a look at our [contribution guide](DEVELOP.md)
+If you'd like to contribute to this code base, have a look at our [contribution guide](CONTRIBUTING.md)
 
 ## Manuscript
 Please check out our [manuscript](https://academic.oup.com/brain/advance-article/doi/10.1093/brain/awac224/6659752) to learn more.
