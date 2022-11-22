@@ -25,7 +25,7 @@ def get_data_parameters():
         "expected_prediction_hdf5_file" : os.path.join("results", "predictions_ensemble_iteration_expected.hdf5"),
         "prediction_hdf5_file" : os.path.join("results", "predictions_ensemble_iteration.hdf5"),
         "expected_prediction_nii_file" : "{}.prediction_expected.nii",
-        "prediction_nii_file" : "{}.prediction.nii"
+        "prediction_nii_file" : "{}.prediction.nii.gz"
     }
     return data_parameters
 
