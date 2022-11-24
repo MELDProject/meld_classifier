@@ -37,7 +37,21 @@ def init(lock):
     global starting
     starting = lock
 
-
+def check_FS_outputs(folder):
+    FS_complete=True
+    if not os.path.isfile(opj(folder,'surf/rh.pial')):
+        FS_complete=False
+    if not os.path.isfile(opj(folder,'surf/lh.pial')):
+        FS_complete=False
+    if not os.path.isfile(opj(folder,'surf/rh.white')):
+        FS_complete=False
+    if not os.path.isfile(opj(folder,'surf/lh.white')):
+        FS_complete=False
+    if not os.path.isfile(opj(folder,'surf/lh.sphere')):
+        FS_complete=False
+    if not os.path.isfile(opj(folder,'surf/rh.sphere')):
+        FS_complete=False
+    return FS_complete
 
 def fastsurfer_subject(subject, fs_folder, verbose=False):
     # run fastsurfer segmentation on 1 subject
@@ -54,9 +68,15 @@ def fastsurfer_subject(subject, fs_folder, verbose=False):
     # if freesurfer outputs already exist for this subject, continue running from where it stopped
     # else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(opj(fs_folder, subject_id)):
-        print(get_m(f'Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped', subject_id, 'STEP 1'))
-        return
-
+        if check_FS_outputs(opj(fs_folder, subject_id))==True:
+            print(get_m(f'Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped', subject_id, 'STEP 1'))
+            return
+        if check_FS_outputs(opj(fs_folder, subject_id))==False:
+            print(get_m(f'Freesurfer outputs already exists for subject {subject_id} but is incomplete. Delete folder {opj(fs_folder, subject_id)} and reran', subject_id, 'ERROR'))
+            sys.exit()
+    else:
+        pass  
+    
     # select inputs files T1 and FLAIR
     if subject_t1_path == '':
         # assume meld data structure
@@ -146,8 +166,14 @@ def freesurfer_subject(subject, fs_folder, verbose=False):
     # If freesurfer outputs already exist for this subject, continue running from where it stopped
     # Else, find inputs T1 and FLAIR and run FS
     if os.path.isdir(opj(fs_folder, subject_id)):
-        print(get_m('Freesurfer outputs already exists. Freesurfer will be skipped', subject_id, "STEP 1"))
-        return
+        if check_FS_outputs(opj(fs_folder, subject_id))==True:
+            print(get_m(f'Freesurfer outputs already exists for subject {subject_id}. Freesurfer will be skipped', subject_id, 'STEP 1'))
+            return
+        if check_FS_outputs(opj(fs_folder, subject_id))==False:
+            print(get_m(f'Freesurfer outputs already exists for subject {subject_id} but is incomplete. Delete folder {opj(fs_folder, subject_id)} and reran', subject_id, 'ERROR'))
+            sys.exit()
+    else:
+        pass 
 
     # select inputs files T1 and FLAIR
     if subject_t1_path == '':
@@ -198,15 +224,23 @@ def freesurfer_subject(subject, fs_folder, verbose=False):
     starting.acquire()  # no other process can get it until it is released
     # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
     proc = run_command(command, verbose=verbose)
-    if proc.returncode == 0 :
-        print(get_m('Finished cortical parcellation', subject_id, 'INFO'))
-    else:
-        print(get_m('Something went wrong during segmentation. Check the recon-all log', subject_id, 'WARNING'))
+    # if proc.returncode == 0 :
+    #     print(get_m('Finished cortical parcellation', subject_id, 'INFO'))
+    # else:
+    #     print(get_m('Something went wrong during segmentation. Check the recon-all log', subject_id, 'WARNING'))
     threading.Timer(120, starting.release).start()  # release in two minutes
     proc.wait()
     
 
 def extract_features(subject_id, fs_folder, output_dir, verbose=False):
+    
+    #check FS outputs
+    if check_FS_outputs(opj(fs_folder, subject_id))==False:
+        print(get_m(f'Files are missing in Freesurfer outputs for subject {subject_id} but is incomplete. Check {opj(fs_folder, subject_id)} before re-running', subject_id, 'ERROR'))
+        return
+    else:
+        pass 
+
     # Launch script to extract surface-based features from freesurfer outputs
     print(get_m('Extract surface-based features', subject_id, 'INFO'))
     
@@ -439,6 +473,16 @@ if __name__ == "__main__":
                         verbose = args.debug_mode
                         )
     
+
+
+
+
+
+
+
+
+
+
 
 
 
