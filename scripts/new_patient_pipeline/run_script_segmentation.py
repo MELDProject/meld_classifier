@@ -236,8 +236,8 @@ def extract_features(subject_id, fs_folder, output_dir, verbose=False):
     
     #check FS outputs
     if check_FS_outputs(opj(fs_folder, subject_id))==False:
-        print(get_m(f'Files are missing in Freesurfer outputs for subject {subject_id} but is incomplete. Check {opj(fs_folder, subject_id)} before re-running', subject_id, 'ERROR'))
-        return
+        print(get_m(f'Files are missing in Freesurfer outputs for subject {subject_id}. Check {opj(fs_folder, subject_id)} is complete before re-running', subject_id, 'ERROR'))
+        sys.exit()
     else:
         pass 
 
