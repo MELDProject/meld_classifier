@@ -39,18 +39,13 @@ def init(lock):
 
 def check_FS_outputs(folder):
     FS_complete=True
-    if not os.path.isfile(opj(folder,'surf/rh.pial')):
-        FS_complete=False
-    if not os.path.isfile(opj(folder,'surf/lh.pial')):
-        FS_complete=False
-    if not os.path.isfile(opj(folder,'surf/rh.white')):
-        FS_complete=False
-    if not os.path.isfile(opj(folder,'surf/lh.white')):
-        FS_complete=False
-    if not os.path.isfile(opj(folder,'surf/lh.sphere')):
-        FS_complete=False
-    if not os.path.isfile(opj(folder,'surf/rh.sphere')):
-        FS_complete=False
+    surf_files = ['pial','white','sphere']
+    hemis=['lh','rh']
+    for sf in surf_files:
+        for hemi in hemis:
+            fname = opj(folder,'surf',f'{hemi}.{sf}')
+            if not os.path.isfile(fname):
+                return False
     return FS_complete
 
 def fastsurfer_subject(subject, fs_folder, verbose=False):
