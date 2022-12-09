@@ -5,6 +5,7 @@ from meld_classifier.meld_cohort import MeldCohort
 from meld_classifier.paths import MELD_DATA_PATH
 import nibabel as nb
 import argparse
+from meld_classifier.tools_commands_prints import get_m
 
 
 def load_prediction(subject, hdf5):
@@ -21,7 +22,7 @@ def save_mgh(filename, array, demo):
     output = nb.MGHImage(mmap, demo.affine, demo.header)
     nb.save(output, filename)
 
-def move_predictions_to_mgh(subject_ids, subjects_dir, prediction_file, verbose=False):
+def move_predictions_to_mgh(subject_id, subjects_dir, prediction_file, verbose=False):
     ''' move meld predictions from hdf to mgh freesurfer volume. Outputs are saved into freesurfer subject directory 
     inputs:
         subject_ids : subjects ID in an array
@@ -29,19 +30,24 @@ def move_predictions_to_mgh(subject_ids, subjects_dir, prediction_file, verbose=
         prediction_file : hdf5 file containing the MELD predictions
     '''
     c = MeldCohort()
-    for subject_id in subject_ids:
-        # create classifier directory if not exist
-        classifier_dir = os.path.join(subjects_dir, subject_id, "xhemi", "classifier")
-        if not os.path.isdir(classifier_dir):
-            os.mkdir(classifier_dir)
-        predictions = load_prediction(subject_id, prediction_file)
-        for hemi in ["lh", "rh"]:
-            prediction_h = predictions[hemi]
-            overlay = np.zeros_like(c.cortex_mask, dtype=int)
-            overlay[c.cortex_mask] = prediction_h
+    # create classifier directory if not exist
+    classifier_dir = os.path.join(subjects_dir, subject_id, "xhemi", "classifier")
+    if not os.path.isdir(classifier_dir):
+        os.mkdir(classifier_dir)
+    predictions = load_prediction(subject_id, prediction_file)
+    for hemi in ["lh", "rh"]:
+        prediction_h = predictions[hemi]
+        overlay = np.zeros_like(c.cortex_mask, dtype=int)
+        overlay[c.cortex_mask] = prediction_h
+        try:
             demo = nb.load(os.path.join(subjects_dir, subject_id, "xhemi", "surf_meld", f"{hemi}.on_lh.thickness.mgh"))
-            filename = os.path.join(subjects_dir, subject_id, "xhemi", "classifier", f"{hemi}.prediction.mgh")
-            save_mgh(filename, overlay, demo)
+        except:
+            print(get_m(f'Could not load {os.path.join(subjects_dir, subject_id, "xhemi", "surf_meld", f"{hemi}.on_lh.thickness.mgh")} ', subject_id, 'ERROR')) 
+            return False   
+        filename = os.path.join(subjects_dir, subject_id, "xhemi", "classifier", f"{hemi}.prediction.mgh")
+        save_mgh(filename, overlay, demo)
+        
+
     
 if __name__ == "__main__":
     # Set up experiment

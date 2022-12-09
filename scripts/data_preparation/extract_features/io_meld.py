@@ -108,6 +108,7 @@ def get_scanner(fs_id):
     return scanner
 
 def save_subject(fs_id,features,medial_wall,subject_dir, output_dir=None):
+    failed=False
     n_vert=163842
     #get subject info from id
     c_p=get_cp(fs_id)
@@ -136,11 +137,12 @@ def save_subject(fs_id,features,medial_wall,subject_dir, output_dir=None):
                 dset[:]=feature
             except:
                 if "FLAIR" not in f_name:
-                    print('Expected feature '+ f_name + ' was not found. One step in the pipeline has failed')
+                    print(f'ERROR: {fs_id} : Expected feature '+h+ ' '+ f_name + ' was not found. One step in the pipeline has failed')
+                    failed=True
         lesion_name=os.path.join(subject_dir,fs_id,'xhemi/surf_meld',h+'.on_lh.lesion.mgh')
         if os.path.isfile(lesion_name):
             lesion = import_mgh(lesion_name)
             dset=group.require_dataset('.on_lh.lesion.mgh',shape=(n_vert,), dtype='float32',compression="gzip", compression_opts=9)
             dset[:]=lesion
     f.close()
-    return
+    return failed

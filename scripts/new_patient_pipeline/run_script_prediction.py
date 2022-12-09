@@ -105,6 +105,7 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         subject_ids_chunk = chunked_subject_list.append(subject_ids)
 
     # for each chunk of subjects
+    subject_ids_failed=[]
     for subject_ids_chunk in chunked_subject_list:
         print(get_m(f'Run predictions', subject_ids_chunk, 'STEP 1'))
         
@@ -119,18 +120,28 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
         
         if not no_prediction_nifti:        
             #Register predictions to native space
-            print(get_m(f'Move predictions into volume', subject_ids_chunk, 'STEP 2'))
-            move_predictions_to_mgh(subject_ids=subject_ids_chunk, 
+            for i, subject_id in enumerate(subject_ids_chunk):
+                print(get_m(f'Move predictions into volume', subject_id, 'STEP 2'))
+                result = move_predictions_to_mgh(subject_id=subject_id, 
                                     subjects_dir=subjects_dir, 
                                     prediction_file=prediction_file,
                                     verbose=verbose)
+                if result == False:
+                    print(get_m(f'One step of the pipeline has failed. Process has been aborted for this subject', subject_id, 'ERROR'))
+                    subject_ids_chunk = np.delete(subject_ids_chunk, i)
+                    subject_ids_failed.append(subject_id)
 
             #Register prediction back to nifti volume
-            print(get_m(f'Move prediction back to native space', subject_ids_chunk, 'STEP 3'))
-            register_subject_to_xhemi(subject_ids=subject_ids_chunk, 
+            for subject_id in subject_ids_chunk:
+                print(get_m(f'Move prediction back to native space', subject_id, 'STEP 3'))
+                result = register_subject_to_xhemi(subject_id=subject_id, 
                                       subjects_dir=subjects_dir, 
                                       output_dir=predictions_output_dir, 
                                       verbose=verbose)
+                if result == False:
+                    print(get_m(f'One step of the pipeline has failed. Process has been aborted for this subject', subject_id, 'ERROR'))
+                    subject_ids_chunk = np.delete(subject_ids_chunk, i)
+                    subject_ids_failed.append(subject_id)
             
             #Merged predictions and T1
             #TODO: remove dependancie to FSL
@@ -139,7 +150,8 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
             #                          subjects_dir=data_dir, 
             #                          output_dir=predictions_output_dir, 
             #                          verbose=verbose)
-        
+
+
         if not no_report:
             # Create individual reports of each identified cluster
             print(get_m(f'Create pdf report', subject_ids_chunk, 'STEP 5'))
@@ -152,6 +164,10 @@ def run_script_prediction(site_code, list_ids=None, sub_id=None, no_prediction_n
                 output_dir = predictions_output_dir,
                 hdf5_file_root = DEFAULT_HDF5_FILE_ROOT
             )
+        
+    if len(subject_ids_failed)>0:
+        print(get_m(f'One step of the pipeline has failed and process has been aborted for subjects {subject_ids_failed}', None, 'ERROR'))
+        return False
 
 if __name__ == '__main__':
 
