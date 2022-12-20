@@ -16,8 +16,9 @@ The MELD surface-based FCD detection algorithm is intended for research purposes
 ## Installation
 
 ### Prerequisites
-For preprocessing, MELD classifier requires Freesurfer. It is trained on data from versions 6 & v5.3, but compatible with v7.2. Please follow instructions on [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall) to install FreeSurfer. \
-New update ! MELD pipeline is now also working with FastSurfer (quicker version of Fresurfer). If you wish to use FastSurfer instead please follow instructions for the [native install of Fastsurfer](https://github.com/Deep-MI/FastSurfer.git). Note that Fastsurfer requires to install Freesurfer V7.2 to works
+For preprocessing, MELD classifier requires Freesurfer. It is trained on data from versions 6 & v5.3, but compatible with Freesurfer **version up to V7.2**. Please follow instructions on [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall) to install FreeSurfer. \
+New update ! MELD pipeline is now also working with FastSurfer (quicker version of Fresurfer). If you wish to use FastSurfer instead please follow instructions for the [native install of Fastsurfer](https://github.com/Deep-MI/FastSurfer.git). Note that Fastsurfer requires to install Freesurfer V7.2 to works \
+WARNING: MELD pipeline has not been adapted for Freesurfer V7.3 and above. Please install Freesurfer V7.2 instead.
 
 ### Conda installation
 We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage the environment and dependencies. Please follow instructions on [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to install Anaconda.

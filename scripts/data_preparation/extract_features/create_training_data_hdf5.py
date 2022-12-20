@@ -7,6 +7,7 @@ import numpy as np
 import nibabel as nb
 import argparse
 from scripts.data_preparation.extract_features.io_meld import save_subject
+from meld_classifier.tools_commands_prints import get_m
 import os
 
 def create_training_data_hdf5(subject, subject_dir, output_dir):
@@ -18,8 +19,13 @@ def create_training_data_hdf5(subject, subject_dir, output_dir):
     n_vert=163842
     cortex_label=nb.freesurfer.io.read_label(os.path.join(subject_dir,'fsaverage_sym/label/lh.cortex.label'))
     medial_wall = np.delete(np.arange(n_vert),cortex_label)
-    save_subject(subject,features,medial_wall, subject_dir, output_dir)
-
+    failed = save_subject(subject,features,medial_wall, subject_dir, output_dir)
+    if failed == True:
+        print(get_m(f'Features not saved. Something went wrong', subject, 'ERROR'))
+        return False
+    else:
+        print(get_m(f'All features have been extracted and saved in {output_dir}', subject, 'INFO'))
+        
 
 
 if __name__ == '__main__':
@@ -56,5 +62,5 @@ if __name__ == '__main__':
 
     if subject_ids:
         for subject in subject_ids:
-            print("saving subject " + subject + "...")
             create_training_data_hdf5(subject, subject_dir, output_dir)
+        

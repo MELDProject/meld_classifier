@@ -1,7 +1,7 @@
 from meld_classifier.experiment import Experiment
 from meld_classifier.meld_cohort import MeldCohort, MeldSubject
-from meld_classifier.dataset import load_combined_hemisphere_data, Dataset, normalise_data
-from meld_classifier.meld_plotting import trim,rotate90
+from meld_classifier.dataset import  normalise_data
+from meld_classifier.meld_plotting import trim
 from meld_classifier.paths import (
     MELD_PARAMS_PATH,
     MELD_DATA_PATH,
@@ -32,6 +32,7 @@ from PIL import Image
 import meld_classifier.mesh_tools as mt
 from datetime import date
 from fpdf import FPDF
+from meld_classifier.tools_commands_prints import get_m
 
 class PDF(FPDF):    
     def lines(self):
@@ -371,7 +372,6 @@ def generate_prediction_report(
             list_clust[hemi].remove(0)
             # loop over clusters
             for cluster in list_clust[hemi]:
-                print(cluster)
                 fig2 = plt.figure(figsize=(17, 9))
                 ax2 = fig2.add_subplot(
                     gs2[0, 1],
@@ -425,7 +425,6 @@ def generate_prediction_report(
                         f" location =  {location}",
                     )
                 )
-                print(int(cluster))
                 props = dict(boxstyle="round", facecolor=colors[int(cluster)], alpha=0.5)
                 ax2 = fig2.add_subplot(gs2[0, 0])
                 ax2.text(0.05, 0.95, textstr, transform=ax2.transAxes, fontsize=18, verticalalignment="top", bbox=props)
@@ -518,8 +517,7 @@ def generate_prediction_report(
         file_path = os.path.join(output_dir_sub, f"MELD_report_{subject.subject_id}.pdf")
         pdf.output(file_path, "F")
 
-        print(f"MELD prediction report ready at {file_path}")
-
+        print(get_m(f'MELD prediction report ready at {file_path}', subject_id, 'INFO'))
 
 if __name__ == "__main__":
     # Set up experiment

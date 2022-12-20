@@ -292,7 +292,9 @@ class Preprocess:
             else:
                 combat_subject_include[k] = False
               
-        
+        if len(np.array(listids)[np.array(combat_subject_include)])==0:
+            print(f'Cannot compute harmonisation for {feature} because no subject found with this feature')
+            return
         # load in covariates - age, sex, group, site and scanner unless provided    
         new_site_covars = self.load_covars(subject_ids=np.array(listids)[np.array(combat_subject_include)], demographic_file=demographic_file).copy()
         #check site_scanner codes are the same for all subjects
@@ -375,8 +377,6 @@ class Preprocess:
             combat_estimates (arrays): combat parameters used for the harmonisation
         """
         # load combat parameters        
-        combat_estimates = self.read_norm_combat_parameters(feature_name, combat_params_file)
-        combat_estimates = self.unshrink_combat_estimates(combat_estimates)
         precombat_features = []
         site_scanner = []
         subjects_included=[]
@@ -391,6 +391,8 @@ class Preprocess:
                 subjects_included.append(subject)
         #if matrix empty, pass
         if precombat_features:
+            combat_estimates = self.read_norm_combat_parameters(feature_name, combat_params_file)
+            combat_estimates = self.unshrink_combat_estimates(combat_estimates)
             precombat_features = np.array(precombat_features)
             site_scanner = np.array(site_scanner)
             dict_combat = neuroCombatFromTraining(dat=precombat_features.T, batch=site_scanner, estimates=combat_estimates)

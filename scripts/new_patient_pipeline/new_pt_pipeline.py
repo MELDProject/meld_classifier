@@ -8,9 +8,9 @@ from scripts.new_patient_pipeline.run_script_prediction import run_script_predic
 from meld_classifier.tools_commands_prints import get_m
 
 class Logger(object):
-    def __init__(self, sys_type=sys.stdout, filename="Default"):
+    def __init__(self, sys_type=sys.stdout, filename='MELD_output.log'):
         self.terminal = sys_type
-        self.filename = filename + time.strftime('%Y-%m-%d-%H-%M-%S') + '.log'
+        self.filename = filename
         self.log = open(self.filename, "a")
 
     def write(self, message):
@@ -90,10 +90,10 @@ if __name__ == "__main__":
 
      
     #write terminal output in a log
-    file_path=os.path.join(os.path.abspath(os.getcwd()), 'MELD_pipeline_')
+    file_path=os.path.join(os.path.abspath(os.getcwd()), 'MELD_pipeline_'+time.strftime('%Y-%m-%d-%H-%M-%S') + '.log')
     sys.stdout = Logger(sys.stdout,file_path)
     sys.stderr = Logger(sys.stderr, file_path)
-
+    
     args = parser.parse_args()
     print(args)
     
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     ### SEGMENTATION ###
     if not args.skip_segmentation:
         print(get_m(f'Call script segmentation', None, 'SCRIPT 1'))
-        run_script_segmentation(
+        result = run_script_segmentation(
                             site_code = args.site_code,
                             list_ids=args.list_ids,
                             sub_id=args.id, 
@@ -115,6 +115,9 @@ if __name__ == "__main__":
                             use_fastsurfer=args.fastsurfer,
                             verbose = args.debug_mode
                             )
+        if result == False:
+            print(get_m(f'Segmentation and feature extraction has failed at least for one subject. See log at {file_path}. Consider fixing errors or excluding these subjects before re-running the pipeline. Segmentation will be skipped for subjects already processed', None, 'SCRIPT 1'))    
+            sys.exit()
     else:
         print(get_m(f'Skip script segmentation', None, 'SCRIPT 1'))
 
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     ### PREDICTION ###
     if not args.harmo_only:
         print(get_m(f'Call script prediction', None, 'SCRIPT 3'))
-        run_script_prediction(
+        result = run_script_prediction(
                             site_code = args.site_code,
                             list_ids=args.list_ids,
                             sub_id=args.id,
@@ -142,6 +145,9 @@ if __name__ == "__main__":
                             split = args.split,
                             verbose = args.debug_mode
                             )
+        if result == False:
+            print(get_m(f'Prediction and mapping back to native MRI has failed at least for one subject. See log at {file_path}. Consider fixing errors or excluding these subjects before re-running the pipeline. Segmentation will be skipped for subjects already processed', None, 'SCRIPT 3'))    
+            sys.exit()
     else:
         print(get_m(f'Skip script predition', None, 'SCRIPT 3'))
                 

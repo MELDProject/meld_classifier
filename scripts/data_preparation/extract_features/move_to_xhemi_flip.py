@@ -1,52 +1,79 @@
 import os
 import argparse
-# from subprocess import Popen,  STDOUT, DEVNULL
 import shutil
-from meld_classifier.tools_commands_prints import get_m, run_command
+import subprocess
+from subprocess import Popen
+from meld_classifier.tools_commands_prints import get_m
 
 
 def move_to_xhemi_flip(subject_id, subjects_dir, verbose=False):
-    measures = [
-        "thickness.mgh",
-        "w-g.pct.mgh",
-        "curv.mgh",
-        "sulc.mgh",
-        "gm_FLAIR_0.75.mgh",
-        "gm_FLAIR_0.5.mgh",
-        "gm_FLAIR_0.25.mgh",
-        "gm_FLAIR_0.mgh",
-        "wm_FLAIR_0.5.mgh",
-        "wm_FLAIR_1.mgh",
-        "pial.K_filtered.sm20.mgh",
-    ]
+    
+    if os.path.isfile(f'{subjects_dir}/{subject_id}/mri/FLAIR.mgz'):
+        measures = [
+            "thickness.mgh",
+            "w-g.pct.mgh",
+            "curv.mgh",
+            "sulc.mgh",
+            "gm_FLAIR_0.75.mgh",
+            "gm_FLAIR_0.5.mgh",
+            "gm_FLAIR_0.25.mgh",
+            "gm_FLAIR_0.mgh",
+            "wm_FLAIR_0.5.mgh",
+            "wm_FLAIR_1.mgh",
+            "pial.K_filtered.sm20.mgh",
+        ]
+    else:
+        measures = [
+            "thickness.mgh",
+            "w-g.pct.mgh",
+            "curv.mgh",
+            "sulc.mgh",
+            "pial.K_filtered.sm20.mgh",
+        ]
 
     os.makedirs(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/", exist_ok=True)
 
     if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh"):
         # create one all zero overlay for inversion step
-        shutil.copy(
+        try:
+            shutil.copy(
             f"{subjects_dir}/fsaverage_sym/surf/lh.white.avg.area.mgh",
             f"{subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh",
         )
-
+        except:
+            print(get_m(f'Could not find {subjects_dir}/fsaverage_sym/surf/lh.white.avg.area.mgh file needed', subject_id, 'ERROR'))
+            return False
+            
         command = f"SUBJECTS_DIR={subjects_dir} mris_calc --output {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh {subjects_dir}/{subject_id}/xhemi/surf_meld/zeros.mgh set 0"
-        # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
-        proc = run_command(command, verbose=verbose)
-        proc.wait()
+        proc = Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+        stdout, stderr= proc.communicate()
+        if verbose:
+            print(stdout)
+        if proc.returncode!=0:
+            print(get_m(f'COMMAND failing : {command} with error {stderr}', subject_id, 'ERROR'))
+            return False
 
     print(get_m(f'Move feature to xhemi flip', subject_id, 'INFO'))
     for measure in measures:
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure}"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/lh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/lh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/surf/lh.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
-            proc = run_command(command, verbose=verbose)
-            proc.wait()
+            proc = Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+            stdout, stderr= proc.communicate()
+            if verbose:
+                print(stdout)
+            if proc.returncode!=0:
+                print(get_m(f'COMMAND failing : {command} with error {stderr}', subject_id, 'ERROR'))
+                return False
 
         if not os.path.isfile(f"{subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure}"):
             command = f"SUBJECTS_DIR={subjects_dir} mris_apply_reg --src {subjects_dir}/{subject_id}/surf_meld/rh.{measure} --trg {subjects_dir}/{subject_id}/xhemi/surf_meld/rh.on_lh.{measure} --streg {subjects_dir}/{subject_id}/xhemi/surf/lh.fsaverage_sym.sphere.reg {subjects_dir}/fsaverage_sym/surf/lh.sphere.reg"
-            # proc = Popen(command, shell=True, stdout = DEVNULL, stderr=STDOUT)
-            proc = run_command(command, verbose=verbose)
-            proc.wait()
+            proc = Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
+            stdout, stderr= proc.communicate()
+            if verbose:
+                print(stdout)
+            if proc.returncode!=0:
+                print(get_m(f'COMMAND failing : {command} with error {stderr}', subject_id, 'ERROR'))
+                return False
 
 
 if __name__ == "__main__":

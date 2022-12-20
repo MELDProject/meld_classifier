@@ -24,6 +24,7 @@ source $FREESURFER_HOME/SetUpFreeSurfer.sh
 ```
 with `<freesurfer_installation_directory>` being the path to where your Freesurfer has been installed.
 
+NOTES: MELD pipeline has only been tested and validated on Freesurfer up to V7.2. Please do not use higher version than V7.2.0.
 
 ## Compute the harmonisation paramaters 
 
