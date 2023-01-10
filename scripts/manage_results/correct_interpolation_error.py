@@ -53,6 +53,31 @@ def correct_interpolation_error(input_mgh,input_surf,output_mgh):
     mt.save_mgh(output_mgh,reindexed_clustered,nb.load(input_mgh))
     return
 
+def correct_interpolation_error_v2(input_mgh,input_surf,output_mgh):
+    """correct errors due to interpolation from xhemi back to native"""
+    prediction = np.array(mt.load_mgh(input_mgh))
+    tolerance = 1e-5
+    close_to_int = np.isclose(prediction, np.round(prediction),
+     rtol=tolerance, atol=tolerance)
+    need_assignment = np.where(~close_to_int)[0]
+    #for each cluster find nearby nonzero vertices to assign to them.
+    #either geodesic distance or neighbours. remove from remainder to be assigned.
+    surf = mt.load_mesh_geometry(input_surf)
+    neighbours = mt.get_neighbours_from_tris(surf['faces'])
+    new_prediction = np.zeros_like(prediction)
+    new_prediction[close_to_int] = np.round(prediction[close_to_int])
+    while len(need_assignment)>0:
+        need_assignment=[]
+        for vertex in need_assignment:
+            vertex_neighbours = neighbours[vertex]
+            vals = new_prediction[vertex_neighbours]
+            if (vals>0).any():
+                new_prediction = np.max(vals)
+            else:
+                need_assignment.append(vertex)
+    mt.save_mgh(output_mgh,new_prediction,nb.load(input_mgh))
+    return
+
 if __name__ == '__main__':
 
     #parse commandline arguments 
@@ -77,4 +102,4 @@ if __name__ == '__main__':
     hemi=args.hemi
 
     input_surf=os.path.join(subdir,'surf',f'{hemi}.white')
-    correct_interpolation_error(input_mgh,input_surf,output_mgh)
+    correct_interpolation_error_v2(input_mgh,input_surf,output_mgh)
