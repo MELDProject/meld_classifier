@@ -399,7 +399,7 @@ class Experiment:
         trainval_ids = np.intersect1d(trainval_ids, dataset_trainval_ids)
         # split trainval_ids in folds
         np.random.shuffle(trainval_ids)
-        folds = np.array_split(trainval_ids, number_of_folds)
+        folds = np.array(np.array_split(trainval_ids, number_of_folds),dtype=object)
         folds = np.roll(folds, shift=iteration, axis=0)
         train_ids = np.concatenate(folds[0:-1]).ravel()
         val_ids = folds[-1]

@@ -538,6 +538,7 @@ class Evaluator:
                     targets = data["input_labels"][mask]
                 elif t == "pred":
                     targets = (data["result"] >= self.threshold)[mask]
+                    targets = targets.astype(int)
 
                 for m in method:
                     data_dictionary[subj_id][f"{m}_{t}"] = np.zeros_like(data["input_features"])
