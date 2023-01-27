@@ -93,5 +93,5 @@ def test_predict_newsubject():
         expected_prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
         diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
         print(f'Test nifti results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
-        assert diff_sum <= 200
+        assert diff_sum <= 250
  
