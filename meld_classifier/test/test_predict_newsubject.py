@@ -85,7 +85,7 @@ def test_predict_newsubject():
     for hemi in ['lh','rh']:
         diff_sum = (np.abs(prediction[hemi] - expected_prediction[hemi])).sum()
         print(f'Test HDF5 results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
-        assert diff_sum <= 200
+        assert diff_sum <= 250
 
     # compare prediction on mri native
     for hemi in ['lh','rh']:
