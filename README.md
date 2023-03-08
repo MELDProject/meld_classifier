@@ -20,6 +20,13 @@ For preprocessing, MELD classifier requires Freesurfer. It is trained on data fr
 New update ! MELD pipeline is now also working with FastSurfer (quicker version of Fresurfer). If you wish to use FastSurfer instead please follow instructions for the [native install of Fastsurfer](https://github.com/Deep-MI/FastSurfer.git). Note that Fastsurfer requires to install Freesurfer V7.2 to works \
 WARNING: MELD pipeline has not been adapted for Freesurfer V7.3 and above. Please install Freesurfer V7.2 instead.
 
+You will need to ensure that Freesurfer is activated in your terminal (you should have some printed FREESURFER paths when opening the terminal). Otherwise you will need to manually activate Freesurfer on each new terminal by running : 
+```bash
+export FREESURFER_HOME=<freesurfer_installation_directory>/freesurfer
+source $FREESURFER_HOME/SetUpFreeSurfer.sh
+```
+with `<freesurfer_installation_directory>` being the path to where your Freesurfer has been installed.
+
 ### Conda installation
 We use [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to manage the environment and dependencies. Please follow instructions on [anaconda](https://docs.anaconda.com/anaconda/install/mac-os/) to install Anaconda.
 
@@ -56,6 +63,8 @@ Please see our [FAQ](FAQs.md) for common installation problems.
 
 ### Verify installation
 We provide a test script to allow you to verify that you have installed all packages, set up paths correctly, and downloaded all data. This script will run the pipeline to predict the lesion classifier on a new patient. It takes approximately 15minutes to run.
+
+Note: Do not forget to activate Fressurfer as describe above before to run the test.
 
 ```bash
 cd <path_to_meld_classifier>
