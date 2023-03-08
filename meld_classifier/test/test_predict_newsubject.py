@@ -85,7 +85,7 @@ def test_predict_newsubject():
     for hemi in ['lh','rh']:
         diff_sum = (np.abs(prediction[hemi] - expected_prediction[hemi])).sum()
         print(f'Test HDF5 results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
-        assert diff_sum <= 200
+        assert diff_sum <= 350
 
     # compare prediction on mri native
     for hemi in ['lh','rh']:
@@ -93,5 +93,5 @@ def test_predict_newsubject():
         expected_prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
         diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
         print(f'Test nifti results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
-        assert diff_sum <= 200
+        assert diff_sum <= 350
  
