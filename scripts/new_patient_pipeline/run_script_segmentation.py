@@ -99,7 +99,7 @@ def fastsurfer_subject(subject, fs_folder, verbose=False):
     # setup cortical segmentation command
     print(get_m(f'Segmentation using T1 only with FastSurfer', subject_id, 'INFO'))
     command = format(
-        "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --run_viewagg_on gpu --surfreg --fsaparc".format(fs_folder, subject_id, subject_t1_path)
+        "$FASTSURFER_HOME/run_fastsurfer.sh --sd {} --sid {} --t1 {} --parallel --batch 1 --viewagg_device auto --fsaparc".format(fs_folder, subject_id, subject_t1_path)
     )
 
     # call fastsurfer
