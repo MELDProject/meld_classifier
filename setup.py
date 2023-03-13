@@ -5,11 +5,11 @@ try:
 except ImportError:
     __author__ = __maintainer__ = "MELD development team"
     __email__ = "meld.study@gmail.com"
-    __version__ = "1.0.1"
+    __version__ = "1.1.2"
 
 setup(
     name="meld_classifier",
-    version="1.0.1",
+    version="1.1.2",
     packages=find_packages(),
     package_dir={"meld_classifier": "meld_classifier"},
 )
