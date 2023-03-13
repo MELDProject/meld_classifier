@@ -1,17 +1,22 @@
 #### tests for Freesurfer ####
 # it test  : 
 # - if Freesurfer is activated 
-# - TODO : check Freesurfer version? 
+# - check Freesurfer version? 
 
 import subprocess
 from subprocess import Popen
 import os
 import pytest
+from meld_classifier.paths import MELD_DATA_PATH
 
 @pytest.mark.slow
 def test_freesurfer():
-    # get freesurfer path
-    command = format("$FREESURFER_HOME/bin/recon-all -sd /home/mathilde/Documents/projects/MELD_classifier/process/270123_test_meld_classifier/meld_data/output/fs_outputs -s MELD_H101_3T_C_00002 -all -dontrun")
+    #initialise variables
+    fs_folder=os.path.join(MELD_DATA_PATH,'output','fs_outputs')
+    id_test = 'MELD_TEST_3T_FCD_0011'
+
+    # check freesurfer activated
+    command = format(f"$FREESURFER_HOME/bin/recon-all -sd {fs_folder} -s {id_test} -all -dontrun")
     proc = Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding='utf-8')
     stdout, stderr= proc.communicate()
     assert proc.returncode<=1 , "Oopsie ! Freesurfer failing with error {}".format(stdout)
