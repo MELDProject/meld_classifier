@@ -543,9 +543,9 @@ class Evaluator:
                     data_dictionary[subj_id][f"{m}_{t}"] = np.zeros_like(data["input_features"])
                     if len(X) != 0:
                         if m == "integrated_gradients":
-                            res = integrated_gradients(self.experiment.model, X, targets, kwargs=ig_kwargs)
+                            res = integrated_gradients(self.experiment.model, X, targets.astype(int), kwargs=ig_kwargs)
                         elif m == "vanilla_backprop":
-                            res = vanilla_backprop(self.experiment.model, X, targets)
+                            res = vanilla_backprop(self.experiment.model, X, targets.astype(int))
                         else:
                             raise NotImplementedError(f"saliency method {m}")
                         data_dictionary[subj_id][f"{m}_{t}"][mask] = res
