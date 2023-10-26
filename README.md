@@ -14,6 +14,7 @@ This package comes with a pretrained model that can be used to predict new subje
 The MELD surface-based FCD detection algorithm is intended for research purposes only and has not been reviewed or approved by the Medicines and Healthcare products Regulatory Agency (MHRA), European Medicine Agency (EMA) or by any other agency. Any clinical application of the software is at the sole risk of the party engaged in such application. There is no warranty of any kind that the software will produce useful results in any way. Use of the software is at the recipient's own risk.
 
 ## Installation
+Note: The current installation of the MELD classifier is not working on MAC M1 and MAC M2 OS because of incompatibilities with tensorflow and these OS systems. 
 
 ### Prerequisites
 For preprocessing, MELD classifier requires Freesurfer. It is trained on data from versions 6 & v5.3, but compatible with Freesurfer **version up to V7.2**. Please follow instructions on [Freesurfer](https://surfer.nmr.mgh.harvard.edu/fswiki/DownloadAndInstall) to install FreeSurfer. \
