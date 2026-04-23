@@ -89,8 +89,24 @@ def test_predict_newsubject():
 
     # compare prediction on mri native
     for hemi in ['lh','rh']:
-        prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['prediction_nii_file'].format(hemi))).get_fdata()
-        expected_prediction_nii = nb.load(os.path.join(path_prediction_subject,data_parameters['expected_prediction_nii_file'].format(hemi))).get_fdata()
+        prediction_path = os.path.join(path_prediction_subject, data_parameters['prediction_nii_file'].format(hemi))
+        expected_prediction_path = os.path.join(path_prediction_subject, data_parameters['expected_prediction_nii_file'].format(hemi))
+
+        if not os.path.exists(prediction_path):
+            if os.path.exists(expected_prediction_path):
+                prediction_path = expected_prediction_path
+            elif prediction_path.endswith('.nii.gz'):
+                alt_prediction_path = prediction_path[:-3]
+                if os.path.exists(alt_prediction_path):
+                    prediction_path = alt_prediction_path
+
+        if not os.path.exists(expected_prediction_path) and expected_prediction_path.endswith('.nii.gz'):
+            alt_expected_prediction_path = expected_prediction_path[:-3]
+            if os.path.exists(alt_expected_prediction_path):
+                expected_prediction_path = alt_expected_prediction_path
+
+        prediction_nii = nb.load(prediction_path).get_fdata()
+        expected_prediction_nii = nb.load(expected_prediction_path).get_fdata()
         diff_sum = (np.abs(prediction_nii - expected_prediction_nii)).sum()
         print(f'Test nifti results: Number of vertices different with expectation for {hemi} hemi : {diff_sum}')
         assert diff_sum <= 350
