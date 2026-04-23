@@ -400,7 +400,12 @@ class Experiment:
         # split trainval_ids in folds
         np.random.shuffle(trainval_ids)
         folds = np.array_split(trainval_ids, number_of_folds)
-        folds = np.roll(folds, shift=iteration, axis=0)
+        folds = list(folds)
+        if isinstance(iteration, (list, tuple, np.ndarray)):
+            iteration = iteration[0]
+        shift = int(iteration) % len(folds)
+        if shift:
+            folds = folds[-shift:] + folds[:-shift]
         train_ids = np.concatenate(folds[0:-1]).ravel()
         val_ids = folds[-1]
         return train_ids, val_ids, test_ids
